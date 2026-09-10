@@ -1,8 +1,8 @@
-# PitchMind LinkedIn MCP Server
+# LinkedIn MCP Server
 
 Small local MCP server for publishing normal LinkedIn feed posts through the official LinkedIn API.
 
-It intentionally lives outside the Spring/React product code. The server is an automation tool, not part of the PitchMind runtime.
+This independent local automation tool is optional and is not part of an application runtime.
 
 ## What It Supports
 
@@ -66,7 +66,7 @@ Example MCP client configuration:
     "linkedin": {
       "command": "node",
       "args": [
-        "C:/Users/Msi/Downloads/ai-coach-backend/tools/linkedin-mcp-server/src/server.mjs"
+        "C:/path/to/repository/tools/linkedin-mcp-server/src/server.mjs"
       ],
       "env": {
         "LINKEDIN_CLIENT_ID": "...",
@@ -122,7 +122,7 @@ Use dry-run first:
 ```json
 {
   "authorUrn": "urn:li:person:PERSON_ID",
-  "commentary": "Hello from PitchMind",
+  "commentary": "Hello from our team",
   "dryRun": true
 }
 ```
@@ -132,7 +132,7 @@ Then publish explicitly:
 ```json
 {
   "authorUrn": "urn:li:person:PERSON_ID",
-  "commentary": "Hello from PitchMind",
+  "commentary": "Hello from our team",
   "dryRun": false,
   "confirmPublish": true
 }

@@ -1,52 +1,26 @@
-HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### IntelliJ IDEA ###
-.idea
+﻿# Local editor settings
+.idea/
+.vscode/
 *.iws
 *.iml
 *.ipr
+
+# Dependencies and generated artifacts
+node_modules/
+build/
+dist/
 out/
-!**/src/main/**/out/
-!**/src/test/**/out/
+.gradle/
+bin/
+scratch/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-### VS Code ###
-.vscode/
-
-# Generated frontend and local test artifacts
-/src/main/resources/static/
-/scratch/
-/frontend-react/node_modules/
-/frontend-react/dist/
+# Local secrets and logs
 .env
 .env.*
-/frontend-react/.env
-/frontend-react/.env.*
 !.env.example
-!/frontend-react/.env.example
-!/tools/linkedin-mcp-server/.env.example
+*.log
 /tools/linkedin-mcp-server/.linkedin-token.json
-/tools/linkedin-mcp-server/*.log
+
+# OS files
+.DS_Store
+Thumbs.db

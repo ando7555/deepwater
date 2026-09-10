@@ -16,7 +16,7 @@ import {
   validateConfig
 } from './linkedin-api.mjs';
 
-const SERVER_NAME = 'pitchmind-linkedin-mcp-server';
+const SERVER_NAME = 'linkedin-mcp-server';
 const SERVER_VERSION = '0.1.0';
 const TOKEN_FILE = new URL('../.linkedin-token.json', import.meta.url);
 

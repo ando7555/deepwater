@@ -1,9 +1,0 @@
-.git
-.gradle
-build
-frontend-react/node_modules
-frontend-react/dist
-frontend-react/.env
-frontend-react/.env.*
-scratch
-*.log
