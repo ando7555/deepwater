@@ -1,13 +1,13 @@
-# Technical debt and reusable lessons
+# Deepwater - Architecture Inspiration
 
 ## Status and provenance
 
 The previous products were discontinued on 2026-09-10. Their application code,
-roadmaps, branding, and deployment configuration are being removed for a new
+roadmaps, branding, and deployment configuration have been removed for a new
 product, Deepwater, with two applications. The new product's purpose, application boundaries,
 and technology choices remain undecided.
 
-This summary preserves engineering knowledge, not a backlog to finish the old
+This is the only retained project document. It preserves engineering knowledge, not a backlog to finish the old
 products. Sources are the former modular architecture document, both planning
 backlogs, the Go architecture note, and the refactoring article in `docs/posts`.
 Their original versions and application code remain in Git at commit
