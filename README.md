@@ -1,6 +1,6 @@
-﻿# New Product
+# Deepwater
 
-This repository is being prepared for a new product with two applications.
+Deepwater is a new product planned as two applications.
 The product idea, application responsibilities, and technology stack are not yet defined.
 
 The previous applications have been discontinued. Their source code, product

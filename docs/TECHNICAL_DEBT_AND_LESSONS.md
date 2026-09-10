@@ -4,7 +4,7 @@
 
 The previous products were discontinued on 2026-09-10. Their application code,
 roadmaps, branding, and deployment configuration are being removed for a new
-product with two applications. The new product's purpose, application boundaries,
+product, Deepwater, with two applications. The new product's purpose, application boundaries,
 and technology choices remain undecided.
 
 This summary preserves engineering knowledge, not a backlog to finish the old

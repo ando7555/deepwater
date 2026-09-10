@@ -1,4 +1,4 @@
-﻿# Engineering Notes
+# Deepwater Engineering Notes
 
 Start with [Technical debt and reusable lessons](TECHNICAL_DEBT_AND_LESSONS.md).
 It preserves useful engineering knowledge from the discontinued projects and
