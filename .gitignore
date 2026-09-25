@@ -1,0 +1,13 @@
+.gradle/
+.tools/
+**/build/
+backend/data/
+frontend/node_modules/
+frontend/dist/
+*.class
+.idea/
+.vscode/
+.env
+.env.*
+!.env.example
+*.log

@@ -1,0 +1,12 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    # Local development only; use a secret-managed password for shared environments.
+    environment:
+      POSTGRES_DB: deepwater
+      POSTGRES_USER: deepwater
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-deepwater-local-only}
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: ["deepwater-postgres:/var/lib/postgresql/data", "./backend/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro"]
+volumes:
+  deepwater-postgres:

@@ -10,8 +10,9 @@ choice:
   after the Echo method and platform boundaries are reviewed.
 - **AI fashion** — a future, isolated product idea; scope and name remain open.
 
-The logo marks are supplied design assets. The current implementation is a local
-proof of flow, not the acceptance-ready product or a deployable MVP.
+The supplied logo and visual direction are retained. The current branch builds a
+local Echo MVP slice; it is not a deployable or teacher-approved product. Amber
+and AI fashion remain later, separately gated applications.
 
 ## Product and architecture documents
 
@@ -44,15 +45,20 @@ under `backend/data`. Docker Compose defines PostgreSQL for future integration;
 PostgreSQL has not been verified in this workspace. Do not put real personal,
 dating, or lesson data in this prototype.
 
-## What the prototype demonstrates
+## Echo MVP flow
 
-- account registration and login;
-- two sample Danish comparison cases and saved learner practice;
-- an Amber profile, visibly labeled sample profiles, and invitation state changes.
+1. Register or sign in.
+2. Set a learning goal and answer three short Danish starting-check questions.
+   Echo selects a guided, standard, or challenge route. This is not a CEFR score.
+3. Study a Danish main-clause word-order pattern grounded in the supplied 5 August
+   lesson notes, with the source shown in the interface.
+4. Answer a multiple-choice check and a short completion exercise. Deterministic
+   feedback updates a simple mastery estimate and schedules review after 1, 3, 7,
+   or 14 days. Write a transfer example that is saved without automatic grading.
 
-The practice response is a reflection prompt, not automated language assessment.
-Sample people are fictional and cannot receive invitations. See `STATUS.md` for
-the known failing GraphQL authorization-error test and for features not yet wired.
+The lesson is visibly marked **Draft — Danish teacher review required**. This
+prototype does not include private teacher messages, song lyrics, or unlicensed
+images, and it does not call an AI model. See `STATUS.md` for validation and gaps.
 
 ## Development direction
 

@@ -1,8 +1,8 @@
 # Deepwater: materials-based product and implementation proposal
 
 **Prepared:** 25 September 2026  
-**Status:** proposal for product-owner and Danish-teacher review; not an implementation authorization  
-**Code changes:** none proposed or made by this document  
+**Status:** product proposal with the first Echo MVP slice implemented on the review branch; Danish-teacher review still required
+**Implementation boundary:** local prototype only; no AI grading, public release, or deployment
 **Evidence:** eight Notion-export ZIPs supplied for this task
 
 ## Executive proposal

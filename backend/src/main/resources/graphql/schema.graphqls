@@ -1,0 +1,70 @@
+type Query {
+  echoHome: EchoHome!
+}
+
+type Mutation {
+  startEcho(goal: String!, selfReportedLevel: String!, answers: [DiagnosticAnswerInput!]!): EchoHome!
+  submitEchoPractice(exerciseId: ID!, answer: String!, transferSelfCheck: Boolean): PracticeResult!
+}
+
+input DiagnosticAnswerInput {
+  id: String!
+  answer: String!
+}
+
+type EchoHome {
+  onboarded: Boolean!
+  profile: EchoLearnerProfile
+  nextAction: String!
+  lessons: [EchoLesson!]!
+  totalAttempts: Int!
+  correctAttempts: Int!
+}
+
+type EchoLearnerProfile {
+  goal: String!
+  selfReportedLevel: String!
+  diagnosticScore: Int!
+  startingRoute: String!
+}
+
+type EchoLesson {
+  id: ID!
+  title: String!
+  level: String!
+  topic: String!
+  objective: String!
+  explanation: String!
+  sourceReference: String!
+  contentStatus: String!
+  mastery: Float!
+  attempts: Int!
+  nextReviewAt: String
+  due: Boolean!
+  exercises: [EchoExercise!]!
+}
+
+type EchoExercise {
+  id: ID!
+  position: Int!
+  taskType: String!
+  prompt: String!
+  options: [EchoExerciseOption!]!
+  lastCorrect: Boolean
+}
+
+type EchoExerciseOption {
+  key: String!
+  text: String!
+}
+
+type PracticeResult {
+  exerciseId: ID!
+  answer: String!
+  graded: Boolean!
+  correct: Boolean
+  feedback: String!
+  mastery: Float!
+  nextReviewAt: String
+  transfer: Boolean!
+}
