@@ -1,53 +1,26 @@
-# Deepwater implementation status
+# Deepwater MVP implementation status
 
-This branch contains a local, end-to-end Echo MVP slice. It is a review build,
-not a public release or a teacher-approved Danish course.
+The local Echo slice now supports teacher-controlled content for Danish and German. Lessons are stored in SQL; a JSON catalog package seeds one Danish lesson as an unapproved draft. Learners only receive published records matching their selected language.
 
-Implemented in this slice:
+Implemented:
 
-- Account registration and sign-in with per-account Echo records.
-- Danish goal and self-reported familiarity onboarding, plus a three-question
-  diagnostic that selects a guided, standard, or challenge route. The result is
-  not presented as a CEFR placement.
-- One source-linked A0 word-order lesson based on the 5 August class note, with
-  teacher-review status visible in the UI.
-- Deterministic multiple-choice and exact short-answer checks; free-writing
-  transfer is stored without automatic correctness or AI grading.
-- Per-account attempts, a bounded mastery estimate, and 1/3/7/14-day review
-  scheduling. GraphQL exposes no answer key and requires authentication.
-- The supplied logo assets and existing Deepwater visual direction remain in use.
+- Danish/German selection at onboarding and a persistent language switch in the learner workspace.
+- A learner profile with a personal goal and self-described starting familiarity. The former three-question Danish-only diagnostic was removed.
+- A teacher workspace gated by the server-side DEEPWATER_TEACHER_EMAIL setting.
+- One existing Danish starter lesson imported as a teacher-only draft on an empty database.
+- Structured lesson drafts with language, source reference, skill key, learning explanation, objectives, and typed exercises.
+- Explicit teacher publication, immutable revision creation, version numbers, and archiving of the previous published revision.
+- Authenticated learner filtering so drafts are hidden; absent course content is shown as an honest empty state.
+- Deterministic exercise grading and per-account practice history/review estimates.
+- An implementation walkthrough for the teacher/product owner in TEACHER_GUIDE.md.
 
-Not included or still required:
+Still needed:
 
-- Danish teacher approval of lesson wording, examples, and diagnostic answers;
-  this lesson is marked `Draft — Danish teacher review required`.
-- More lessons, reviewed audio/pronunciation support, a content authoring/review
-  workflow, delayed-transfer study, validated assessment, and accessibility/user
-  testing with learners.
-- Production privacy controls such as export/deletion, rate limiting, operational
-  monitoring, retention policy, and production identity hardening.
-- PostgreSQL verification, deployment infrastructure, Kafka, Azure Cosmos/vector
-  retrieval, or AI integration. None is needed for this first local slice.
-- Amber and AI fashion flows; they remain separately scoped future products.
+- The teacher must review and approve the Danish starter lesson. There is no German source content bundled; German becomes useful after a teacher-authored lesson is published.
+- A language-specific diagnostic and multi-answer accepted-answer rules.
+- A richer teacher authoring UI or file importer, review history screen, and reversible unpublish action.
+- Production privacy controls, identity hardening, rate limiting, monitoring, accessibility/user testing, PostgreSQL verification, and a deployment environment.
+- Kafka, Azure Cosmos/vector retrieval, and model integration; none is required for this small content-reviewed MVP.
+- Amber and AI fashion remain separately scoped later products.
 
-Run locally from the repository root with Java 25 and Node 22:
-
-```powershell
-./gradlew.bat :backend:bootRun
-```
-
-```powershell
-cd frontend
-npm ci
-npm run dev -- --host 127.0.0.1 --port 5173
-```
-
-Open `http://127.0.0.1:5173`. The backend defaults to a local H2 database. Do not
-enter sensitive personal, relationship, or class-message data into this prototype.
-
-Verification on 25 September 2026: `:backend:test` and `:backend:bootJar` pass;
-`npm run build` passes. A live local smoke flow verified registration, the
-starting diagnostic, the source-linked lesson, a correct answer, mastery update,
-and progress retrieval. The review demo is open at `http://localhost:5173/` and
-currently uses the backend on `127.0.0.1:8082` with an in-memory database; its
-demo records disappear when that backend process stops.
+The project is not a public release and must not contain sensitive learner or relationship data. Deployment remains a separate decision after tests and review.

@@ -11,10 +11,10 @@ create table if not exists audit_events (
   aggregate_id varchar(36) not null, occurred_at timestamp with time zone not null default current_timestamp
 );
 
--- Echo's first Danish learning slice. Source notes are retained on every lesson;
--- personal class notes and unlicensed media are deliberately excluded.
+-- Echo learner preferences, teacher-reviewed language lessons, and practice records.
 create table if not exists echo_learner_profiles (
   account_id varchar(36) primary key references accounts(id),
+  language_code varchar(8) not null default 'da',
   goal varchar(300) not null,
   self_reported_level varchar(32) not null,
   diagnostic_score integer not null,
@@ -24,6 +24,13 @@ create table if not exists echo_learner_profiles (
 );
 create table if not exists echo_lessons (
   id varchar(120) primary key,
+  language_code varchar(8) not null default 'da',
+  review_status varchar(24) not null default 'DRAFT',
+  version integer not null default 1,
+  revision_of varchar(120) references echo_lessons(id),
+  created_by varchar(36) references accounts(id),
+  approved_by varchar(36) references accounts(id),
+  approved_at timestamp with time zone,
   title varchar(240) not null,
   level varchar(32) not null,
   topic varchar(120) not null,
@@ -34,6 +41,15 @@ create table if not exists echo_lessons (
   skill_key varchar(120) not null,
   sort_order integer not null
 );
+alter table echo_learner_profiles add column if not exists language_code varchar(8) not null default 'da';
+alter table echo_lessons add column if not exists language_code varchar(8) not null default 'da';
+alter table echo_lessons add column if not exists review_status varchar(24) not null default 'DRAFT';
+alter table echo_lessons add column if not exists version integer not null default 1;
+alter table echo_lessons add column if not exists revision_of varchar(120) references echo_lessons(id);
+alter table echo_lessons add column if not exists created_by varchar(36) references accounts(id);
+alter table echo_lessons add column if not exists approved_by varchar(36) references accounts(id);
+alter table echo_lessons add column if not exists approved_at timestamp with time zone;
+create index if not exists echo_lessons_language_review on echo_lessons(language_code,review_status,sort_order);
 create table if not exists echo_exercises (
   id varchar(120) primary key,
   lesson_id varchar(120) not null references echo_lessons(id),

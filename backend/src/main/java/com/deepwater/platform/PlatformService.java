@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -14,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class PlatformService {
     private final JdbcTemplate db;
     private final BCryptPasswordEncoder passwords = new BCryptPasswordEncoder();
+    @Value("${deepwater.teacher.email:}") private String teacherEmail;
 
     public PlatformService(JdbcTemplate db) { this.db = db; }
 
@@ -55,6 +57,21 @@ public class PlatformService {
         return accounts.getFirst();
     }
 
+    /** Only the deployment-configured teacher account receives authoring access. */
+    public String requireTeacher(String authorization) {
+        String accountId = requireAccount(authorization);
+        String email = db.queryForObject("select email from accounts where id=?", String.class, accountId);
+        if (teacherEmail == null || teacherEmail.isBlank() || !email.equalsIgnoreCase(teacherEmail.strip()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Teacher access is not enabled for this account.");
+        return accountId;
+    }
+
+    public String role(String accountId) {
+        if (accountId == null || teacherEmail == null || teacherEmail.isBlank()) return "LEARNER";
+        String email = db.queryForObject("select email from accounts where id=?", String.class, accountId);
+        return email.equalsIgnoreCase(teacherEmail.strip()) ? "TEACHER" : "LEARNER";
+    }
+
     /** Public lesson content can be browsed anonymously; a missing/invalid session maps to no learner. */
     public String accountIfAuthenticated(String authorization) {
         if (authorization == null || !authorization.startsWith("Bearer ")) return null;
@@ -68,7 +85,7 @@ public class PlatformService {
         String token = UUID.randomUUID().toString();
         db.update("insert into user_sessions(token,account_id,expires_at) values(?,?,?)", token, id,
                 java.sql.Timestamp.from(Instant.now().plusSeconds(60L * 60 * 24 * 7)));
-        return Map.of("token", token, "name", name, "email", email, "accountId", id);
+        return Map.of("token", token, "name", name, "email", email, "accountId", id, "role", role(id));
     }
 
     private ResponseStatusException unauthorized() {

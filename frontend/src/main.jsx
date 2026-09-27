@@ -42,7 +42,7 @@ function Auth({ onLogin }) {
     <img className="logo hero-logo" src="/deepwater-logo-warm.png" alt="Deepwater" />
     <p className="eyebrow">THROUGH EXPRESSION, CONNECT THE WORLD</p>
     <h1>Learn a pattern.<br />Make it yours.</h1>
-    <p>Echo helps you notice how Danish works, practise it in context, and return to it when it is useful.</p>
+    <p>Echo helps you notice how a language works, practise it in context, and return to patterns that matter to you.</p>
     <form onSubmit={submit}>
       {mode === 'register' && <label>Your name<input required maxLength="160" autoComplete="name" value={name} onChange={event => setName(event.target.value)} /></label>}
       <label>Email<input required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} /></label>
@@ -57,31 +57,21 @@ function Auth({ onLogin }) {
 const HOME_QUERY = `query EchoHome {
   echoHome {
     onboarded nextAction totalAttempts correctAttempts
-    profile { goal selfReportedLevel diagnosticScore startingRoute }
+    profile { goal selfReportedLevel languageCode diagnosticScore startingRoute }
     lessons { id title level topic objective explanation sourceReference contentStatus mastery attempts nextReviewAt due
       exercises { id position taskType prompt lastCorrect options { key text } }
     }
   }
 }`;
 
-const DIAGNOSTIC = [
-  { id: 'v2', prompt: 'Which sentence puts the finite verb second after the time phrase?', options: [['A', 'I dag jeg arbejder hjemme.'], ['B', 'I dag arbejder jeg hjemme.'], ['C', 'Jeg i dag arbejder hjemme.']] },
-  { id: 'definite', prompt: 'The class note uses “en gade”. Which is its definite form?', options: [['A', 'gade'], ['B', 'gadeen'], ['C', 'gaden']] },
-  { id: 'present', prompt: 'Which form is shown as the present form of “at være” in the notes?', options: [['A', 'være'], ['B', 'er'], ['C', 'var']] },
-];
-
-const ROUTE_COPY = {
-  GUIDED: 'We’ll take a guided start and keep the pattern visible as you practise.',
-  STANDARD: 'You have some of the pattern already. We’ll practise it, then try a fresh example.',
-  CHALLENGE: 'Your starting check suggests you can move quickly to an independent example. It is a short check, not a CEFR placement.',
-};
+const ROUTE_COPY = 'We’ll begin with the experience level you chose and adjust as you practise.';
 
 function App() {
   const [user, setUser] = useState(() => { try { return JSON.parse(sessionStorage.getItem('deepwater-user')); } catch { return null; } });
   const [home, setHome] = useState(null);
-  const [goal, setGoal] = useState('Use Danish in everyday and work conversations');
+  const [goal, setGoal] = useState('');
+  const [languageCode, setLanguageCode] = useState('da');
   const [selfReportedLevel, setSelfReportedLevel] = useState('new');
-  const [diagnosticAnswers, setDiagnosticAnswers] = useState({});
   const [answers, setAnswers] = useState({});
   const [selfChecks, setSelfChecks] = useState({});
   const [results, setResults] = useState({});
@@ -89,6 +79,10 @@ function App() {
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [teacherLessons, setTeacherLessons] = useState([]);
+  const [teacherMode, setTeacherMode] = useState(false);
+  const [draftJson, setDraftJson] = useState('');
+  const [selectedLessonId, setSelectedLessonId] = useState('');
 
   function login(account) {
     sessionStorage.setItem('deepwater-token', account.token);
@@ -114,15 +108,50 @@ function App() {
   async function start(event) {
     event.preventDefault(); setBusy(true); setError(''); setNotice('');
     try {
-      const data = await gql(`mutation StartEcho($goal: String!, $level: String!, $answers: [DiagnosticAnswerInput!]!) {
-        startEcho(goal: $goal, selfReportedLevel: $level, answers: $answers) {
-          onboarded nextAction totalAttempts correctAttempts profile { goal selfReportedLevel diagnosticScore startingRoute }
+      const data = await gql(`mutation StartEcho($goal: String!, $languageCode: String!, $level: String!) {
+        startEcho(goal: $goal, languageCode: $languageCode, selfReportedLevel: $level) {
+          onboarded nextAction totalAttempts correctAttempts profile { goal selfReportedLevel languageCode diagnosticScore startingRoute }
           lessons { id title level topic objective explanation sourceReference contentStatus mastery attempts nextReviewAt due exercises { id position taskType prompt lastCorrect options { key text } } }
         }
-      }`, { goal, level: selfReportedLevel, answers: DIAGNOSTIC.map(item => ({ id: item.id, answer: diagnosticAnswers[item.id] || '' })) });
-      setHome(data.startEcho); setNotice('Your starting route is ready. The three-question check is a guide, not a formal level test.');
+      }`, { goal, languageCode, level: selfReportedLevel });
+      setHome(data.startEcho); setNotice(`${languageCode === 'da' ? 'Danish' : 'German'} is selected. Your starting route uses your self-described experience; this is not a formal level test.`);
     } catch (startError) { setError(startError.message); }
     finally { setBusy(false); }
+  }
+
+  async function loadTeacherLessons() {
+    const data = await gql(`query { teacherLessons { id languageCode title level topic objective explanation sourceReference skillKey reviewStatus version revisionOf exercises { position taskType prompt expectedAnswer feedbackCorrect feedbackIncorrect options { key text } } } }`);
+    setTeacherLessons(data.teacherLessons);
+  }
+
+  async function saveDraft(event) {
+    event.preventDefault(); setError(''); setNotice('');
+    try {
+      const input = JSON.parse(draftJson);
+      const data = await gql(`mutation($input: LessonDraftInput!) { saveEchoLessonDraft(input: $input) { id title languageCode reviewStatus } }`, { input });
+      setNotice(`Saved “${data.saveEchoLessonDraft.title}” as a private teacher draft.`);
+      await loadTeacherLessons();
+    } catch (saveError) { setError(saveError.message); }
+  }
+
+  async function publishDraft(id) {
+    setError(''); setNotice('');
+    try {
+      const data = await gql(`mutation($id: ID!) { publishEchoLesson(lessonId: $id) { title reviewStatus } }`, { id });
+      setNotice(`You approved and published “${data.publishEchoLesson.title}”.`);
+      await loadTeacherLessons(); await loadHome();
+    } catch (publishError) { setError(publishError.message); }
+  }
+
+  async function chooseLanguage(code) {
+    setError(''); setNotice(''); setLanguageCode(code);
+    try {
+      const data = await gql(`mutation($languageCode: String!) { chooseEchoLanguage(languageCode: $languageCode) {
+        onboarded nextAction totalAttempts correctAttempts profile { goal selfReportedLevel languageCode diagnosticScore startingRoute }
+        lessons { id title level topic objective explanation sourceReference contentStatus mastery attempts nextReviewAt due exercises { id position taskType prompt lastCorrect options { key text } } }
+      } }`, { languageCode: code });
+      setHome(data.chooseEchoLanguage); setNotice(`Switched to ${code === 'da' ? 'Danish' : 'German'}.`);
+    } catch (changeError) { setError(changeError.message); }
   }
 
   async function submitExercise(event, exercise) {
@@ -145,7 +174,7 @@ function App() {
 
   if (!user) return <Auth onLogin={login} />;
 
-  const lesson = home?.lessons?.[0];
+  const lesson = home?.lessons?.find(item => item.id === selectedLessonId) || home?.lessons?.[0];
   const percent = lesson ? Math.round(lesson.mastery * 100) : 0;
   const startingRoute = home?.profile?.startingRoute;
   const orderedExercises = lesson?.exercises ? [...lesson.exercises].sort((a, b) => {
@@ -164,33 +193,32 @@ function App() {
     {loading && !home && <p role="status" className="loading">Loading your Echo workspace…</p>}
 
     {home && !home.onboarded && <section className="onboarding panel">
-      <p className="eyebrow">ECHO · YOUR DANISH START</p>
+      <p className="eyebrow">ECHO · YOUR LANGUAGE START</p>
       <h1>Start with what you want to say.</h1>
-      <p className="intro">Tell Echo what Danish should help you do. A quick check chooses a starting route; it does not assign a CEFR level.</p>
+      <p className="intro">Choose a language and tell Echo what you want to be able to express. Your self-described experience sets a gentle starting point.</p>
       <form onSubmit={start}>
-        <label>What would you like to do in Danish?<textarea required maxLength="300" value={goal} onChange={event => setGoal(event.target.value)} /></label>
-        <label>How familiar does Danish feel today?
+        <label>Language<select value={languageCode} onChange={event => setLanguageCode(event.target.value)}><option value="da">Danish</option><option value="de">German</option></select></label>
+        <label>What would you like to express in {languageCode === 'da' ? 'Danish' : 'German'}?<textarea required maxLength="300" value={goal} onChange={event => setGoal(event.target.value)} /></label>
+        <label>How familiar does {languageCode === 'da' ? 'Danish' : 'German'} feel today?
           <select value={selfReportedLevel} onChange={event => setSelfReportedLevel(event.target.value)}>
-            <option value="new">I’m new to Danish</option><option value="some">I know a few things</option><option value="comfortable">I can manage simple conversations</option>
+            <option value="new">I’m new to {languageCode === 'da' ? 'Danish' : 'German'}</option><option value="some">I know a few things</option><option value="comfortable">I can manage simple conversations</option>
           </select>
         </label>
-        <div className="diagnostic"><h2>A short starting check</h2><p>Choose the answer that feels right. You can learn from every item.</p>
-          {DIAGNOSTIC.map(item => <fieldset key={item.id}><legend>{item.prompt}</legend>{item.options.map(([key, text]) => <label className="choice" key={key}><input type="radio" name={item.id} required checked={diagnosticAnswers[item.id] === key} onChange={() => setDiagnosticAnswers(current => ({ ...current, [item.id]: key }))} /> <span>{text}</span></label>)}</fieldset>)}
-        </div>
         <button disabled={busy}>{busy ? 'Preparing your route…' : 'Build my starting route'}</button>
       </form>
     </section>}
 
     {home?.onboarded && <>
       <section className="welcome">
-        <p className="eyebrow">ECHO · LEARN THROUGH EXPRESSION</p>
+        <div className="welcome-row"><div><p className="eyebrow">ECHO · {home.profile.languageCode === 'de' ? 'GERMAN' : 'DANISH'} · LEARN THROUGH EXPRESSION</p>
         <h1>Make the pattern yours.</h1>
-        <p className="intro">{home.nextAction}</p>
-        <div className="route-note"><b>{startingRoute} route</b><span>{ROUTE_COPY[startingRoute] || ROUTE_COPY.GUIDED}</span></div>
+        <p className="intro">{home.nextAction}</p></div><label className="language-switch">Learning language<select value={home.profile.languageCode} onChange={event => chooseLanguage(event.target.value)}><option value="da">Danish</option><option value="de">German</option></select></label></div>
+        <div className="route-note"><b>{startingRoute} route</b><span>{ROUTE_COPY}</span></div>
       </section>
 
       <div className="workspace-grid">
         <section className="lesson panel">
+          {home.lessons.length > 1 && <label className="lesson-picker">Choose a lesson<select value={lesson?.id || ''} onChange={event => setSelectedLessonId(event.target.value)}>{home.lessons.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label>}
           {lesson && <>
             <div className="lesson-topline"><span className="pill">{lesson.level}</span><span className="pill soft">{lesson.topic}</span></div>
             <h2>{lesson.title}</h2>
@@ -204,25 +232,33 @@ function App() {
                 <form onSubmit={event => submitExercise(event, exercise)}>
                   {exercise.taskType === 'SELECT' && <fieldset className="exercise-options"><legend className="visually-hidden">Choose one answer</legend>{exercise.options.map(option => <label className="choice" key={option.key}><input type="radio" name={exercise.id} required checked={answers[exercise.id] === option.key} onChange={() => setAnswers(current => ({ ...current, [exercise.id]: option.key }))} /><span><b>{option.key}.</b> {option.text}</span></label>)}</fieldset>}
                   {exercise.taskType !== 'SELECT' && <label className="answer-label">{exercise.taskType === 'TRANSFER' ? 'Your sentence' : 'Missing word'}
-                    {exercise.taskType === 'TRANSFER' ? <textarea required maxLength="500" value={answers[exercise.id] || ''} onChange={event => setAnswers(current => ({ ...current, [exercise.id]: event.target.value }))} placeholder="Write a new sentence in Danish…" /> : <input required maxLength="200" value={answers[exercise.id] || ''} onChange={event => setAnswers(current => ({ ...current, [exercise.id]: event.target.value }))} autoComplete="off" />}
+                    {exercise.taskType === 'TRANSFER' ? <textarea required maxLength="500" value={answers[exercise.id] || ''} onChange={event => setAnswers(current => ({ ...current, [exercise.id]: event.target.value }))} placeholder={`Write a new sentence in ${home.profile.languageCode === 'de' ? 'German' : 'Danish'}…`} /> : <input required maxLength="200" value={answers[exercise.id] || ''} onChange={event => setAnswers(current => ({ ...current, [exercise.id]: event.target.value }))} autoComplete="off" />}
                   </label>}
-                  {exercise.taskType === 'TRANSFER' && <label className="choice self-check"><input type="checkbox" checked={Boolean(selfChecks[exercise.id])} onChange={event => setSelfChecks(current => ({ ...current, [exercise.id]: event.target.checked }))} /><span>I checked that the finite verb is in second position.</span></label>}
+                  {exercise.taskType === 'TRANSFER' && <label className="choice self-check"><input type="checkbox" checked={Boolean(selfChecks[exercise.id])} onChange={event => setSelfChecks(current => ({ ...current, [exercise.id]: event.target.checked }))} /><span>I checked my example against the pattern.</span></label>}
                   <button className="practice-button" disabled={busy || (exercise.taskType === 'TRANSFER' && !selfChecks[exercise.id])}>{busy ? 'Saving…' : exercise.taskType === 'TRANSFER' ? 'Save my example' : 'Check answer'}</button>
                 </form>
                 {results[exercise.id] && <div className={`feedback ${results[exercise.id].graded && results[exercise.id].correct ? 'feedback-good' : ''}`} role="status"><b>{results[exercise.id].graded ? results[exercise.id].correct ? 'That’s it' : 'Let’s look again' : 'Saved for reflection'}</b><p>{results[exercise.id].feedback}</p>{results[exercise.id].graded && <small>Practice estimate: {Math.round(results[exercise.id].mastery * 100)}% · Next review {formatDate(results[exercise.id].nextReviewAt)}</small>}</div>}
               </article>)}
             </div>
           </>}
+          {!lesson && <div className="empty-course"><span className="eyebrow">{home.profile.languageCode === 'de' ? 'GERMAN' : 'DANISH'} COURSE</span><h2>Your course is waiting for teacher review.</h2><p>{home.nextAction} Your teacher adds source material, checks every explanation and exercise, then publishes it here. No unreviewed or AI-generated lessons are shown as course content.</p></div>}
         </section>
 
         <aside className="progress panel">
           <p className="eyebrow">YOUR LEARNING SIGNALS</p><h2>Progress, made visible.</h2>
-          <div className="mastery"><div className="mastery-label"><span>Word-order practice</span><b>{percent}%</b></div><div className="progress-track"><span style={{ width: `${percent}%` }} /></div><small>A practice estimate, not a fluency or CEFR score.</small></div>
+          <div className="mastery"><div className="mastery-label"><span>{lesson?.topic || 'Your first learning skill'}</span><b>{percent}%</b></div><div className="progress-track"><span style={{ width: `${percent}%` }} /></div><small>A practice estimate, not a fluency or CEFR score.</small></div>
           <div className="stat-grid"><div><strong>{home.totalAttempts}</strong><span>graded attempts</span></div><div><strong>{home.correctAttempts}</strong><span>correct answers</span></div></div>
           <div className="review-card"><span className="eyebrow">NEXT REVIEW</span><b>{lesson?.due ? 'Ready when you are' : lesson?.nextReviewAt ? formatDate(lesson.nextReviewAt) : 'After your first check'}</b><p>{lesson?.due ? 'This pattern is ready for another short practice.' : 'Correct answers extend the interval; a missed answer brings it closer.'}</p></div>
-          <div className="method-note"><b>How Echo adapts</b><p>The starting check chooses a guided, standard, or challenge route. Correct and missed answers update a simple practice estimate and a 1 / 3 / 7 / 14-day review interval. Your free-writing example is saved without automatic grading.</p></div>
+          <div className="method-note"><b>How Echo adapts</b><p>Your chosen experience level sets a guided start. Correct and missed answers update a simple practice estimate and a 1 / 3 / 7 / 14-day review interval. Your free-writing example is saved without automatic grading.</p></div>
         </aside>
       </div>
+      {user.role === 'TEACHER' && <section className="teacher panel">
+        <div className="teacher-heading"><div><p className="eyebrow">TEACHER WORKSPACE</p><h2>Review and publish Echo lessons</h2><p>Only your configured teacher account can save drafts or approve publication.</p></div><button className="practice-button" onClick={async () => { setTeacherMode(!teacherMode); if (!teacherMode) { try { await loadTeacherLessons(); } catch (e) { setError(e.message); } } }}>{teacherMode ? 'Hide workspace' : 'Open workspace'}</button></div>
+        {teacherMode && <div className="teacher-content">
+          <div><h3>Lesson queue</h3>{teacherLessons.length === 0 ? <p>No teacher drafts yet.</p> : teacherLessons.map(item => <article className="teacher-item" key={item.id}><div className="teacher-review"><b>{item.title} · v{item.version}</b><span>{item.languageCode.toUpperCase()} · {item.level} · {item.reviewStatus}</span><code>{item.id}</code><small><b>Source:</b> {item.sourceReference}</small><p>{item.objective}</p><p>{item.explanation}</p>{item.exercises.map(exercise => <div className="teacher-exercise" key={exercise.position}><b>{exercise.position}. {exercise.taskType}: {exercise.prompt}</b>{exercise.options.map(option => <small key={option.key}>{option.key}. {option.text}{option.key === exercise.expectedAnswer ? ' · expected answer' : ''}</small>)}{exercise.taskType !== 'TRANSFER' && !exercise.options.length && <small>Expected answer: {exercise.expectedAnswer}</small>}<small>Correct feedback: {exercise.feedbackCorrect || '—'}</small><small>Hint: {exercise.feedbackIncorrect || '—'}</small></div>)}</div>{item.reviewStatus === 'DRAFT' && <button onClick={() => publishDraft(item.id)}>I approve & publish</button>}</article>)}</div>
+          <form onSubmit={saveDraft}><h3>Add a lesson draft</h3><p>Paste lesson content as JSON. It stays private until you press “I approve &amp; publish”.</p><textarea required value={draftJson} onChange={event => setDraftJson(event.target.value)} placeholder={'{\n  "languageCode": "de",\n  "title": "Verb-second after a time phrase",\n  ...\n}'} /><button>Save as draft</button><small>Shape: languageCode, title, level, topic, objective, explanation, sourceReference, skillKey, exercises[]. See TEACHER_GUIDE.md for a complete example.</small></form>
+        </div>}
+      </section>}
     </>}
     <footer>Through expression, connect the world.</footer>
   </main>;

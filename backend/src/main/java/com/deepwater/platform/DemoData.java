@@ -1,49 +1,58 @@
 package com.deepwater.platform;
 
+import java.util.List;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.support.TransactionTemplate;
+import tools.jackson.databind.ObjectMapper;
 
+/**
+ * Imports the checked-in Danish starter package as a private draft on empty databases.
+ * All lesson text lives in the JSON package; runtime edits are stored in SQL.
+ */
 @Configuration
 class DemoData {
     @Bean
-    ApplicationRunner seedEchoContent(JdbcTemplate db) {
-        return args -> {
+    ApplicationRunner importStarterDraft(JdbcTemplate db, ObjectMapper json, TransactionTemplate transactions) {
+        return args -> transactions.executeWithoutResult(status -> {
             String lessonId = "v2-time-first";
-            int lessonExists = db.queryForObject("select count(*) from echo_lessons where id=?", Integer.class, lessonId);
-            if (lessonExists == 0) {
-                db.update("insert into echo_lessons(id,title,level,topic,objective,explanation,source_reference,content_status,skill_key,sort_order) values(?,?,?,?,?,?,?,?,?,?)",
-                        lessonId, "Start with time. Put the verb second.", "A0 · beginner", "Danish word order",
-                        "Use a fronted time phrase and keep the finite verb in second constituent position.",
-                        "In a Danish declarative main clause, the finite verb is typically in second constituent position. In “I dag arbejder jeg hjemme”, “I dag” is the first constituent and “arbejder” is the finite verb in the second. The subject “jeg” follows it. This is one useful main-clause pattern, not a rule for every Danish sentence.",
-                        "Notion export: 5 August lesson; source example: “I dag arbejder jeg hjemme.”",
-                        "Draft — Danish teacher review required", "danish.main-clause.v2", 1);
-                addExercise(db, "v2-select", lessonId, 1, "SELECT",
-                        "Which sentence places the finite verb second after a time phrase?", "A",
-                        "Correct. “I dag” is the first constituent; “arbejder” is the finite verb in the second.",
-                        "Look for the finite verb immediately after the opening time phrase. The target pattern is “I dag arbejder jeg hjemme.”",
-                        new String[][]{{"A", "I dag arbejder jeg hjemme."}, {"B", "I dag jeg arbejder hjemme."}, {"C", "Jeg i dag arbejder hjemme."}});
-                addExercise(db, "v2-fill", lessonId, 2, "TEXT",
-                        "Complete the sentence with the finite verb: “I dag ___ jeg hjemme.”", "arbejder",
-                        "Correct. The finite verb “arbejder” follows the opening time phrase.",
-                        "In the lesson example, “I dag” comes first and “arbejder” is the next constituent.", new String[0][0]);
-                addExercise(db, "v2-transfer", lessonId, 3, "TRANSFER",
-                        "Write a new Danish sentence that begins with a time phrase. Then check: is the finite verb in second position?",
-                        null, "", "", new String[0][0]);
+            Integer exists = db.queryForObject("select count(*) from echo_lessons where id=?", Integer.class, lessonId);
+            if (exists != null && exists > 0) return;
+            try {
+                var resource = new ClassPathResource("echo/catalog/v2-time-first.da.json");
+                LessonSeed lesson = json.readValue(resource.getInputStream().readAllBytes(), LessonSeed.class);
+                db.update("insert into echo_lessons(id,language_code,title,level,topic,objective,explanation,source_reference,content_status,skill_key,sort_order,review_status,version) values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        lesson.id(), lesson.languageCode(), lesson.title(), lesson.level(), lesson.topic(), lesson.objective(),
+                        lesson.explanation(), lesson.sourceReference(), "Starter catalog — teacher review required",
+                        lesson.skillKey(), 1, "DRAFT", 1);
+                int position = 0;
+                for (ExerciseSeed exercise : lesson.exercises()) {
+                    String exerciseId = lessonId + "-" + (++position);
+                    db.update("insert into echo_exercises(id,lesson_id,position,task_type,prompt,expected_answer,feedback_correct,feedback_incorrect) values(?,?,?,?,?,?,?,?)",
+                            exerciseId, lessonId, position, exercise.taskType(), exercise.prompt(), exercise.expectedAnswer(),
+                            text(exercise.feedbackCorrect()), text(exercise.feedbackIncorrect()));
+                    int optionPosition = 0;
+                    for (OptionSeed option : exercise.options() == null ? List.<OptionSeed>of() : exercise.options()) {
+                        db.update("insert into echo_exercise_options(exercise_id,option_key,option_text,sort_order) values(?,?,?,?)",
+                                exerciseId, option.key(), option.text(), ++optionPosition);
+                    }
+                }
+            } catch (Exception ex) {
+                status.setRollbackOnly();
+                throw new IllegalStateException("Could not import the Danish starter lesson draft.", ex);
             }
-        };
+        });
     }
 
-    private static void addExercise(JdbcTemplate db, String id, String lessonId, int position, String taskType,
-                                    String prompt, String expectedAnswer, String feedbackCorrect,
-                                    String feedbackIncorrect, String[][] options) {
-        db.update("insert into echo_exercises(id,lesson_id,position,task_type,prompt,expected_answer,feedback_correct,feedback_incorrect) values(?,?,?,?,?,?,?,?)",
-                id, lessonId, position, taskType, prompt, expectedAnswer, feedbackCorrect, feedbackIncorrect);
-        for (int index = 0; index < options.length; index++) {
-            String[] option = options[index];
-            db.update("insert into echo_exercise_options(exercise_id,option_key,option_text,sort_order) values(?,?,?,?)",
-                    id, option[0], option[1], index + 1);
-        }
-    }
+    private static String text(String value) { return value == null ? "" : value; }
+
+    record LessonSeed(String id, String languageCode, String title, String level, String topic,
+                      String objective, String explanation, String sourceReference, String skillKey,
+                      List<ExerciseSeed> exercises) {}
+    record ExerciseSeed(String taskType, String prompt, String expectedAnswer, String feedbackCorrect,
+                        String feedbackIncorrect, List<OptionSeed> options) {}
+    record OptionSeed(String key, String text) {}
 }

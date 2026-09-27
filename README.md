@@ -21,6 +21,7 @@ and AI fashion remain later, separately gated applications.
 - [Target architecture and Mermaid system/workflow diagrams](docs/architecture/DEEPWATER_TARGET_ARCHITECTURE.md)
 - [Architecture overview](ARCHITECTURE.md)
 - [Implementation status and known gaps](STATUS.md)
+- [Teacher workflow and coding guide](TEACHER_GUIDE.md)
 
 ## Run the local proof of flow
 
@@ -47,18 +48,22 @@ dating, or lesson data in this prototype.
 
 ## Echo MVP flow
 
-1. Register or sign in.
-2. Set a learning goal and answer three short Danish starting-check questions.
-   Echo selects a guided, standard, or challenge route. This is not a CEFR score.
-3. Study a Danish main-clause word-order pattern grounded in the supplied 5 August
-   lesson notes, with the source shown in the interface.
-4. Answer a multiple-choice check and a short completion exercise. Deterministic
-   feedback updates a simple mastery estimate and schedules review after 1, 3, 7,
-   or 14 days. Write a transfer example that is saved without automatic grading.
+1. Optionally set `DEEPWATER_TEACHER_EMAIL` before starting the backend, then
+   register using that email to enable the teacher workspace. See
+   [TEACHER_GUIDE.md](TEACHER_GUIDE.md).
+2. As a teacher, author Danish or German lessons as structured JSON drafts and
+   review them before explicitly publishing. Learners cannot see drafts.
+3. As a learner, choose Danish or German during onboarding, set a personal goal,
+   and select a starting familiarity. The learner can switch languages later.
+4. Study only published lessons, practise teacher-defined checks, and track a
+   simple per-skill estimate and 1/3/7/14-day review schedule.
 
-The lesson is visibly marked **Draft — Danish teacher review required**. This
-prototype does not include private teacher messages, song lyrics, or unlicensed
-images, and it does not call an AI model. See `STATUS.md` for validation and gaps.
+There is no German corpus bundled: choosing German shows an empty state until
+you author and approve the first lesson. A Danish starter lesson imports as a
+teacher-only draft from a JSON catalog file and must be approved before it appears.
+The fixed Danish quiz was removed
+because it would be incorrect for German. This prototype does not generate
+course content or use private messages/unlicensed media.
 
 ## Development direction
 

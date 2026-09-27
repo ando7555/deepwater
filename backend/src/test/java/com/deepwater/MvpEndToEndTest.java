@@ -14,66 +14,84 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
+@TestPropertySource(properties = "deepwater.teacher.email=teacher@deepwater.test")
 class MvpEndToEndTest {
     @Autowired TestRestTemplate http;
     @Autowired JdbcTemplate db;
 
     @Test
-    void learnerCanOnboardPracticeTrackMasteryAndSaveAnUngradedTransferExample() {
-        String suffix = UUID.randomUUID().toString();
-        String token = register("Echo Learner", "echo-" + suffix + "@example.test");
-        assertThat(graph("query { echoHome { onboarded nextAction } }", Map.of(), token))
-                .contains("\"onboarded\":false");
+    void teacherCanDraftPublishAndLearnerCanSelectAndPractiseGerman() {
+        String teacher = register("Echo Teacher", "teacher@deepwater.test");
+        assertThat(graph("query { teacherLessons { id title languageCode reviewStatus exercises{taskType expectedAnswer} } }", Map.of(), teacher))
+                .contains("v2-time-first", "Start with time. Put the verb second.", "\"reviewStatus\":\"DRAFT\"");
+        var exercise = Map.of("taskType", "SELECT", "prompt", "Choose the correct order.",
+                "expectedAnswer", "A", "feedbackCorrect", "Correct.", "feedbackIncorrect", "Try again.",
+                "options", List.of(Map.of("key", "A", "text", "Heute arbeite ich."),
+                        Map.of("key", "B", "text", "Heute ich arbeite.")));
+        var input = Map.of("languageCode", "de", "title", "Verb second after time",
+                "level", "A1", "topic", "German word order", "objective", "Place the finite verb second.",
+                "explanation", "In a German main clause, the finite verb is in position two.",
+                "sourceReference", "Teacher-authored example", "skillKey", "german.main-clause.v2",
+                "exercises", List.of(exercise));
+        String draft = graph("mutation($input:LessonDraftInput!){saveEchoLessonDraft(input:$input){id languageCode title reviewStatus}}",
+                Map.of("input", input), teacher);
+        assertThat(draft).contains("\"languageCode\":\"de\"", "\"reviewStatus\":\"DRAFT\"");
 
-        var diagnostic = List.of(Map.of("id", "v2", "answer", "B"),
-                Map.of("id", "definite", "answer", "C"), Map.of("id", "present", "answer", "B"));
-        var start = graph("mutation($goal:String!,$level:String!,$answers:[DiagnosticAnswerInput!]!){" +
-                        "startEcho(goal:$goal,selfReportedLevel:$level,answers:$answers){" +
-                        "onboarded profile{diagnosticScore startingRoute} lessons{id title sourceReference contentStatus " +
-                        "exercises{id taskType prompt options{key text}}}}}",
-                Map.of("goal", "Use Danish at work", "level", "new", "answers", diagnostic), token);
-        assertThat(start).contains("\"diagnosticScore\":3", "\"startingRoute\":\"CHALLENGE\"",
-                "I dag arbejder jeg hjemme", "Danish teacher review required");
-        assertThat(start).doesNotContain("expectedAnswer");
+        String token = register("Echo Learner", "echo-" + UUID.randomUUID() + "@example.test");
+        String start = graph("mutation { startEcho(goal:\"Use German at work\",languageCode:\"de\",selfReportedLevel:\"new\"){" +
+                "onboarded nextAction profile{languageCode startingRoute} lessons{id}} }", Map.of(), token);
+        assertThat(start).contains("\"languageCode\":\"de\"", "\"lessons\":[]", "No German lessons are published yet");
 
-        String correct = graph("mutation($id:ID!,$answer:String!){submitEchoPractice(exerciseId:$id,answer:$answer){" +
-                        "graded correct mastery nextReviewAt feedback}}",
-                Map.of("id", "v2-select", "answer", "A"), token);
+        String lessonId = db.queryForObject("select id from echo_lessons where title='Verb second after time'", String.class);
+        graph("mutation($id:ID!){publishEchoLesson(lessonId:$id){reviewStatus}}", Map.of("id", lessonId), teacher);
+        String chosen = graph("mutation { chooseEchoLanguage(languageCode:\"de\"){profile{languageCode} lessons{id title exercises{id}}} }",
+                Map.of(), token);
+        String exerciseId = lessonId + "-1";
+        assertThat(chosen).contains("\"title\":\"Verb second after time\"", exerciseId)
+                .doesNotContain("expectedAnswer");
+
+        String correct = graph("mutation($id:ID!,$answer:String!){submitEchoPractice(exerciseId:$id,answer:$answer){graded correct mastery}}",
+                Map.of("id", exerciseId, "answer", "A"), token);
         assertThat(correct).contains("\"graded\":true", "\"correct\":true", "\"mastery\":0.2");
         String wrong = graph("mutation($id:ID!,$answer:String!){submitEchoPractice(exerciseId:$id,answer:$answer){graded correct mastery}}",
-                Map.of("id", "v2-select", "answer", "B"), token);
+                Map.of("id", exerciseId, "answer", "B"), token);
         assertThat(wrong).contains("\"correct\":false", "\"mastery\":0.0");
-
-        String transfer = graph("mutation($id:ID!,$answer:String!,$checked:Boolean!){submitEchoPractice(" +
-                        "exerciseId:$id,answer:$answer,transferSelfCheck:$checked){graded correct transfer feedback mastery}}",
-                Map.of("id", "v2-transfer", "answer", "I morgen arbejder jeg hjemme.", "checked", true), token);
-        assertThat(transfer).contains("\"graded\":false", "\"correct\":null", "\"transfer\":true",
-                "does not automatically score free writing", "\"mastery\":0.0");
         String accountId = accountId(token);
-        assertThat(db.queryForObject("select count(*) from echo_attempts where account_id=?", Integer.class, accountId)).isEqualTo(3);
-        assertThat(db.queryForObject("select count(*) from echo_attempts where account_id=? and is_transfer=true and is_correct is null", Integer.class, accountId)).isEqualTo(1);
+        assertThat(db.queryForObject("select count(*) from echo_attempts where account_id=?", Integer.class, accountId)).isEqualTo(2);
 
-        String otherToken = register("Another Learner", "other-" + suffix + "@example.test");
-        assertThat(graph("query { echoHome { onboarded totalAttempts lessons{attempts mastery} } }", Map.of(), otherToken))
-                .contains("\"onboarded\":false", "\"totalAttempts\":0", "\"mastery\":0.0");
+        var revisionInput = new java.util.HashMap<>(input);
+        revisionInput.put("revisionOf", lessonId);
+        revisionInput.put("title", "Verb second after time — reviewed revision");
+        graph("mutation($input:LessonDraftInput!){saveEchoLessonDraft(input:$input){id version reviewStatus}}",
+                Map.of("input", revisionInput), teacher);
+        String revisionId = db.queryForObject("select id from echo_lessons where revision_of=?", String.class, lessonId);
+        assertThat(db.queryForObject("select version from echo_lessons where id=?", Integer.class, revisionId)).isEqualTo(2);
+        graph("mutation($id:ID!){publishEchoLesson(lessonId:$id){version reviewStatus}}", Map.of("id", revisionId), teacher);
+        assertThat(db.queryForObject("select review_status from echo_lessons where id=?", String.class, lessonId)).isEqualTo("ARCHIVED");
+        assertThat(graph("query { echoHome { lessons{id title} } }", Map.of(), token))
+                .contains("Verb second after time — reviewed revision").doesNotContain("Verb second after time\"");
     }
 
     @Test
-    void anonymousEchoHomeShowsLessonContentButNoLearnerData() {
-        var result = postGraph("query { echoHome { onboarded totalAttempts lessons{mastery attempts exercises{lastCorrect}} } }", Map.of(), null);
-        assertThat(result).doesNotContain("errors").contains("\"onboarded\":false", "\"totalAttempts\":0",
-                "\"mastery\":0.0", "\"attempts\":0", "\"lastCorrect\":null");
+    void learnerCanSeeOnlyTheirOwnProgressAndCannotOpenTeacherWorkspace() {
+        String token = register("Ordinary learner", "ordinary-" + UUID.randomUUID() + "@example.test");
+        assertThat(graph("query { echoHome { onboarded totalAttempts lessons{attempts mastery} } }", Map.of(), token))
+                .contains("\"onboarded\":false", "\"totalAttempts\":0");
+        String forbidden = postGraph("query { teacherLessons { id } }", Map.of(), token);
+        assertThat(forbidden).contains("errors", "Teacher access is not enabled");
+        String otherToken = register("Another learner", "other-" + UUID.randomUUID() + "@example.test");
+        assertThat(graph("query { echoHome { onboarded totalAttempts } }", Map.of(), otherToken))
+                .contains("\"onboarded\":false", "\"totalAttempts\":0");
     }
 
     @Test
-    void startingCheckRejectsMissingAnswers() {
-        String token = register("Incomplete Learner", "incomplete-" + UUID.randomUUID() + "@example.test");
-        String result = postGraph("mutation { startEcho(goal:\"Work\",selfReportedLevel:\"new\",answers:[]){onboarded} }",
-                Map.of(), token);
-        assertThat(result).contains("errors", "Answer all three starting-check questions");
+    void anonymousWorkspaceDoesNotExposeUnapprovedDrafts() {
+        String result = postGraph("query { echoHome { onboarded totalAttempts lessons{id} } }", Map.of(), null);
+        assertThat(result).doesNotContain("errors").contains("\"onboarded\":false", "\"lessons\":[]");
     }
 
     private String register(String name, String email) {
@@ -82,22 +100,18 @@ class MvpEndToEndTest {
         assertThat(body).containsKey("token");
         return (String) body.get("token");
     }
-
     private String accountId(String token) {
         return db.queryForObject("select account_id from user_sessions where token=?", String.class, token);
     }
-
     private String graph(String query, Map<String, ?> variables, String token) {
         String result = postGraph(query, variables, token);
         assertThat(result).doesNotContain("\"errors\"");
         return result;
     }
-
     private String postGraph(String query, Map<String, ?> variables, String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         if (token != null) headers.setBearerAuth(token);
-        var entity = new HttpEntity<>(Map.of("query", query, "variables", variables), headers);
-        return http.postForObject("/graphql", entity, String.class);
+        return http.postForObject("/graphql", new HttpEntity<>(Map.of("query", query, "variables", variables), headers), String.class);
     }
 }

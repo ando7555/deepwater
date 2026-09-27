@@ -1,16 +1,38 @@
 type Query {
   echoHome: EchoHome!
+  teacherLessons: [TeacherLesson!]!
 }
 
 type Mutation {
-  startEcho(goal: String!, selfReportedLevel: String!, answers: [DiagnosticAnswerInput!]!): EchoHome!
+  startEcho(goal: String!, languageCode: String!, selfReportedLevel: String!): EchoHome!
+  chooseEchoLanguage(languageCode: String!): EchoHome!
   submitEchoPractice(exerciseId: ID!, answer: String!, transferSelfCheck: Boolean): PracticeResult!
+  saveEchoLessonDraft(input: LessonDraftInput!): TeacherLesson!
+  publishEchoLesson(lessonId: ID!): TeacherLesson!
 }
 
-input DiagnosticAnswerInput {
-  id: String!
-  answer: String!
+input LessonDraftInput {
+  revisionOf: ID
+  languageCode: String!
+  title: String!
+  level: String!
+  topic: String!
+  objective: String!
+  explanation: String!
+  sourceReference: String!
+  skillKey: String!
+  sortOrder: Int
+  exercises: [ExerciseDraftInput!]!
 }
+input ExerciseDraftInput {
+  taskType: String!
+  prompt: String!
+  expectedAnswer: String
+  feedbackCorrect: String
+  feedbackIncorrect: String
+  options: [ExerciseOptionInput!]
+}
+input ExerciseOptionInput { key: String!, text: String! }
 
 type EchoHome {
   onboarded: Boolean!
@@ -24,8 +46,33 @@ type EchoHome {
 type EchoLearnerProfile {
   goal: String!
   selfReportedLevel: String!
+  languageCode: String!
   diagnosticScore: Int!
   startingRoute: String!
+}
+type TeacherLesson {
+  id: ID!
+  languageCode: String!
+  title: String!
+  level: String!
+  topic: String!
+  objective: String!
+  explanation: String!
+  sourceReference: String!
+  skillKey: String!
+  reviewStatus: String!
+  version: Int!
+  revisionOf: ID
+  exercises: [TeacherExercise!]!
+}
+type TeacherExercise {
+  position: Int!
+  taskType: String!
+  prompt: String!
+  expectedAnswer: String
+  feedbackCorrect: String!
+  feedbackIncorrect: String!
+  options: [EchoExerciseOption!]!
 }
 
 type EchoLesson {
