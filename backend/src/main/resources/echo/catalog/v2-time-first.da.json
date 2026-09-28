@@ -1,0 +1,36 @@
+{
+  "id": "v2-time-first",
+  "languageCode": "da",
+  "title": "Start with time. Put the verb second.",
+  "level": "A0 · beginner",
+  "topic": "Danish word order",
+  "objective": "Use a fronted time phrase and keep the finite verb in second constituent position.",
+  "explanation": "In a Danish declarative main clause, the finite verb is typically in second constituent position. In “I dag arbejder jeg hjemme”, “I dag” is the first constituent and “arbejder” is the finite verb in the second. The subject “jeg” follows it. This is one useful main-clause pattern, not a rule for every Danish sentence.",
+  "sourceReference": "Notion export: 5 August lesson; source example: “I dag arbejder jeg hjemme.”",
+  "skillKey": "danish.main-clause.v2",
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "Which sentence places the finite verb second after a time phrase?",
+      "expectedAnswer": "A",
+      "feedbackCorrect": "Correct. “I dag” is the first constituent; “arbejder” is the finite verb in the second.",
+      "feedbackIncorrect": "Look for the finite verb immediately after the opening time phrase. The target pattern is “I dag arbejder jeg hjemme.”",
+      "options": [
+        { "key": "A", "text": "I dag arbejder jeg hjemme." },
+        { "key": "B", "text": "I dag jeg arbejder hjemme." },
+        { "key": "C", "text": "Jeg i dag arbejder hjemme." }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete the sentence with the finite verb: “I dag ___ jeg hjemme.”",
+      "expectedAnswer": "arbejder",
+      "feedbackCorrect": "Correct. The finite verb “arbejder” follows the opening time phrase.",
+      "feedbackIncorrect": "In the lesson example, “I dag” comes first and “arbejder” is the next constituent."
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "Write a new Danish sentence that begins with a time phrase. Then check: is the finite verb in second position?"
+    }
+  ]
+}

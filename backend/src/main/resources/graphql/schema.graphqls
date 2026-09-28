@@ -1,0 +1,117 @@
+type Query {
+  echoHome: EchoHome!
+  teacherLessons: [TeacherLesson!]!
+}
+
+type Mutation {
+  startEcho(goal: String!, languageCode: String!, selfReportedLevel: String!): EchoHome!
+  chooseEchoLanguage(languageCode: String!): EchoHome!
+  submitEchoPractice(exerciseId: ID!, answer: String!, transferSelfCheck: Boolean): PracticeResult!
+  saveEchoLessonDraft(input: LessonDraftInput!): TeacherLesson!
+  publishEchoLesson(lessonId: ID!): TeacherLesson!
+}
+
+input LessonDraftInput {
+  revisionOf: ID
+  languageCode: String!
+  title: String!
+  level: String!
+  topic: String!
+  objective: String!
+  explanation: String!
+  sourceReference: String!
+  skillKey: String!
+  sortOrder: Int
+  exercises: [ExerciseDraftInput!]!
+}
+input ExerciseDraftInput {
+  taskType: String!
+  prompt: String!
+  expectedAnswer: String
+  feedbackCorrect: String
+  feedbackIncorrect: String
+  options: [ExerciseOptionInput!]
+}
+input ExerciseOptionInput { key: String!, text: String! }
+
+type EchoHome {
+  onboarded: Boolean!
+  profile: EchoLearnerProfile
+  nextAction: String!
+  lessons: [EchoLesson!]!
+  totalAttempts: Int!
+  correctAttempts: Int!
+}
+
+type EchoLearnerProfile {
+  goal: String!
+  selfReportedLevel: String!
+  languageCode: String!
+  diagnosticScore: Int!
+  startingRoute: String!
+}
+type TeacherLesson {
+  id: ID!
+  languageCode: String!
+  title: String!
+  level: String!
+  topic: String!
+  objective: String!
+  explanation: String!
+  sourceReference: String!
+  skillKey: String!
+  reviewStatus: String!
+  version: Int!
+  revisionOf: ID
+  exercises: [TeacherExercise!]!
+}
+type TeacherExercise {
+  position: Int!
+  taskType: String!
+  prompt: String!
+  expectedAnswer: String
+  feedbackCorrect: String!
+  feedbackIncorrect: String!
+  options: [EchoExerciseOption!]!
+}
+
+type EchoLesson {
+  id: ID!
+  title: String!
+  level: String!
+  topic: String!
+  objective: String!
+  explanation: String!
+  sourceReference: String!
+  contentStatus: String!
+  mastery: Float!
+  attempts: Int!
+  nextReviewAt: String
+  due: Boolean!
+  exercises: [EchoExercise!]!
+}
+
+type EchoExercise {
+  id: ID!
+  position: Int!
+  taskType: String!
+  prompt: String!
+  options: [EchoExerciseOption!]!
+  lastCorrect: Boolean
+}
+
+type EchoExerciseOption {
+  key: String!
+  text: String!
+}
+
+type PracticeResult {
+  exerciseId: ID!
+  answer: String!
+  graded: Boolean!
+  correct: Boolean
+  feedback: String!
+  mastery: Float!
+  nextReviewAt: String
+  transfer: Boolean!
+}

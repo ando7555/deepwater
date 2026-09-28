@@ -10,8 +10,9 @@ choice:
   after the Echo method and platform boundaries are reviewed.
 - **AI fashion** — a future, isolated product idea; scope and name remain open.
 
-The logo marks are supplied design assets. The current implementation is a local
-proof of flow, not the acceptance-ready product or a deployable MVP.
+The supplied logo and visual direction are retained. The current branch builds a
+local Echo MVP slice; it is not a deployable or teacher-approved product. Amber
+and AI fashion remain later, separately gated applications.
 
 ## Product and architecture documents
 
@@ -20,6 +21,7 @@ proof of flow, not the acceptance-ready product or a deployable MVP.
 - [Target architecture and Mermaid system/workflow diagrams](docs/architecture/DEEPWATER_TARGET_ARCHITECTURE.md)
 - [Architecture overview](ARCHITECTURE.md)
 - [Implementation status and known gaps](STATUS.md)
+- [Teacher workflow and coding guide](TEACHER_GUIDE.md)
 
 ## Run the local proof of flow
 
@@ -44,15 +46,24 @@ under `backend/data`. Docker Compose defines PostgreSQL for future integration;
 PostgreSQL has not been verified in this workspace. Do not put real personal,
 dating, or lesson data in this prototype.
 
-## What the prototype demonstrates
+## Echo MVP flow
 
-- account registration and login;
-- two sample Danish comparison cases and saved learner practice;
-- an Amber profile, visibly labeled sample profiles, and invitation state changes.
+1. Optionally set `DEEPWATER_TEACHER_EMAIL` before starting the backend, then
+   register using that email to enable the teacher workspace. See
+   [TEACHER_GUIDE.md](TEACHER_GUIDE.md).
+2. As a teacher, author Danish or German lessons as structured JSON drafts and
+   review them before explicitly publishing. Learners cannot see drafts.
+3. As a learner, choose Danish or German during onboarding, set a personal goal,
+   and select a starting familiarity. The learner can switch languages later.
+4. Study only published lessons, practise teacher-defined checks, and track a
+   simple per-skill estimate and 1/3/7/14-day review schedule.
 
-The practice response is a reflection prompt, not automated language assessment.
-Sample people are fictional and cannot receive invitations. See `STATUS.md` for
-the known failing GraphQL authorization-error test and for features not yet wired.
+There is no German corpus bundled: choosing German shows an empty state until
+you author and approve the first lesson. A Danish starter lesson imports as a
+teacher-only draft from a JSON catalog file and must be approved before it appears.
+The fixed Danish quiz was removed
+because it would be incorrect for German. This prototype does not generate
+course content or use private messages/unlicensed media.
 
 ## Development direction
 
