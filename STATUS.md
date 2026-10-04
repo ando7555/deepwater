@@ -12,11 +12,19 @@ Implemented:
 - Explicit teacher publication, immutable revision creation, version numbers, and archiving of the previous published revision.
 - Authenticated learner filtering so drafts are hidden; absent course content is shown as an honest empty state.
 - Deterministic exercise grading and per-account practice history/review estimates.
+- Teacher audio authoring for music and podcasts, with editorial bands from A0–A1 through C1–C2, separate listening-demand ratings, source/provenance and rights fields, and before-listening/gist/focus prompts.
+- Server-side publish checks require a verified rights basis and learner source-link permission, enforce playback/transcript permissions independently, hide expired items, and prevent unapproved lessons from learner queries.
+- Learner music/podcast and level filters, direct audio controls only when explicitly allowed, source links, optional rights-approved transcripts, four guided listening steps, confidence capture, and audio-attempt counts.
+- Explainable audio recommendations use the learner's stated goal and starting familiarity; low-confidence first-listen reflections prompt a context-supported replay. A permitted transcript unlocks only after the gist step.
+- Audio reflections store response length and support/confidence metadata rather than raw free text, reducing the chance of retaining copyrighted lyrics or personal notes.
+- End-to-end tests cover unapproved visibility, unverified-rights publication rejection, cleared publishing, transcript exposure, and learner evidence ownership.
 - An implementation walkthrough for the teacher/product owner in TEACHER_GUIDE.md.
 
 Still needed:
 
 - The teacher must review and approve the Danish starter lesson. There is no German source content bundled; German becomes useful after a teacher-authored lesson is published.
+- The supplied song lesson has no audio attachment, and its commercial-song reference does not establish lyric/audio rights. No media source is bundled; only teacher-created or explicitly rights-cleared music and podcast sources should be published.
+- Review the new audio flow with the teacher and source owner, including actual permission evidence and player/transcript behavior for a first music and podcast lesson.
 - A language-specific diagnostic and multi-answer accepted-answer rules.
 - A richer teacher authoring UI or file importer, review history screen, and reversible unpublish action.
 - Production privacy controls, identity hardening, rate limiting, monitoring, accessibility/user testing, PostgreSQL verification, and a deployment environment.
