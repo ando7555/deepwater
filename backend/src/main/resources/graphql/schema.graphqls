@@ -7,6 +7,7 @@ type Mutation {
   startEcho(goal: String!, languageCode: String!, selfReportedLevel: String!): EchoHome!
   chooseEchoLanguage(languageCode: String!): EchoHome!
   submitEchoPractice(exerciseId: ID!, answer: String!, transferSelfCheck: Boolean): PracticeResult!
+  submitEchoAudioEvidence(lessonId: ID!, taskType: String!, answer: String!, transcriptUsed: Boolean!, confidence: Int!): AudioPracticeResult!
   saveEchoLessonDraft(input: LessonDraftInput!): TeacherLesson!
   publishEchoLesson(lessonId: ID!): TeacherLesson!
 }
@@ -23,6 +24,31 @@ input LessonDraftInput {
   skillKey: String!
   sortOrder: Int
   exercises: [ExerciseDraftInput!]!
+  audio: AudioLessonDraftInput
+}
+input AudioLessonDraftInput {
+  mediaType: String!
+  sourceTitle: String!
+  creator: String!
+  sourceUrl: String!
+  playbackUrl: String
+  editorialBand: String!
+  topicTags: String!
+  speechRate: Int!
+  vocabularyDensity: Int!
+  idiomDensity: Int!
+  pronunciationLoad: Int!
+  topicFamiliarity: Int!
+  beforeListeningPrompt: String!
+  gistPrompt: String!
+  focusPrompt: String!
+  transcriptText: String
+  rightsBasis: String!
+  linkAllowed: Boolean!
+  playbackAllowed: Boolean!
+  transcriptAllowed: Boolean!
+  rightsReference: String!
+  rightsExpiresAt: String
 }
 input ExerciseDraftInput {
   taskType: String!
@@ -41,6 +67,9 @@ type EchoHome {
   lessons: [EchoLesson!]!
   totalAttempts: Int!
   correctAttempts: Int!
+  audioAttempts: Int!
+  recommendedAudioLessonId: ID
+  recommendedAudioReason: String!
 }
 
 type EchoLearnerProfile {
@@ -64,6 +93,31 @@ type TeacherLesson {
   version: Int!
   revisionOf: ID
   exercises: [TeacherExercise!]!
+  audio: TeacherAudioLesson
+}
+type TeacherAudioLesson {
+  mediaType: String!
+  sourceTitle: String!
+  creator: String!
+  sourceUrl: String!
+  playbackUrl: String
+  editorialBand: String!
+  topicTags: String!
+  speechRate: Int!
+  vocabularyDensity: Int!
+  idiomDensity: Int!
+  pronunciationLoad: Int!
+  topicFamiliarity: Int!
+  beforeListeningPrompt: String!
+  gistPrompt: String!
+  focusPrompt: String!
+  transcriptAllowed: Boolean!
+  transcriptText: String
+  rightsBasis: String!
+  linkAllowed: Boolean!
+  playbackAllowed: Boolean!
+  rightsReference: String!
+  rightsExpiresAt: String
 }
 type TeacherExercise {
   position: Int!
@@ -89,6 +143,27 @@ type EchoLesson {
   nextReviewAt: String
   due: Boolean!
   exercises: [EchoExercise!]!
+  audio: EchoAudioLesson
+}
+type EchoAudioLesson {
+  mediaType: String!
+  sourceTitle: String!
+  creator: String!
+  sourceUrl: String!
+  playbackUrl: String
+  editorialBand: String!
+  topicTags: String!
+  speechRate: Int!
+  vocabularyDensity: Int!
+  idiomDensity: Int!
+  pronunciationLoad: Int!
+  topicFamiliarity: Int!
+  beforeListeningPrompt: String!
+  gistPrompt: String!
+  focusPrompt: String!
+  transcriptAllowed: Boolean!
+  transcriptText: String
+  rightsExpiresAt: String
 }
 
 type EchoExercise {
@@ -114,4 +189,13 @@ type PracticeResult {
   mastery: Float!
   nextReviewAt: String
   transfer: Boolean!
+}
+type AudioPracticeResult {
+  saved: Boolean!
+  taskType: String!
+  transcriptUsed: Boolean!
+  confidence: Int!
+  nextTaskType: String!
+  repeatSuggested: Boolean!
+  feedback: String!
 }

@@ -80,6 +80,18 @@ In scope:
   and later transfer. No single activity count is described as mastery.
 - An authoring/review path that stores source provenance and review status.
 
+**Authentic Audio — implemented as a local prototype:** the teacher-curated music
+and podcast workflow follows the text-based learner loop. Curate
+beginner (A0–A1), elementary (A2), intermediate (B1–B2), and advanced (C1–C2)
+editorial collections over time; do not imply formal CEFR certification. For the
+first pilot, target one suitable music item and one podcast item only if the source
+rights permit the learner-facing experience. Each starts with listening before
+transcript, then uses level-appropriate support, reviewed language notes, and an
+original expression task. Music-derived grammar claims need an everyday example
+as corroboration; podcast pace, topic familiarity, and speech features remain
+separate demand signals. If a source is not cleared, use teacher-created audio or
+keep the item in a private draft.
+
 Out of scope for the first Echo pilot unless later accepted: open-ended AI tutoring,
 automated pronunciation scoring, a full CEFR curriculum, unrestricted lesson
 imports, social discovery, and claims of fluency from a short test.
@@ -188,6 +200,54 @@ recorded. Unclear rights block publication.
 **AC-CONTENT-4 — review gate**  
 Given an AI-drafted explanation with no reviewer approval, when a learner requests
 the lesson, then the draft is not served as authoritative learning content.
+
+**AC-AUDIO-1 — visible editorial level**
+
+Given a learner opens an audio recommendation, when the item is shown, then its
+teacher-assigned editorial band, topic, medium, and relevant listening-demand
+signals are visible with a plain-language reason; the band is not called a
+certified CEFR result.
+
+**AC-AUDIO-2 — distinct music and podcast pedagogy**
+
+Given a music lesson teaches language from lyrics, when the lesson presents a
+general grammar rule, then it labels poetic/colloquial/dialectal wording where
+relevant and cites a reviewed everyday example. Given a podcast lesson, when its
+learning task references a speaker's accent, register, or speed, then each is
+described as a property of that recording and is not used to judge learner ability.
+
+**AC-AUDIO-3 — rights-gated media and transcript**
+
+Given a source lacks current permission for streaming, hosting, or transcript
+display, when a teacher attempts to publish that use, then publication is blocked
+and no copied audio or transcript is served. A source link is used only where its
+terms permit linking.
+
+**AC-AUDIO-4 — listen before reading**
+
+Given transcript display is permitted, when a learner starts an audio lesson,
+then they can attempt a gist prompt before revealing the transcript and can later
+hide/reveal it using keyboard-accessible controls.
+
+**AC-AUDIO-5 — honest adaptation and progress**
+
+Given a learner misses a listening task, when Echo selects a follow-up, then it
+offers a narrower question or contextual support before increasing demand. When
+Echo records success, then it records the specific listening or language skill and
+support used; it does not infer grammar mastery from gist comprehension.
+
+**AC-AUDIO-6 — source and transcript review**
+
+Given audio metadata, transcript, translation, level, or grammar notes are
+unreviewed or uncertain, when the learner browses Echo, then the unapproved claims
+remain hidden and the item is not presented as a trusted lesson.
+
+**AC-AUDIO-7 — unavailable audio/accessibility alternative**
+
+Given the external player fails or the learner cannot use the audio control, when
+the lesson opens, then Echo explains the failure and offers an authorized
+transcript or teacher-created alternative where available; it does not record a
+completed listening attempt.
 
 ### B. Echo learning outcomes
 

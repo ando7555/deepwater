@@ -1,7 +1,7 @@
 # Deepwater: materials-based product and implementation proposal
 
 **Prepared:** 25 September 2026  
-**Status:** product proposal with the first Echo MVP slice implemented on the review branch; Danish-teacher review still required
+**Status:** product proposal and local Echo implementation; Danish-teacher review and media-rights evidence still required
 **Implementation boundary:** local prototype only; no AI grading, public release, or deployment
 **Evidence:** eight Notion-export ZIPs supplied for this task
 
@@ -162,6 +162,109 @@ until the owner confirms applicable licenses/permission. The audio file itself w
 not present in the ZIPs; the song page references it but the attached export
 doesn't include the recording.
 
+### Proposed Echo feature: learn through music and podcasts
+
+The source lesson already suggests a strong audio-learning loop: predict from the
+situation, listen before reading, notice useful language in short sections,
+discuss meaning, reuse a phrase, and return to rhythm and connected speech. Make
+this a first-class **Authentic Audio** pathway in Echo. Music and podcasts belong
+in the same pathway because both give learners meaningful listening context, but
+they need distinct teaching treatment: songs use rhythm, repetition, imagery, and
+often poetic language; podcasts expose learners to spoken phrasing, reductions,
+turn-taking, register, and topic vocabulary.
+
+**Why offer both:** songs can make sound patterns, refrain vocabulary, emotion,
+and repeated phrases memorable. Podcasts can give a learner longer stretches of
+natural speech, practical topic vocabulary, speaker intention, and conversational
+repair. Neither medium is inherently easier, more authentic, or more educational
+than the other. Echo should let a learner choose by interest and show why a
+specific item fits their current learning goal.
+
+**Level path:** curate separate, reviewed collections for beginner (A0–A1),
+elementary (A2), intermediate (B1–B2), and advanced (C1–C2). These are proposed
+editorial bands, not certified CEFR placements. A teacher assigns the suggested
+band and records evidence such as speech rate, vocabulary frequency, clause
+complexity, idiom density, pronunciation/reduction load, topic knowledge, and how
+much scaffolding the lesson provides. Do not reduce those dimensions to one
+opaque "song difficulty" score. The learner can choose an easier or harder item;
+Echo explains its recommendation and adapts based on attempts and confidence.
+
+| Editorial band | Example teaching treatment |
+|---|---|
+| Beginner · A0–A1 | Short authorized segment; familiar topic; one listening goal; image/context preview; high-frequency phrases; optional word bank; slow replay; one reviewed structure; sentence frame for original production |
+| Elementary · A2 | Longer connected segment; reduced support; distinguish known from new phrases; one grammar contrast; short retelling or role-play |
+| Intermediate · B1–B2 | Natural pace first; infer stance and idiom from context; notice linking, reductions, register, and clause patterns; summarize or respond with a new viewpoint |
+| Advanced · C1–C2 | Dense or implicit meaning; ambiguity, metaphor, humor, cultural references, speaker/rhetorical intent, accent and register variation; defend an interpretation with audio evidence |
+
+These bands guide curation; the actual item metadata and teacher review determine
+whether a particular asset is appropriate. Music may be linguistically advanced
+while a short chorus is easy to remember. A podcast may be on a familiar topic yet
+hard to follow because of speed, accents, or overlapping speakers. Keep topic
+familiarity and listening demand visible as separate signals.
+
+**Music lesson flow:**
+
+1. Show the situation, theme, and one prediction prompt without displaying the
+   lyrics or translation.
+2. Play the authorized audio once at its original pace. Ask for gist, mood, or a
+   few recognized words; accept uncertainty and partial understanding.
+3. Replay the selected, rights-cleared segment. Guide the learner to notice a
+   sound, repeated phrase, grammar pattern, or useful expression.
+4. Reveal only the reviewed transcript portion that the rights grant permits.
+   Explain literal meaning, natural meaning, register, and relevant sound links.
+5. Mark poetic, colloquial, dialectal, or nonstandard forms explicitly. Never use
+   a lyric as the sole evidence for a general grammar rule; compare with a
+   teacher-approved everyday example.
+6. Ask the learner to adapt a phrase to their own situation, then schedule a
+   retrieval or transfer prompt with a different context or audio source.
+
+**Podcast lesson flow:** preview the topic and speakers, listen for the gist,
+replay a selected segment for a target phrase or structure, optionally reveal a
+reviewed transcript with synchronized timestamps, notice reductions/turn-taking/
+register, then summarize, answer, or role-play a related situation. Teach repair
+phrases when useful (for example, asking a speaker to repeat or clarify). A
+transcript is support that can be toggled; it should not replace listening.
+
+**Adaptive selection:** first filter media to items the teacher has approved and
+whose rights allow this learner-facing use. Then consider the learner's chosen
+language, goal, editorial band, topic interest, available time, preferred medium,
+confidence, and due skill evidence. Prefer a due target heard in a new context;
+otherwise offer a new item that practises a relevant sound, phrase, or structure.
+If the learner reports low confidence on the gist, repeat the first listen and use
+the context prompt as a clue. If
+they understand the segment but miss a phrase, reveal a permitted transcript cue.
+If they succeed with support, fade that support next time. A correct response on
+one lyric does not establish mastery; look for recall and independent use in a
+different item or original expression.
+
+**Teacher-approved media record:** source title/creator, publisher or host,
+canonical URL/provider ID, medium, language and dialect when known, source owner,
+license/permission basis, permitted use (link, stream, transcript, excerpt,
+classroom-only, etc.), attribution text, rights expiry/review date, segment
+timestamps, transcript provenance, editorial band, topic and listening-demand
+dimensions, learning objectives, target phrase/structure, explanations,
+exercises, reviewer/version, and publication state. Unreviewed or rights-unclear
+assets remain private drafts and cannot be recommended.
+
+**Rights boundary:** the export does not grant a license to reproduce commercial
+lyrics or podcast transcripts. The MVP should store citations and provider links,
+and play source audio through an authorized provider where its terms permit. Store
+audio, transcripts, or lyric excerpts only when the product has explicit
+permission covering the proposed use, territory, audience, duration, and display.
+Do not scrape transcripts or fetch unauthorized media. A learner-supplied link is
+not permission for Echo to redistribute it. Where transcript rights are absent,
+teach with teacher-authored prompts and explanations that do not reproduce the
+protected text. Private classroom design material stays access-restricted.
+
+**MVP boundary:** include the reviewed audio lesson schema, rights-aware source
+link, teacher-authored objectives/prompts, level and topic filters, an accessible
+external-player/link experience, transcript visibility only when authorized,
+listening reflections, and original production with the existing deterministic
+practice flow. Defer platform-wide licensed catalog deals, full audio hosting,
+automated speech recognition or pronunciation grading, automatic lyric/transcript
+ingestion, and model-generated learner-facing interpretations. These require
+separate rights, quality, consent, and cost validation.
+
 ## 2. Product concept and scope
 
 ### Product family
@@ -205,6 +308,12 @@ user-selected wardrobe items, with visible constraints and editable suggestions.
 - Text-first examples, phrase audio only when approved audio is supplied, speaking
   prompts, image description using licensed/created assets, role-play, and
   transparent review scheduling.
+- A local **Authentic Audio implementation** for teacher-created music and podcast
+  drafts, separate listening-demand ratings, A0–C2 editorial bands, source and
+  rights metadata, approval-gated publishing, learner filters, permission-aware
+  playback/transcript display, staged listening reflections, and confidence
+  evidence. The first real media lesson still requires teacher review and rights
+  evidence; no audio or transcript is bundled.
 - Structured, source-linked feedback. Initially deterministic rubric feedback;
   bounded AI can propose feedback where the rubric cannot, with evidence and an
   explicit “uncertain” fallback.
@@ -309,6 +418,99 @@ Advance one rung after **two successful attempts in different prompts**, at leas
 one without a hint. On a repeated error, keep the concept in rotation, offer a
 contrasting example and a simpler cue, and reduce task complexity. Do not punish
 productive risk-taking or erase progress globally for one mistake.
+
+### Authentic-audio selection and adaptation
+
+For a media lesson, the selector uses these separate inputs: learner-selected
+language and goal, optional level band, topic/medium preferences, available time,
+per-skill evidence, and the media record's teacher-assigned level and listening
+demand. First reject unpublished items, out-of-scope rights, unavailable source
+links, wrong language, or content outside the learner's chosen controls. Then
+prefer a due skill heard in a different source; next prefer a relevant unseen
+skill and a topic the learner chose. Explain the reason in the UI and allow the
+learner to switch item, medium, transcript support, or difficulty.
+
+Adapt **scaffolding before changing the source**: replay the same authorized
+segment with a narrower listening question; offer a contextual clue or a
+rights-permitted transcript cue; isolate a phrase; then fade that cue on the next
+attempt. Keep one original-speed listen available so slowed playback does not
+become the only evidence. If the learner understands a music segment, a later
+transfer should use a new podcast, a teacher-authored sentence, or a different
+conversation task—not just replay the same refrain.
+
+Track the event separately as `gist`, `phrase_recognition`, `structure_noticing`,
+`sound_noticing`, `supported_recall`, `independent_recall`, or `transfer`. Self-
+reported confidence and the amount of transcript/context support accompany the
+result. Listening comprehension and grammar production are different skills;
+success in one must not silently upgrade the other.
+
+For music, store whether the target language is standard, colloquial, dialectal,
+poetic, or uncertain and what evidence supports that label. A teacher-approved
+everyday example must corroborate any grammar point abstracted from lyrics.
+For podcasts, annotate speaker count, known accent/variety, speed estimate,
+overlap/noise, register, transcript confidence, and timestamp ranges when known.
+These are descriptive review aids, not identity or ability judgments.
+
+**Audio selector pseudocode:**
+
+```text
+function chooseAudio(learner, now, minutes):
+    items = publishedMedia(language=learner.chosenLanguage)
+      .filter(rightsPermitThisUse(now))
+      .filter(sourceLinkAvailable)
+      .filter(learnerControlsAllow)
+    if items is empty:
+        return explainNoRightsClearedAudioAndOfferTextLesson()
+
+    target = mostOverdueAudioSkill(items, learner.skillEvidence)
+    if target exists:
+        candidates = items.teaching(target).fromDifferentSourceThan(lastPractice)
+        if candidates is not empty:
+            return bestFit(candidates, learner.topicChoice, minutes,
+                           reason="review this skill in a new voice/context")
+
+    candidates = items.forGoal(learner.goal)
+    candidates = preferBandAndDemand(candidates, learner.confidence,
+                                     learner.optionalBandChoice)
+    return bestFit(candidates, learner.topicChoice, learner.mediumChoice, minutes,
+                   reason="new audio supports your chosen goal")
+
+function adaptAudioTask(result):
+    if result.gistMissed: repeatGistWithContextPrompt()
+    else if result.phraseMissed: offerContextThenPermittedTranscriptCue()
+    else if result.correctWithSupport: scheduleSimilarNewSourceWithLessSupport()
+    else if result.independent: scheduleDelayedTransferInDifferentContext()
+```
+
+The selector, rights checks, task sequence, support fading, and review scheduling
+are deterministic. AI is optional for proposing topic/phrase annotations from
+authorized media, but a teacher verifies transcripts, translations, grammar,
+register, and CEFR-adjacent bands. Automatic speech recognition can be wrong;
+never present uncertain words as a confirmed transcript or use ASR/accent scoring
+to grade a learner in this MVP.
+
+**Worked example (illustrative; no commercial lyrics reproduced):** an A0/A1
+learner who chooses music and an everyday-conversation goal receives a
+rights-cleared, teacher-reviewed song segment tagged beginner for topic familiarity
+but moderate for sound reduction. Before reading, the learner listens for overall
+mood and whether a repeated phrase is a question or a statement. The second listen
+focuses on a teacher-selected present-tense verb. The teacher-approved transcript
+may then be revealed, followed by the original everyday examples `Jeg møder min
+ven efter arbejde.` / `I aften møder jeg min ven.` If the song uses an elliptical
+or poetic form, it is discussed as a feature of that song and is not normalized as
+the everyday rule. The learner makes a new sentence about their own evening and
+self-rates confidence. Echo records gist, phrase recognition, transcript support,
+and production separately. At a later review, a different podcast or new everyday
+prompt checks whether the learner recognizes or produces the target without the
+original song. If rights are unclear or the player is unavailable, the lesson is
+not published and no completion evidence is recorded.
+
+For an intermediate podcast example, a teacher might select a short interview
+segment and target how a speaker signals agreement, qualification, or a request to
+clarify. Learners first identify the speaker's purpose, then replay with an
+authorized timestamped transcript, notice a phrase and its register, and respond
+in a new role-play. That measures discourse/listening evidence; it does not infer
+the learner's personality or broadly rate their speaking ability.
 
 ### Recurring errors and grounded correction
 
@@ -415,7 +617,12 @@ Primary learning metric: delayed transfer on a new prompt against baseline.
 Supporting metrics: recall by concept, help/hint use, recurrence after correction,
 confidence calibration, learner-reported usefulness, return at review due date,
 and teacher correction rate. Completion time/streaks are engagement measures, not
-proof of learning.
+proof of learning. For Authentic Audio, additionally measure first-listen gist
+success, phrase recognition with/without transcript support, transfer to a
+different source/context, transcript reveal behavior, item abandonment/player
+failure, teacher correction rate, rights-related publication blocks, and learner
+rating of topic/level fit. Do not optimize for minutes listened or number of
+replays as a proxy for acquisition.
 
 ## 4. Reuse across products
 
@@ -506,6 +713,62 @@ and required attribution are present. Missing rights block publication.
 Given two identical source pages are imported, when the authoring tool detects the
 duplicate, then one canonical source version is created with both import
 references recorded; the original files remain recoverable.
+
+**AC-AUDIO-1 — levelled, explainable audio choice**
+
+Given a learner chooses an audio lesson, when Echo recommends a music or podcast
+item, then the teacher-assigned editorial band and relevant listening-demand
+dimensions are visible, and Echo explains how the item supports the learner's
+goal. The band is not represented as a certified CEFR placement.
+
+**AC-AUDIO-2 — separate listening evidence**
+
+Given a learner completes a gist, phrase-recognition, or grammar task, when Echo
+updates progress, then it records evidence against that specific skill and the
+amount of transcript/context support; listening success alone does not mark
+grammar production as mastered.
+
+**AC-AUDIO-3 — music versus podcast treatment**
+
+Given a teacher publishes a music lesson, when it teaches a grammar pattern from
+lyrics, then the lesson labels poetic/colloquial/dialectal wording where relevant
+and cites a reviewed everyday example for the rule. Given a podcast lesson, then
+its reviewed activity may target connected speech, speaker intent, turn-taking,
+register, or topic vocabulary without claiming every speaker represents a single
+standard accent.
+
+**AC-AUDIO-4 — listen before transcript**
+
+Given transcript display is authorized, when a learner starts an audio lesson,
+then the first listening prompt can be completed before transcript text appears;
+the learner can reveal, hide, and revisit the transcript after listening.
+
+**AC-AUDIO-5 — rights gate and expiry**
+
+Given a media source has missing, expired, or insufficient permission for the
+requested display/stream/transcript use, when an author attempts to publish it,
+then publication is blocked and learners receive no copied audio or transcript.
+An allowed source link may be shown only if its terms permit that linking use.
+
+**AC-AUDIO-6 — accessible audio fallback**
+
+Given audio is unavailable, blocked, or not usable with assistive technology, when
+a learner opens the lesson, then Echo explains the limitation and provides the
+authorized transcript or teacher-created text alternative when available, without
+claiming a listening attempt was completed.
+
+**AC-AUDIO-7 — scaffold adaptation**
+
+Given a learner misses the audio gist, when Echo selects the next task, then it
+offers a narrower prompt or contextual support before raising difficulty. Given
+the learner succeeds with transcript support, then later practice fades that
+support and uses a different source before inferring transfer.
+
+**AC-AUDIO-8 — teacher review**
+
+Given an imported or AI-proposed transcript, phrase, translation, level, or grammar
+annotation is unreviewed, when learners browse audio lessons, then that annotation
+is hidden and the item stays in teacher draft state.
 
 ### Privacy, safety, and model behavior
 
@@ -665,6 +928,16 @@ review date; task mode/rubric/version; learner goal; skill stage, evidence type,
 confidence, due time; attempt result, hint use, optional error tags. Avoid one
 untyped JSON blob for all semantic and rights data.
 
+Authentic-audio extensions stay within Echo ownership: `MediaSource` (provider,
+canonical URI/ID, creator, language/variety), `MediaRightsGrant` (permitted acts,
+audience/territory, attribution, expiry/review state), `MediaSegment` (time bounds,
+medium, topic, editorial band, independent listening-demand dimensions),
+`TranscriptVersion` (source, rights, timestamps, confidence, reviewer), and
+`AudioSkillEvidence` (skill, attempt, support used, source/version). Store actual
+audio/transcript blobs only behind authorized object storage when the grant permits
+it; otherwise retain references and teacher-authored activities. Enforce expiry at
+publication and playback time, not only during import.
+
 Amber-specific future entities (kept separate): `AmberProfile`,
 `PreferenceGrant`, `Invitation`, `Conversation`, `Block`, `Report`, and
 `ModerationCase`. Fashion-specific future entities: `WardrobeItem`, `StyleGoal`,
@@ -674,10 +947,12 @@ Amber-specific future entities (kept separate): `AmberProfile`,
 
 **Client GraphQL** (version/compatibility policy required):
 
-- queries: `echoCourse`, `lesson`, `nextPractice`, `skillEvidence`,
-  `reviewSchedule`, `sourceExplanation`;
+- queries: `echoHome` (including published lessons and optional audio metadata),
+  `teacherLessons`, and future dedicated `audioLessons(filters)` if catalog size
+  makes a separate endpoint useful;
 - mutations: `completeDiagnostic`, `submitAttempt`, `rateConfidence`,
-  `snoozeReview`, `reportContentIssue`, `requestExport`, `requestDeletion`;
+  `snoozeReview`, `reportContentIssue`, `submitEchoAudioEvidence`,
+  `requestExport`, `requestDeletion`;
 - restricted authoring REST/GraphQL boundary: `createImport`, `reviewContent`,
   `approveContentVersion`, `publishContentVersion`;
 - platform REST: authentication callbacks, health/readiness, administrative
@@ -753,6 +1028,7 @@ clear.
 |---|---|---|---|---|
 | 0. Discovery and content rights | Confirm audience/job, source inventory/dedup, permissions, teacher review role, measurable AC, pilot metrics | 1–2 team-weeks; 1 week elapsed | Owner and teacher approve Echo scope; song/image rights disposition recorded; sensitive examples excluded | Lesson notes may not be reusable commercially; unclear scope or teacher availability |
 | 1. Content normalization | Canonical schema; first 8–12 proposed micro-lessons from source material; reviewed examples, errors, answer rubrics; source ledger | 2–4 team-weeks; 2–3 weeks elapsed | Every published item has source, rights state, reviewer, version, target, exercise, rubric | Correcting errors and authored examples takes longer than parsing |
+| 1A. Authentic Audio vertical slice | Implemented locally: rights-aware audio schema, teacher draft form, level/demand rubric, external/direct player, conditional transcript, listening steps, and evidence capture | Prototype implemented; source curation and review remain | A real lesson appears only after the teacher records permission evidence and approves every language claim; otherwise it remains a private draft | Commercial licensing, host availability, transcript errors, and accessibility support can block one medium |
 | 2. Adaptive algorithm prototype | Diagnostic, per-skill state, simple review boxes, task ladder, next-item explanations; offline test cases | 2–3 team-weeks; 2 weeks elapsed | Teacher/product owner accept pseudocode and sample schedules across strong/weak/unknown learner cases | Heuristic overfits one learner; no transfer baseline |
 | 3. Working end-to-end prototype | Web onboarding → one lesson → practice → correction → later review; saved state; deterministic first, optional AI behind flag | 4–6 team-weeks; 2–3 weeks elapsed | AC-E1–E5 and API auth/error tests pass on PostgreSQL; accessible core path demo | Current demo auth error, content gaps, and UI scope creep |
 | 4. Echo MVP hardening | Content review workflow; progress evidence; privacy/export/delete; AI gold set and fallback; responsive/a11y/perf; CI/CD and staging | 8–12 team-weeks; 4–6 weeks elapsed | All Echo and quality gates pass; known gaps owner-approved; no deployment without release signoff | Rights, model quality, data-retention operational burden |
@@ -768,6 +1044,9 @@ clear.
    `keep`, `correct`, `rewrite`, `private-only`, or `exclude`.
 2. Record rights/attribution for each page, image, screenshot, song reference/audio,
    and teacher-created asset. No unclear asset enters a public product build.
+   For the audio follow-on, shortlist one music source and one podcast source whose
+   exact playback/transcript uses can be documented; use teacher-created audio as
+   the fallback instead of assuming the existing song export grants rights.
 3. Agree one audience and one goal: proposed candidate is adult A0/early-A1 learner
    who wants simple everyday/workplace communication.
 4. Teacher corrects and annotates three seed concepts: `at være`, `en/et` plus
@@ -806,6 +1085,10 @@ clear.
 **P1 — Echo learning slice**
 
 - Versioned content/source/provenance model and reviewer publication state.
+- [Implemented locally] Rights-aware media records, editorial bands,
+  listening-demand rubric, teacher approval, rights-permission checks, and
+  learner listening evidence. Still needed: a real reviewed music/podcast sample
+  whose provider terms permit the exact learner-facing uses.
 - Learner goal + low-pressure diagnostic; per-skill evidence state.
 - Deterministic lesson picker and review scheduler with visible reason/override.
 - One complete `V2` or `en/et` lesson: example → contrast → retrieval → own
@@ -817,6 +1100,9 @@ clear.
 
 - Golden set and teacher review UI/process; deterministic rubric before generative
   feedback; model structured output, grounding, abstention, privacy notice, quotas.
+- Improve the audio player/link flow and accessibility, add support fading across
+  sessions, and evaluate delayed transfer using different sources. Keep copied
+  audio/transcript hosting deferred until rights explicitly permit it.
 - Review intervals and task ladder evaluation; transfer/pre-post pilot protocol.
 - Keyboard/screen-reader, captions/audio controls, mobile reflow, and accessibility
   testing.

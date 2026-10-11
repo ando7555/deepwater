@@ -65,6 +65,14 @@ The fixed Danish quiz was removed
 because it would be incorrect for German. This prototype does not generate
 course content or use private messages/unlicensed media.
 
+The local app now includes a rights-gated music and podcast lesson path. A teacher
+can create private audio drafts, set a beginner-to-advanced editorial band and
+listening demands, record source permissions, then explicitly approve publication.
+Learners can filter approved material, listen before revealing a permitted
+transcript, complete staged reflections, and track listening evidence separately.
+No audio catalog is bundled; the supplied commercial-song reference does not grant
+reuse rights. See the [teacher guide](TEACHER_GUIDE.md) for the workflow.
+
 ## Development direction
 
 Read and agree the product acceptance criteria before broadening implementation.

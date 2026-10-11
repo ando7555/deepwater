@@ -2,6 +2,7 @@ package com.deepwater.api;
 
 import com.deepwater.echo.EchoService;
 import com.deepwater.echo.EchoService.EchoHome;
+import com.deepwater.echo.EchoService.AudioPracticeResult;
 import com.deepwater.echo.EchoService.PracticeResult;
 import com.deepwater.echo.EchoService.LessonDraft;
 import com.deepwater.echo.EchoService.TeacherLesson;
@@ -42,6 +43,14 @@ public class DeepwaterGraphQlController {
     PracticeResult submitEchoPractice(@Argument String exerciseId, @Argument String answer,
                                       @Argument Boolean transferSelfCheck, GraphQLContext context) {
         return echo.practice(account(context), exerciseId, answer, transferSelfCheck);
+    }
+
+    @MutationMapping
+    AudioPracticeResult submitEchoAudioEvidence(@Argument String lessonId, @Argument String taskType,
+            @Argument String answer, @Argument Boolean transcriptUsed, @Argument Integer confidence,
+            GraphQLContext context) {
+        return echo.audioEvidence(account(context), lessonId, taskType, answer,
+                Boolean.TRUE.equals(transcriptUsed), confidence == null ? 0 : confidence);
     }
 
     @QueryMapping

@@ -168,6 +168,32 @@ For every comparison, state the relation (same function, similar form, partial
 transfer, contrast, or no supported comparison); do not collapse it to a numeric
 language-similarity score.
 
+### Echo authentic-audio boundary
+
+```mermaid
+flowchart LR
+  Curator[Teacher selects music or podcast] --> Rights{Rights permit this use?}
+  Rights -- no / unknown --> Private[Private draft; no learner playback]
+  Rights -- yes --> Metadata[Record source, license, band, topic, demand, timestamps]
+  Metadata --> Review{Teacher reviews transcript and lesson claims?}
+  Review -- no --> Private
+  Review -- yes --> Published[Publish versioned audio lesson]
+  Published --> Player[Authorized provider link/player]
+  Player --> Gist[Listen for gist before transcript]
+  Gist --> Scaffold[Replay, clue, or permitted transcript support]
+  Scaffold --> Evidence[Store skill evidence and support used]
+  Evidence --> Transfer[Delayed task from a different source/context]
+```
+
+For the pilot, store provider IDs/URLs and segment timestamps, not copied media,
+unless a license explicitly permits hosting. Lyrics are not a grammar authority:
+mark poetic or colloquial forms and corroborate a general rule with a reviewed
+everyday example. Podcast accents, rate, topic familiarity, overlap, and register
+are separate descriptive signals; avoid turning them into one opaque difficulty
+score. Transcript and listening evidence are distinct. Speech recognition and
+pronunciation scoring remain disabled until consent, rights, accuracy, and bias
+evaluation are approved.
+
 ### Amber algorithm boundary
 
 ```mermaid
@@ -304,12 +330,14 @@ deploy just because the CI build is green.
 
 ## 10. Current implementation versus target
 
-The current repository contains a small local proof of flow: account registration,
-two seeded comparison cases, persisted practice, Amber profile creation, sample
-profiles, and invitation acceptance. It uses H2 locally. Its GraphQL auth error
-path has a known HTTP 500 test failure. It does not yet implement the content
-authoring/review model, the analytical Echo algorithm, Kafka delivery, Cosmos,
-vector retrieval, Amber block/report/moderation, Swift, Kubernetes, or deployment.
+The current repository contains a local Echo proof of flow: account registration,
+Danish/German choice, teacher-controlled lesson drafts and approval, practice
+history, deterministic review estimates, plus rights-gated audio lesson drafts for
+music and podcasts. It uses H2 locally. Audio rights are supplied as teacher
+attestations and references; the code does not establish whether a real provider
+license is legally sufficient. The prototype does not yet implement Kafka
+delivery, Cosmos, vector retrieval, speech recognition, a licensed media catalog,
+Amber safety operations, Swift, Kubernetes, or a production deployment.
 
 Treat `STATUS.md` as the dated implementation ledger, this file as the proposed
 technical target, and

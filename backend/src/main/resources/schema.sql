@@ -68,6 +68,45 @@ create table if not exists echo_exercise_options (
   sort_order integer not null,
   primary key(exercise_id, option_key)
 );
+
+-- Rights-aware music and podcast lessons remain private until teacher approval.
+create table if not exists echo_audio_lessons (
+  lesson_id varchar(120) primary key references echo_lessons(id),
+  media_type varchar(16) not null,
+  source_title varchar(240) not null,
+  creator varchar(240) not null,
+  source_url varchar(1500) not null,
+  playback_url varchar(1500),
+  editorial_band varchar(16) not null,
+  topic_tags varchar(500) not null,
+  speech_rate integer not null,
+  vocabulary_density integer not null,
+  idiom_density integer not null,
+  pronunciation_load integer not null,
+  topic_familiarity integer not null,
+  before_listening_prompt varchar(1000) not null,
+  gist_prompt varchar(1000) not null,
+  focus_prompt varchar(1000) not null,
+  transcript_text varchar(5000),
+  rights_basis varchar(24) not null,
+  link_allowed boolean not null default false,
+  playback_allowed boolean not null default false,
+  transcript_allowed boolean not null default false,
+  rights_reference varchar(500) not null,
+  rights_expires_at date
+);
+create table if not exists echo_audio_attempts (
+  id varchar(36) primary key,
+  account_id varchar(36) not null references accounts(id),
+  lesson_id varchar(120) not null references echo_audio_lessons(lesson_id),
+  task_type varchar(24) not null,
+  response_chars integer not null,
+  transcript_used boolean not null,
+  confidence integer not null,
+  created_at timestamp with time zone not null default current_timestamp
+);
+create index if not exists echo_audio_attempts_account_created on echo_audio_attempts(account_id, created_at);
+
 create table if not exists echo_attempts (
   id varchar(36) primary key,
   account_id varchar(36) not null references accounts(id),
