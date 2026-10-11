@@ -1,0 +1,36 @@
+{
+  "id": "articles-de",
+  "languageCode": "de",
+  "title": "Articles: der, die, das, ein, eine",
+  "level": "A0 · beginner",
+  "topic": "German articles and grammatical gender",
+  "objective": "Identify the definite and indefinite article for a noun and understand that gender must be learned with each noun.",
+  "explanation": "German nouns have one of three grammatical genders: masculine (der/ein), feminine (die/eine), and neuter (das/ein). Unlike Danish, where \"en\" and \"et\" give two choices, German has three. The gender of a noun cannot reliably be guessed from the noun's meaning, so you learn each noun together with its article: \"der Tisch\" (the table, masc.), \"die Schule\" (the school, fem.), \"das Buch\" (the book, neut.). In the definite form \"das Buch\" uses \"das\"; in the indefinite form it uses \"ein Buch\" (neuter and masculine share \"ein\" in the indefinite nominative). This lesson focuses on recognising and matching articles — not on case endings, which come later.",
+  "sourceReference": "Teacher-authored example. Article forms verified against standard German grammar (nominative definite and indefinite articles, three-gender system).",
+  "skillKey": "german.articles.nominative",
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "\"Buch\" (book) is neuter. Which sentence uses the correct definite article?",
+      "expectedAnswer": "C",
+      "feedbackCorrect": "Correct. Neuter nouns take \"das\" as the definite article: \"das Buch\".",
+      "feedbackIncorrect": "\"Buch\" is neuter. Neuter nouns take \"das\", not \"der\" (masculine) or \"die\" (feminine).",
+      "options": [
+        { "key": "A", "text": "der Buch liegt auf dem Tisch." },
+        { "key": "B", "text": "die Buch liegt auf dem Tisch." },
+        { "key": "C", "text": "das Buch liegt auf dem Tisch." }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "\"Schule\" (school) is feminine. Complete: \"___ Schule ist groß.\"",
+      "expectedAnswer": "die",
+      "feedbackCorrect": "Correct. \"Die Schule\" — feminine nouns take \"die\" as the definite article.",
+      "feedbackIncorrect": "Feminine nouns take \"die\". \"Die Schule ist groß.\" — learn the article together with each new noun."
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "Choose three German nouns you know or look up. Write each with its definite article (der/die/das) and then with its indefinite article (ein/eine/ein)."
+    }
+  ]
+}
