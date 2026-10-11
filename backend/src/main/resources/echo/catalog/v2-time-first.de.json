@@ -1,0 +1,36 @@
+{
+  "id": "v2-time-first-de",
+  "languageCode": "de",
+  "title": "Start with time. The verb stays second.",
+  "level": "A1 · beginner",
+  "topic": "German word order",
+  "objective": "Place the finite verb in second constituent position after a fronted time phrase.",
+  "explanation": "In a German declarative main clause, the finite verb is always in the second constituent position — not the second word, but the second constituent. When a time phrase like \"Heute\" opens the sentence, the verb must still come second and the subject follows it: \"Heute arbeite ich zu Hause.\" This is the same V2 pattern as in Danish. Subordinate clauses and questions follow different rules and should be treated separately.",
+  "sourceReference": "Teacher-authored example. V2 rule verified against standard German grammar: the finite verb occupies the second syntactic position in a declarative main clause.",
+  "skillKey": "german.main-clause.v2",
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "Which sentence correctly places the finite verb second after a time phrase?",
+      "expectedAnswer": "A",
+      "feedbackCorrect": "Correct. \"Heute\" is the first constituent; \"arbeite\" is the finite verb in second position; \"ich\" (subject) follows.",
+      "feedbackIncorrect": "The finite verb must come directly after the opening time phrase. The target pattern is \"Heute arbeite ich zu Hause.\"",
+      "options": [
+        { "key": "A", "text": "Heute arbeite ich zu Hause." },
+        { "key": "B", "text": "Heute ich arbeite zu Hause." },
+        { "key": "C", "text": "Ich heute arbeite zu Hause." }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete the sentence: \"Morgen ___ wir in die Schule.\"",
+      "expectedAnswer": "gehen",
+      "feedbackCorrect": "Correct. \"Morgen\" opens the sentence; \"gehen\" is the finite verb in second position; \"wir\" follows.",
+      "feedbackIncorrect": "After the time phrase \"Morgen\", the finite verb must come next: \"Morgen gehen wir in die Schule.\""
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "Write a new German sentence that begins with a time phrase (e.g. Heute, Morgen, Am Montag). Then check: is the finite verb in second position?"
+    }
+  ]
+}

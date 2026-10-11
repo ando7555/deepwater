@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './style.css';
 
 // Empty VITE_API_URL keeps API calls on the frontend origin, where Vite can proxy them.
-const API = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8081';
+const API = import.meta.env.VITE_API_URL ?? '';
 const GRAPHQL = `${API}/graphql`;
 
 async function gql(query, variables = {}, token = sessionStorage.getItem('deepwater-token')) {

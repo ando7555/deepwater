@@ -1,0 +1,36 @@
+{
+  "id": "sein-basics-de",
+  "languageCode": "de",
+  "title": "sein — the verb to be",
+  "level": "A0 · beginner",
+  "topic": "Present tense of sein",
+  "objective": "Use the correct present-tense form of sein (bin, bist, ist, sind) to describe yourself and others.",
+  "explanation": "\"Sein\" (to be) is the most essential German verb. Its present-tense forms are irregular: ich bin (I am), du bist (you are), er/sie/es ist (he/she/it is), wir/sie/Sie sind (we/they/you-formal are). Compare Danish: Danish uses one form \"er\" for all persons. German keeps a separate form for each person, so you must match the verb to the subject each time.",
+  "sourceReference": "Teacher-authored example. Conjugation verified against standard German grammar reference (sein, Präsens).",
+  "skillKey": "german.verb.sein.present",
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "Which sentence correctly uses the form of \"sein\" for \"she\"?",
+      "expectedAnswer": "B",
+      "feedbackCorrect": "Correct. \"Sie ist\" — \"ist\" is the third-person singular form of sein.",
+      "feedbackIncorrect": "For \"sie\" (she), the form of sein is \"ist\": \"Sie ist Lehrerin.\" — \"bin\" is only for \"ich\", and \"bist\" only for \"du\".",
+      "options": [
+        { "key": "A", "text": "Sie bin Lehrerin." },
+        { "key": "B", "text": "Sie ist Lehrerin." },
+        { "key": "C", "text": "Sie bist Lehrerin." }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete the sentence: \"Ich ___ Studentin.\"",
+      "expectedAnswer": "bin",
+      "feedbackCorrect": "Correct. \"Ich bin\" — use \"bin\" with \"ich\" (I am).",
+      "feedbackIncorrect": "With \"ich\" (I), the form of sein is always \"bin\": \"Ich bin Studentin.\""
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "Write two German sentences: one about yourself and one about another person, using the correct form of sein each time."
+    }
+  ]
+}

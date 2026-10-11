@@ -1,0 +1,36 @@
+{
+  "id": "cafe-requests-de",
+  "languageCode": "de",
+  "title": "Ordering in a café",
+  "level": "A1 · beginner",
+  "topic": "Polite requests and orders",
+  "objective": "Use \"ich möchte\" and \"ich hätte gern\" to place a polite order in a café or restaurant.",
+  "explanation": "In a German café or restaurant, two polite request forms are standard: \"Ich möchte ...\" (I would like ...) and \"Ich hätte gern ...\" (I would gladly have ...). Both are polite and natural. \"Ich hätte gern\" is slightly more formal. Avoid \"Ich will ...\" in this context — it is grammatically correct but sounds too direct for a shop or restaurant. Adding \"bitte\" (please) at the end of either form is always appropriate: \"Ich möchte einen Kaffee, bitte.\"",
+  "sourceReference": "Teacher-authored example. Register guidance verified against standard spoken German for café and restaurant contexts.",
+  "skillKey": "german.functional.cafe-order",
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "Which phrase is the most appropriate polite order in a German café?",
+      "expectedAnswer": "B",
+      "feedbackCorrect": "Correct. \"Ich möchte einen Kaffee, bitte.\" is the natural polite form for a café order.",
+      "feedbackIncorrect": "\"Ich will\" is grammatically correct but too direct for a polite order. Use \"Ich möchte\" or \"Ich hätte gern\" in a shop or restaurant.",
+      "options": [
+        { "key": "A", "text": "Ich will einen Kaffee." },
+        { "key": "B", "text": "Ich möchte einen Kaffee, bitte." },
+        { "key": "C", "text": "Ich bin einen Kaffee." }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete the polite order: \"Ich ___ gern einen Tee, bitte.\"",
+      "expectedAnswer": "hätte",
+      "feedbackCorrect": "Correct. \"Ich hätte gern\" — the slightly more formal polite order form.",
+      "feedbackIncorrect": "The phrase is \"Ich hätte gern\". Fill in \"hätte\" to complete the polite request."
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "You are in a German café. Write your complete order using \"ich möchte\" or \"ich hätte gern\". Include what you want and add \"bitte\" at the end."
+    }
+  ]
+}
