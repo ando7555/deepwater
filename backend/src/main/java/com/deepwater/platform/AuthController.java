@@ -37,16 +37,33 @@ public class AuthController {
 
     private final PlatformService platform;
     private final GoogleAuthService google;
+    private final EmailVerificationService verification;
     @Value("${deepwater.frontend.base-url:http://localhost:5173}") private String frontendBaseUrl;
 
-    public AuthController(PlatformService platform, GoogleAuthService google) {
+    public AuthController(PlatformService platform, GoogleAuthService google, EmailVerificationService verification) {
         this.platform = platform;
         this.google = google;
+        this.verification = verification;
     }
 
     @PostMapping("/register")
     Map<String, String> register(@RequestBody Credentials body) {
-        return platform.register(body.name(), body.email(), body.password());
+        var session = platform.register(body.name(), body.email(), body.password());
+        verification.sendVerification(session.get("accountId"));
+        return session;
+    }
+
+    /** Confirms the email address from the link in the verification email. */
+    @PostMapping("/verify-email")
+    Map<String, Boolean> verifyEmail(@RequestBody VerifyRequest body) {
+        verification.verify(body.token());
+        return Map.of("emailVerified", true);
+    }
+
+    @PostMapping("/verify-email/resend")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    void resendVerification(@RequestHeader(value = "Authorization", required = false) String authorization) {
+        verification.resend(platform.requireAccount(authorization));
     }
 
     @PostMapping("/login")
@@ -128,4 +145,5 @@ public class AuthController {
     record Credentials(String name, String email, String password) {}
     record LoginCode(String code) {}
     record DeleteRequest(String confirmEmail) {}
+    record VerifyRequest(String token) {}
 }

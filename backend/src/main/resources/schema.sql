@@ -143,3 +143,12 @@ create table if not exists oauth_login_codes (
   code varchar(64) primary key, account_id varchar(36) not null references accounts(id),
   expires_at timestamp with time zone not null
 );
+
+-- Email verification: Google-verified accounts count as verified.
+alter table accounts add column if not exists email_verified boolean not null default false;
+update accounts set email_verified=true where google_sub is not null and email_verified=false;
+create table if not exists email_verification_tokens (
+  token_hash varchar(64) primary key, account_id varchar(36) not null references accounts(id),
+  expires_at timestamp with time zone not null,
+  created_at timestamp with time zone not null default current_timestamp
+);

@@ -60,7 +60,7 @@ function Brand({ product = 'Echo' }) {
   return <span className="brand"><img src={mark} alt="" width="40" height="40" /><span className="brand-text"><b>{product}</b><small>by Deepwater</small></span></span>;
 }
 
-function Auth({ onLogin }) {
+function Auth({ onLogin, message }) {
   const [mode, setMode] = useState('register');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -125,6 +125,7 @@ function Auth({ onLogin }) {
       <button disabled={busy}>{busy ? 'Please wait…' : mode === 'register' ? 'Create account' : 'Sign in'}</button>
     </form>
     {error && <p role="alert" className="error">{error}</p>}
+    {message && <p role="status" className="notice">{message}</p>}
     <div className="auth-divider"><span>or</span></div>
     <a href={`${API}/api/v1/auth/google`} className="google-btn">Continue with Google</a>
     <button className="link" onClick={() => { setError(''); setMode(mode === 'register' ? 'login' : 'register'); }}>{mode === 'register' ? 'Already have an account? Sign in' : 'Create an account'}</button>
@@ -207,6 +208,7 @@ function App() {
   const [results, setResults] = useState({});
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [verifyMessage, setVerifyMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [teacherLessons, setTeacherLessons] = useState([]);
@@ -226,6 +228,35 @@ function App() {
     sessionStorage.setItem('deepwater-token', account.token);
     sessionStorage.setItem('deepwater-user', JSON.stringify(account));
     setUser(account);
+  }
+
+  // The confirmation email links here with ?verify_email=<token>.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('verify_email');
+    if (!token) return;
+    window.history.replaceState({}, '', window.location.pathname);
+    fetch(`${API}/api/v1/auth/verify-email`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }),
+    }).then(async response => {
+      if (!response.ok) throw new Error((await response.json().catch(() => ({}))).detail || 'This confirmation link did not work.');
+      setVerifyMessage('Your email is confirmed.');
+      setUser(current => {
+        if (!current) return current;
+        const updated = { ...current, emailVerified: 'true' };
+        sessionStorage.setItem('deepwater-user', JSON.stringify(updated));
+        return updated;
+      });
+    }).catch(verifyError => setVerifyMessage(verifyError.message));
+  }, []);
+
+  async function resendVerification() {
+    setVerifyMessage('');
+    const response = await fetch(`${API}/api/v1/auth/verify-email/resend`, {
+      method: 'POST', headers: { Authorization: `Bearer ${sessionStorage.getItem('deepwater-token')}` },
+    });
+    setVerifyMessage(response.ok ? `A new link is on its way to ${user.email}.`
+      : (await response.json().catch(() => ({}))).detail || 'A new link could not be sent.');
   }
 
   function logout() {
@@ -368,7 +399,7 @@ function App() {
     finally { setBusy(false); }
   }
 
-  if (!user) return <Auth onLogin={login} />;
+  if (!user) return <Auth onLogin={login} message={verifyMessage} />;
 
   const filteredLessons = (home?.lessons || []).filter(item =>
     (audioFilter === 'ALL' || item.audio?.mediaType === audioFilter)
@@ -390,6 +421,8 @@ function App() {
 
     {error && <p role="alert" className="banner error">{error}</p>}
     {notice && <p role="status" className="banner notice">{notice}</p>}
+    {verifyMessage && <p role="status" className="banner notice">{verifyMessage}</p>}
+    {user.emailVerified === 'false' && <p role="status" className="banner notice">Please confirm your email: we sent a link to {user.email}. <button className="link" onClick={resendVerification}>Send a new link</button></p>}
     {loading && !home && <p role="status" className="loading">Loading your Echo workspace…</p>}
 
     {home && !home.onboarded && <section className="onboarding panel">
