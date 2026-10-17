@@ -25,6 +25,26 @@ function Auth({ onLogin }) {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
+  // Google sign-in returns here with a one-time code (or an error) that is exchanged for a session.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('login_code');
+    const googleError = params.get('login_error');
+    if (!code && !googleError) return;
+    window.history.replaceState({}, '', window.location.pathname);
+    if (googleError) {
+      setError(googleError === 'cancelled' ? 'Google sign-in was cancelled.' : 'Google sign-in did not complete. Please try again.');
+      return;
+    }
+    setBusy(true);
+    fetch(`${API}/api/v1/auth/google/exchange`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }),
+    }).then(async response => {
+      if (!response.ok) throw new Error('Google sign-in expired. Please try again.');
+      onLogin(await response.json());
+    }).catch(exchangeError => setError(exchangeError.message)).finally(() => setBusy(false));
+  }, []);
+
   async function submit(event) {
     event.preventDefault(); setError(''); setBusy(true);
     try {
@@ -51,6 +71,8 @@ function Auth({ onLogin }) {
       <button disabled={busy}>{busy ? 'Please wait…' : mode === 'register' ? 'Create account' : 'Sign in'}</button>
     </form>
     {error && <p role="alert" className="error">{error}</p>}
+    <div className="auth-divider"><span>or</span></div>
+    <a href={`${API}/api/v1/auth/google`} className="google-btn">Continue with Google</a>
     <button className="link" onClick={() => { setError(''); setMode(mode === 'register' ? 'login' : 'register'); }}>{mode === 'register' ? 'Already have an account? Sign in' : 'Create an account'}</button>
   </section></main>;
 }
