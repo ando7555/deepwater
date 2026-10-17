@@ -134,3 +134,12 @@ create table if not exists echo_skill_states (
   updated_at timestamp with time zone not null default current_timestamp,
   primary key(account_id, skill_key)
 );
+
+-- Google OAuth support
+alter table accounts add column if not exists google_sub varchar(255);
+create unique index if not exists accounts_google_sub on accounts(google_sub);
+alter table accounts alter column password_hash drop not null;
+create table if not exists oauth_login_codes (
+  code varchar(64) primary key, account_id varchar(36) not null references accounts(id),
+  expires_at timestamp with time zone not null
+);
