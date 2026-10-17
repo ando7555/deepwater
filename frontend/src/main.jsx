@@ -17,8 +17,47 @@ async function gql(query, variables = {}, token = sessionStorage.getItem('deepwa
   return payload.data;
 }
 
+const THEMES = [
+  { id: 'deep', label: 'Deep blue', mark: '/brand/mark.svg' },
+  { id: 'amber', label: 'Amber', mark: '/brand/mark-amber.svg' },
+  { id: 'light', label: 'Light', mark: '/brand/mark-light.svg' },
+];
+
+function readTheme() {
+  try { return THEMES.some(theme => theme.id === localStorage.getItem('deepwater-theme')) ? localStorage.getItem('deepwater-theme') : 'deep'; } catch { return 'deep'; }
+}
+
+function applyTheme(id) {
+  if (id === 'deep') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', id);
+}
+
+function useTheme() {
+  const [theme, setTheme] = useState(readTheme);
+  useEffect(() => {
+    applyTheme(theme);
+    try { localStorage.setItem('deepwater-theme', theme); } catch { /* storage unavailable; theme still applies for this visit */ }
+    window.dispatchEvent(new CustomEvent('deepwater-theme', { detail: theme }));
+  }, [theme]);
+  useEffect(() => {
+    const sync = event => setTheme(event.detail);
+    window.addEventListener('deepwater-theme', sync);
+    return () => window.removeEventListener('deepwater-theme', sync);
+  }, []);
+  return [theme, setTheme];
+}
+
+function ThemeSwitch() {
+  const [theme, setTheme] = useTheme();
+  return <div className="theme-switch" role="group" aria-label="Color theme">
+    {THEMES.map(option => <button key={option.id} type="button" className={`swatch swatch-${option.id}`} aria-pressed={theme === option.id} aria-label={option.label} title={option.label} onClick={() => setTheme(option.id)} />)}
+  </div>;
+}
+
 function Brand({ product = 'Echo' }) {
-  return <span className="brand"><img src="/brand/mark.svg" alt="" width="40" height="40" /><span className="brand-text"><b>{product}</b><small>by Deepwater</small></span></span>;
+  const [theme] = useTheme();
+  const mark = THEMES.find(option => option.id === theme)?.mark ?? THEMES[0].mark;
+  return <span className="brand"><img src={mark} alt="" width="40" height="40" /><span className="brand-text"><b>{product}</b><small>by Deepwater</small></span></span>;
 }
 
 function Auth({ onLogin }) {
@@ -44,7 +83,7 @@ function Auth({ onLogin }) {
   }
 
   return <main className="auth-shell">
-    <header className="auth-header"><Brand /></header>
+    <header className="auth-header"><Brand /><ThemeSwitch /></header>
     <div className="auth-grid">
     <section className="pitch">
       <p className="eyebrow">Danish and German, one pattern at a time</p>
@@ -324,7 +363,7 @@ function App() {
   return <main className="app-shell">
     <header className="site-header">
       <Brand />
-      <div className="account"><span>{user.name}</span><button className="link" onClick={logout}>Sign out</button></div>
+      <div className="account"><ThemeSwitch /><span>{user.name}</span><button className="link" onClick={logout}>Sign out</button></div>
     </header>
 
     {error && <p role="alert" className="banner error">{error}</p>}
@@ -438,4 +477,5 @@ function formatDate(value) {
   return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value));
 }
 
+applyTheme(readTheme());
 createRoot(document.getElementById('root')).render(<App />);
