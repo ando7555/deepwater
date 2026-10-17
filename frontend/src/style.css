@@ -274,3 +274,11 @@ footer{text-align:center;color:var(--text-3);font-size:13px;letter-spacing:.04em
 /* Google sign-in */
 .auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0 4px;color:var(--text-3);font-size:13px}.auth-divider::before,.auth-divider::after{content:'';flex:1;border-top:1px solid var(--line-soft)}
 .google-btn{display:block;text-align:center;padding:12px 20px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--deep);color:var(--text);font-weight:600;font-size:15px;text-decoration:none;transition:background .15s,border-color .15s}.google-btn:hover{background:var(--surface);border-color:var(--line-hover)}
+
+/* Account deletion */
+.delete-account{max-width:620px;margin:40px auto 0;padding:0 10px;color:var(--text-3);font-size:14px}
+.delete-account summary{cursor:pointer;color:var(--text-2)}
+.delete-account form{display:grid;gap:10px;margin-top:12px;padding:16px;border:1px solid var(--warn-line);border-radius:var(--radius-sm);background:var(--warn-bg)}
+.delete-account p{margin:0}
+.delete-account button{justify-self:start;background:var(--warn-line);color:#fff;box-shadow:none}
+:root[data-theme="light"] .delete-account button:not(.link):not(.swatch){background:#b3392d}

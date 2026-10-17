@@ -80,13 +80,16 @@ class GoogleSignInTest {
     }
 
     @Test
-    void googleIdentityLinksToExistingPasswordAccountAndPasswordLoginStillWorks() {
+    void googleIdentityTakesOverUnverifiedPasswordAccountWithTheSameEmail() {
         String email = "both-" + UUID.randomUUID() + "@example.test";
-        String accountId = platform.register("Both Ways", email, "a-long-password-1").get("accountId");
+        var registered = platform.register("Both Ways", email, "a-long-password-1");
+        String accountId = registered.get("accountId");
 
         assertThat(platform.loginOrRegisterWithGoogle("sub-" + email, email.toUpperCase(), "Both Ways")).isEqualTo(accountId);
         assertThat(platform.loginOrRegisterWithGoogle("sub-" + email, email, "Both Ways")).isEqualTo(accountId);
-        assertThat(platform.login(email, "a-long-password-1").get("accountId")).isEqualTo(accountId);
+        // Whoever set the password never proved they own the email, so the password and its sessions stop working.
+        assertThatThrownBy(() -> platform.login(email, "a-long-password-1")).isInstanceOf(ResponseStatusException.class);
+        assertThatThrownBy(() -> platform.requireAccount("Bearer " + registered.get("token"))).isInstanceOf(ResponseStatusException.class);
         assertThat(db.queryForObject("select google_sub from accounts where id=?", String.class, accountId)).isEqualTo("sub-" + email);
 
         String googleOnly = "google-only-" + UUID.randomUUID() + "@example.test";
