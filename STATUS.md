@@ -19,6 +19,7 @@ Implemented:
 - Audio reflections store response length and support/confidence metadata rather than raw free text, reducing the chance of retaining copyrighted lyrics or personal notes.
 - End-to-end tests cover unapproved visibility, unverified-rights publication rejection, cleared publishing, transcript exposure, and learner evidence ownership.
 - An implementation walkthrough for the teacher/product owner in TEACHER_GUIDE.md.
+- Account safety: Google sign-in, five failed password sign-ins per email lock that email out for 15 minutes, signing in with Google removes an unverified password set on the same email, and learners can permanently delete their account and learning records.
 
 Still needed:
 
@@ -27,7 +28,7 @@ Still needed:
 - Review the new audio flow with the teacher and source owner, including actual permission evidence and player/transcript behavior for a first music and podcast lesson.
 - A language-specific diagnostic.
 - A richer teacher authoring UI or file importer, review history screen, and reversible unpublish action.
-- Production privacy controls, identity hardening, rate limiting, monitoring, accessibility/user testing, and PostgreSQL verification. See Deployment below for what exists today.
+- Email verification for password sign-up, data export, wider rate limiting (per IP, registration), monitoring, accessibility/user testing, and PostgreSQL verification. See Deployment below for what runs today.
 - Kafka, Azure Cosmos/vector retrieval, and model integration; none is required for this small content-reviewed MVP.
 - Amber and AI fashion remain separately scoped later products.
 
@@ -56,6 +57,6 @@ Not verified against the running services:
 - That VITE_API_URL was set to the backend's public URL when the frontend was built. The nginx image has no /graphql proxy, so the empty default only works behind the Vite dev server.
 - That DEEPWATER_CORS_ALLOWED_ORIGINS includes the frontend domain, DEEPWATER_TEACHER_EMAIL is set, and the Google sign-in variables point to the Railway URLs.
 - Why the frontend service is not redeploying on pushes to main (watch paths, auto-deploy setting or a failed build that reported no status).
-- Public-exposure settings: GraphiQL is enabled in all environments, and there is no rate limiting or monitoring yet.
+- Public-exposure settings: GraphiQL is enabled in all environments, rate limiting covers only password sign-in, and there is no monitoring yet.
 
 The project is not a public release and must not contain sensitive learner or relationship data. Any public deployment remains a separate decision after tests and review.

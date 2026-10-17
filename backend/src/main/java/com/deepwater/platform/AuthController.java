@@ -13,7 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +52,13 @@ public class AuthController {
     @PostMapping("/login")
     Map<String, String> login(@RequestBody Credentials body) {
         return platform.login(body.email(), body.password());
+    }
+
+    @DeleteMapping("/account")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteAccount(@RequestHeader(value = "Authorization", required = false) String authorization,
+            @RequestBody DeleteRequest body) {
+        platform.deleteAccount(authorization, body.confirmEmail());
     }
 
     /** Starts Google sign-in; the state is bound to this browser through a short-lived HttpOnly cookie. */
@@ -84,6 +99,12 @@ public class AuthController {
         return platform.redeemLoginCode(body.code());
     }
 
+    /** Sends the reason as JSON ({"detail": ...}) so the sign-in page can show it. */
+    @ExceptionHandler(ResponseStatusException.class)
+    ResponseEntity<ProblemDetail> problem(ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(ProblemDetail.forStatusAndDetail(ex.getStatusCode(), ex.getReason()));
+    }
+
     private boolean stateMatches(String state, HttpServletRequest request) {
         if (state == null || request.getCookies() == null) return false;
         return Arrays.stream(request.getCookies())
@@ -106,4 +127,5 @@ public class AuthController {
 
     record Credentials(String name, String email, String password) {}
     record LoginCode(String code) {}
+    record DeleteRequest(String confirmEmail) {}
 }

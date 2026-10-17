@@ -433,8 +433,41 @@ function App() {
         </div>}
       </section>}
     </>}
+    <DeleteAccount email={user.email} onDeleted={logout} />
     <footer>Through expression, connect the world.</footer>
   </main>;
+}
+
+function DeleteAccount({ email, onDeleted }) {
+  const [confirmEmail, setConfirmEmail] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  async function remove(event) {
+    event.preventDefault(); setError(''); setBusy(true);
+    try {
+      const response = await fetch(`${API}/api/v1/auth/account`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionStorage.getItem('deepwater-token')}` },
+        body: JSON.stringify({ confirmEmail }),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.detail || body.message || 'Your account could not be deleted.');
+      }
+      onDeleted();
+    } catch (deleteError) { setError(deleteError.message); } finally { setBusy(false); }
+  }
+
+  return <details className="delete-account">
+    <summary>Delete my account</summary>
+    <form onSubmit={remove}>
+      <p>This permanently deletes your account, learning profile, answers and progress. It cannot be undone.</p>
+      <label>Type <b>{email}</b> to confirm<input required type="email" autoComplete="off" value={confirmEmail} onChange={event => setConfirmEmail(event.target.value)} /></label>
+      <button disabled={busy || confirmEmail.trim().toLowerCase() !== email.toLowerCase()}>{busy ? 'Deleting…' : 'Delete permanently'}</button>
+      {error && <p role="alert" className="error">{error}</p>}
+    </form>
+  </details>;
 }
 
 function formatDate(value) {
