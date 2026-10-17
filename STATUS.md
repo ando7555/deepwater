@@ -19,7 +19,7 @@ Implemented:
 - Audio reflections store response length and support/confidence metadata rather than raw free text, reducing the chance of retaining copyrighted lyrics or personal notes.
 - End-to-end tests cover unapproved visibility, unverified-rights publication rejection, cleared publishing, transcript exposure, and learner evidence ownership.
 - An implementation walkthrough for the teacher/product owner in TEACHER_GUIDE.md.
-- Account safety: Google sign-in, five failed password sign-ins per email lock that email out for 15 minutes, signing in with Google removes an unverified password set on the same email, and learners can permanently delete their account and learning records.
+- Account safety: Google sign-in, five failed password sign-ins per email lock that email out for 15 minutes, signing in with Google removes an unverified password set on the same email, and learners can permanently delete their account and learning records. Password sign-ups get a single-use, 24-hour confirmation link by email (Postmark); signing in with Google keeps the password of an account whose email is confirmed.
 
 Still needed:
 
@@ -28,7 +28,7 @@ Still needed:
 - Review the new audio flow with the teacher and source owner, including actual permission evidence and player/transcript behavior for a first music and podcast lesson.
 - A language-specific diagnostic.
 - A richer teacher authoring UI or file importer, review history screen, and reversible unpublish action.
-- Email verification for password sign-up, data export, wider rate limiting (per IP, registration), monitoring, accessibility/user testing, PostgreSQL verification, and a deployment environment.
+- Data export, wider rate limiting (per IP, registration), monitoring, accessibility/user testing, PostgreSQL verification, and a deployment environment.
 - Kafka, Azure Cosmos/vector retrieval, and model integration; none is required for this small content-reviewed MVP.
 - Amber and AI fashion remain separately scoped later products.
 

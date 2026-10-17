@@ -68,17 +68,19 @@ public class PlatformService {
         String normalizedEmail = email.strip().toLowerCase();
         var byEmail = db.queryForList("select id from accounts where email=?", String.class, normalizedEmail);
         if (!byEmail.isEmpty()) {
-            // Google has verified this email; password sign-up has not. Whoever set the existing password may not own
-            // the address, so linking removes that password and signs out its sessions. The owner continues with Google.
+            // Google has verified this email. If the existing password account never confirmed it, whoever set that
+            // password may not own the address, so linking removes the password and signs out its sessions.
             String accountId = byEmail.getFirst();
-            if (db.update("update accounts set google_sub=?, password_hash=null where id=? and google_sub is null", googleSub, accountId) == 1)
+            if (db.update("update accounts set google_sub=?, password_hash=null, email_verified=true where id=? and google_sub is null and email_verified=false", googleSub, accountId) == 1)
                 db.update("delete from user_sessions where account_id=?", accountId);
+            else
+                db.update("update accounts set google_sub=? where id=? and google_sub is null", googleSub, accountId);
             return byEmail.getFirst();
         }
         String displayName = name == null || name.isBlank() ? normalizedEmail.substring(0, normalizedEmail.indexOf('@')) : name.strip();
         if (displayName.length() > 160) displayName = displayName.substring(0, 160);
         String id = UUID.randomUUID().toString();
-        db.update("insert into accounts(id,name,email,google_sub) values(?,?,?,?)", id, displayName, normalizedEmail, googleSub);
+        db.update("insert into accounts(id,name,email,google_sub,email_verified) values(?,?,?,?,true)", id, displayName, normalizedEmail, googleSub);
         return id;
     }
 
@@ -116,7 +118,7 @@ public class PlatformService {
         db.update("update echo_lessons set created_by=null where created_by=?", accountId);
         db.update("update echo_lessons set approved_by=null where approved_by=?", accountId);
         for (String table : new String[]{"echo_audio_attempts", "echo_attempts", "echo_skill_states",
-                "echo_learner_profiles", "oauth_login_codes", "user_sessions"})
+                "echo_learner_profiles", "oauth_login_codes", "email_verification_tokens", "user_sessions"})
             db.update("delete from " + table + " where account_id=?", accountId);
         db.update("delete from accounts where id=?", accountId);
         db.update("insert into audit_events(id,event_type,aggregate_id) values(?,?,?)",
@@ -160,7 +162,9 @@ public class PlatformService {
         String token = UUID.randomUUID().toString();
         db.update("insert into user_sessions(token,account_id,expires_at) values(?,?,?)", token, id,
                 java.sql.Timestamp.from(Instant.now().plusSeconds(60L * 60 * 24 * 7)));
-        return Map.of("token", token, "name", name, "email", email, "accountId", id, "role", role(id));
+        Boolean verified = db.queryForObject("select email_verified from accounts where id=?", Boolean.class, id);
+        return Map.of("token", token, "name", name, "email", email, "accountId", id, "role", role(id),
+                "emailVerified", String.valueOf(Boolean.TRUE.equals(verified)));
     }
 
     private ResponseStatusException unauthorized() {

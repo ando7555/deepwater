@@ -46,6 +46,17 @@ under `backend/data`. Docker Compose defines PostgreSQL for future integration;
 PostgreSQL has not been verified in this workspace. Do not put real personal,
 dating, or lesson data in this prototype.
 
+## Sign-in and email settings
+
+The backend reads these optional environment variables:
+
+| Variable | Purpose |
+|---|---|
+| `DEEPWATER_TEACHER_EMAIL` | The one account that gets the teacher workspace. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` | Google sign-in. The redirect URI ends in `/api/v1/auth/google/callback`. |
+| `FRONTEND_BASE_URL` | Where Google sign-in and email confirmation links send people back to. |
+| `POSTMARK_SERVER_TOKEN`, `MAIL_FROM` | Sends the confirm-your-email message on sign-up. `MAIL_FROM` must be a sender signature or domain verified in Postmark. Without them, sign-up still works and no email is sent. |
+
 ## Echo MVP flow
 
 1. Optionally set `DEEPWATER_TEACHER_EMAIL` before starting the backend, then
