@@ -48,6 +48,44 @@ public class PlatformService {
         return session(account[0], account[1], account[2]);
     }
 
+    /** Finds the account for a verified Google identity, linking it by email or creating it as needed. */
+    @Transactional
+    public String loginOrRegisterWithGoogle(String googleSub, String email, String name) {
+        var bySub = db.queryForList("select id from accounts where google_sub=?", String.class, googleSub);
+        if (!bySub.isEmpty()) return bySub.getFirst();
+        String normalizedEmail = email.strip().toLowerCase();
+        var byEmail = db.queryForList("select id from accounts where email=?", String.class, normalizedEmail);
+        if (!byEmail.isEmpty()) {
+            // Google has verified this email, so it is safe to attach the Google identity to the existing account.
+            db.update("update accounts set google_sub=? where id=? and google_sub is null", googleSub, byEmail.getFirst());
+            return byEmail.getFirst();
+        }
+        String displayName = name == null || name.isBlank() ? normalizedEmail.substring(0, normalizedEmail.indexOf('@')) : name.strip();
+        if (displayName.length() > 160) displayName = displayName.substring(0, 160);
+        String id = UUID.randomUUID().toString();
+        db.update("insert into accounts(id,name,email,google_sub) values(?,?,?,?)", id, displayName, normalizedEmail, googleSub);
+        return id;
+    }
+
+    /** A single-use code, valid for one minute, that the frontend exchanges for a session after the Google redirect. */
+    public String issueLoginCode(String accountId) {
+        db.update("delete from oauth_login_codes where expires_at<?", java.sql.Timestamp.from(Instant.now()));
+        String code = UUID.randomUUID().toString();
+        db.update("insert into oauth_login_codes(code,account_id,expires_at) values(?,?,?)", code, accountId,
+                java.sql.Timestamp.from(Instant.now().plusSeconds(60)));
+        return code;
+    }
+
+    @Transactional
+    public Map<String, String> redeemLoginCode(String code) {
+        if (code == null) throw unauthorized();
+        var accounts = db.queryForList("select account_id from oauth_login_codes where code=? and expires_at>?",
+                String.class, code, java.sql.Timestamp.from(Instant.now()));
+        if (accounts.isEmpty() || db.update("delete from oauth_login_codes where code=?", code) != 1) throw unauthorized();
+        var account = db.queryForMap("select id,name,email from accounts where id=?", accounts.getFirst());
+        return session((String) account.get("id"), (String) account.get("name"), (String) account.get("email"));
+    }
+
     public String requireAccount(String authorization) {
         if (authorization == null || !authorization.startsWith("Bearer ")) throw unauthorized();
         String token = authorization.substring(7).strip();

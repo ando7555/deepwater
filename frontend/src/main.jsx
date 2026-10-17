@@ -25,6 +25,26 @@ function Auth({ onLogin }) {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
+  // Google sign-in returns here with a one-time code (or an error) that is exchanged for a session.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('login_code');
+    const googleError = params.get('login_error');
+    if (!code && !googleError) return;
+    window.history.replaceState({}, '', window.location.pathname);
+    if (googleError) {
+      setError(googleError === 'cancelled' ? 'Google sign-in was cancelled.' : 'Google sign-in did not complete. Please try again.');
+      return;
+    }
+    setBusy(true);
+    fetch(`${API}/api/v1/auth/google/exchange`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }),
+    }).then(async response => {
+      if (!response.ok) throw new Error('Google sign-in expired. Please try again.');
+      onLogin(await response.json());
+    }).catch(exchangeError => setError(exchangeError.message)).finally(() => setBusy(false));
+  }, []);
+
   async function submit(event) {
     event.preventDefault(); setError(''); setBusy(true);
     try {
@@ -51,6 +71,8 @@ function Auth({ onLogin }) {
       <button disabled={busy}>{busy ? 'Please wait…' : mode === 'register' ? 'Create account' : 'Sign in'}</button>
     </form>
     {error && <p role="alert" className="error">{error}</p>}
+    <div className="auth-divider"><span>or</span></div>
+    <a href={`${API}/api/v1/auth/google`} className="google-btn">Continue with Google</a>
     <button className="link" onClick={() => { setError(''); setMode(mode === 'register' ? 'login' : 'register'); }}>{mode === 'register' ? 'Already have an account? Sign in' : 'Create an account'}</button>
   </section></main>;
 }
@@ -179,7 +201,7 @@ function App() {
   }
 
   async function loadTeacherLessons() {
-    const data = await gql(`query { teacherLessons { id languageCode title level topic objective explanation sourceReference skillKey reviewStatus version revisionOf exercises { position taskType prompt expectedAnswer feedbackCorrect feedbackIncorrect options { key text } } audio { mediaType sourceTitle creator sourceUrl playbackUrl editorialBand topicTags speechRate vocabularyDensity idiomDensity pronunciationLoad topicFamiliarity beforeListeningPrompt gistPrompt focusPrompt transcriptAllowed transcriptText rightsBasis linkAllowed playbackAllowed rightsReference rightsExpiresAt } } }`);
+    const data = await gql(`query { teacherLessons { id languageCode title level topic objective explanation sourceReference skillKey reviewStatus version revisionOf exercises { position taskType prompt expectedAnswer acceptedAnswers feedbackCorrect feedbackIncorrect options { key text } } audio { mediaType sourceTitle creator sourceUrl playbackUrl editorialBand topicTags speechRate vocabularyDensity idiomDensity pronunciationLoad topicFamiliarity beforeListeningPrompt gistPrompt focusPrompt transcriptAllowed transcriptText rightsBasis linkAllowed playbackAllowed rightsReference rightsExpiresAt } } }`);
     setTeacherLessons(data.teacherLessons);
   }
 
@@ -258,7 +280,7 @@ function App() {
     try {
       const data = await gql(`mutation SubmitEchoPractice($exerciseId: ID!, $answer: String!, $selfCheck: Boolean) {
         submitEchoPractice(exerciseId: $exerciseId, answer: $answer, transferSelfCheck: $selfCheck) {
-          exerciseId answer graded correct feedback mastery nextReviewAt transfer
+          exerciseId answer graded correct feedback hint mastery nextReviewAt transfer
         }
       }`, {
         exerciseId: exercise.id,
@@ -387,7 +409,7 @@ function App() {
                   {exercise.taskType === 'TRANSFER' && <label className="choice self-check"><input type="checkbox" checked={Boolean(selfChecks[exercise.id])} onChange={event => setSelfChecks(current => ({ ...current, [exercise.id]: event.target.checked }))} /><span>I checked my example against the pattern.</span></label>}
                   <button className="practice-button" disabled={busy || (exercise.taskType === 'TRANSFER' && !selfChecks[exercise.id])}>{busy ? 'Saving…' : exercise.taskType === 'TRANSFER' ? 'Save my example' : 'Check answer'}</button>
                 </form>
-                {results[exercise.id] && <div className={`feedback ${results[exercise.id].graded && results[exercise.id].correct ? 'feedback-good' : ''}`} role="status"><b>{results[exercise.id].graded ? results[exercise.id].correct ? 'That’s it' : 'Let’s look again' : 'Saved for reflection'}</b><p>{results[exercise.id].feedback}</p>{results[exercise.id].graded && <small>Practice estimate: {Math.round(results[exercise.id].mastery * 100)}% · Next review {formatDate(results[exercise.id].nextReviewAt)}</small>}</div>}
+                {results[exercise.id] && <div className={`feedback ${results[exercise.id].graded && results[exercise.id].correct ? 'feedback-good' : ''}`} role="status"><b>{results[exercise.id].graded ? results[exercise.id].correct ? 'That’s it' : 'Let’s look again' : 'Saved for reflection'}</b><p>{results[exercise.id].feedback}</p>{results[exercise.id].hint && <p className="feedback-hint"><b>Suggestion:</b> {results[exercise.id].hint} <small>(automatic, may be wrong)</small></p>}{results[exercise.id].graded && <small>Practice estimate: {Math.round(results[exercise.id].mastery * 100)}% · Next review {formatDate(results[exercise.id].nextReviewAt)}</small>}</div>}
               </article>)}
             </div>}
           </>}
@@ -405,7 +427,7 @@ function App() {
       {user.role === 'TEACHER' && <section className="teacher panel">
         <div className="teacher-heading"><div><p className="eyebrow">TEACHER WORKSPACE</p><h2>Review and publish Echo lessons</h2><p>Only your configured teacher account can save drafts or approve publication.</p></div><button className="practice-button" onClick={async () => { setTeacherMode(!teacherMode); if (!teacherMode) { try { await loadTeacherLessons(); } catch (e) { setError(e.message); } } }}>{teacherMode ? 'Hide workspace' : 'Open workspace'}</button></div>
         {teacherMode && <div className="teacher-content">
-          <div><h3>Lesson queue</h3>{teacherLessons.length === 0 ? <p>No teacher drafts yet.</p> : teacherLessons.map(item => <article className="teacher-item" key={item.id}><div className="teacher-review"><b>{item.title} · v{item.version}</b><span>{item.languageCode.toUpperCase()} · {item.level} · {item.reviewStatus}</span><code>{item.id}</code><small><b>Source:</b> {item.sourceReference}</small><p>{item.objective}</p><p>{item.explanation}</p>{item.audio && <div className="teacher-exercise"><b>{item.audio.mediaType} · {item.audio.sourceTitle}</b><small>By {item.audio.creator} · {BAND_LABELS[item.audio.editorialBand]} · {item.audio.topicTags}</small><small>Rights: {item.audio.rightsBasis} · link {item.audio.linkAllowed ? 'allowed' : 'not allowed'} · playback {item.audio.playbackAllowed ? 'allowed' : 'not allowed'} · transcript {item.audio.transcriptAllowed ? 'allowed' : 'not allowed'}</small><small>Rights evidence: {item.audio.rightsReference}{item.audio.rightsExpiresAt ? ` · through ${item.audio.rightsExpiresAt}` : ''}</small><small>Before: {item.audio.beforeListeningPrompt} · Gist: {item.audio.gistPrompt} · Focus: {item.audio.focusPrompt}</small>{item.audio.transcriptText && <details><summary>Review transcript</summary><p>{item.audio.transcriptText}</p></details>}</div>}{item.exercises.map(exercise => <div className="teacher-exercise" key={exercise.position}><b>{exercise.position}. {exercise.taskType}: {exercise.prompt}</b>{exercise.options.map(option => <small key={option.key}>{option.key}. {option.text}{option.key === exercise.expectedAnswer ? ' · expected answer' : ''}</small>)}{exercise.taskType !== 'TRANSFER' && !exercise.options.length && <small>Expected answer: {exercise.expectedAnswer}</small>}<small>Correct feedback: {exercise.feedbackCorrect || '—'}</small><small>Hint: {exercise.feedbackIncorrect || '—'}</small></div>)}</div>{item.reviewStatus === 'DRAFT' && <button onClick={() => publishDraft(item.id)}>I approve & publish</button>}</article>)}</div>
+          <div><h3>Lesson queue</h3>{teacherLessons.length === 0 ? <p>No teacher drafts yet.</p> : teacherLessons.map(item => <article className="teacher-item" key={item.id}><div className="teacher-review"><b>{item.title} · v{item.version}</b><span>{item.languageCode.toUpperCase()} · {item.level} · {item.reviewStatus}</span><code>{item.id}</code><small><b>Source:</b> {item.sourceReference}</small><p>{item.objective}</p><p>{item.explanation}</p>{item.audio && <div className="teacher-exercise"><b>{item.audio.mediaType} · {item.audio.sourceTitle}</b><small>By {item.audio.creator} · {BAND_LABELS[item.audio.editorialBand]} · {item.audio.topicTags}</small><small>Rights: {item.audio.rightsBasis} · link {item.audio.linkAllowed ? 'allowed' : 'not allowed'} · playback {item.audio.playbackAllowed ? 'allowed' : 'not allowed'} · transcript {item.audio.transcriptAllowed ? 'allowed' : 'not allowed'}</small><small>Rights evidence: {item.audio.rightsReference}{item.audio.rightsExpiresAt ? ` · through ${item.audio.rightsExpiresAt}` : ''}</small><small>Before: {item.audio.beforeListeningPrompt} · Gist: {item.audio.gistPrompt} · Focus: {item.audio.focusPrompt}</small>{item.audio.transcriptText && <details><summary>Review transcript</summary><p>{item.audio.transcriptText}</p></details>}</div>}{item.exercises.map(exercise => <div className="teacher-exercise" key={exercise.position}><b>{exercise.position}. {exercise.taskType}: {exercise.prompt}</b>{exercise.options.map(option => <small key={option.key}>{option.key}. {option.text}{option.key === exercise.expectedAnswer ? ' · expected answer' : ''}</small>)}{exercise.taskType !== 'TRANSFER' && !exercise.options.length && <small>Expected answer: {exercise.expectedAnswer}</small>}{exercise.acceptedAnswers.length > 0 && <small>Also accepted: {exercise.acceptedAnswers.join(' · ')}</small>}<small>Correct feedback: {exercise.feedbackCorrect || '—'}</small><small>Hint: {exercise.feedbackIncorrect || '—'}</small></div>)}</div>{item.reviewStatus === 'DRAFT' && <button onClick={() => publishDraft(item.id)}>I approve & publish</button>}</article>)}</div>
           <AudioDraftForm draft={audioDraft} update={updateAudioDraft} busy={busy} onSubmit={saveAudioLessonDraft} />
           <form onSubmit={saveDraft}><h3>Add a lesson draft</h3><p>Paste lesson content as JSON. It stays private until you press “I approve &amp; publish”.</p><textarea required value={draftJson} onChange={event => setDraftJson(event.target.value)} placeholder={'{\n  "languageCode": "de",\n  "title": "Verb-second after a time phrase",\n  ...\n}'} /><button>Save as draft</button><small>Shape: languageCode, title, level, topic, objective, explanation, sourceReference, skillKey, exercises[]. See TEACHER_GUIDE.md for a complete example.</small></form>
         </div>}

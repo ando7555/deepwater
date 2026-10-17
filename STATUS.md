@@ -11,7 +11,7 @@ Implemented:
 - Structured lesson drafts with language, source reference, skill key, learning explanation, objectives, and typed exercises.
 - Explicit teacher publication, immutable revision creation, version numbers, and archiving of the previous published revision.
 - Authenticated learner filtering so drafts are hidden; absent course content is shown as an honest empty state.
-- Deterministic exercise grading and per-account practice history/review estimates.
+- Deterministic exercise grading and per-account practice history/review estimates. Typed exercises accept several teacher-listed answers, and near misses (special letters, word order, one-letter typo) get a tentative suggestion without revealing the answer.
 - Teacher audio authoring for music and podcasts, with editorial bands from A0–A1 through C1–C2, separate listening-demand ratings, source/provenance and rights fields, and before-listening/gist/focus prompts.
 - Server-side publish checks require a verified rights basis and learner source-link permission, enforce playback/transcript permissions independently, hide expired items, and prevent unapproved lessons from learner queries.
 - Learner music/podcast and level filters, direct audio controls only when explicitly allowed, source links, optional rights-approved transcripts, four guided listening steps, confidence capture, and audio-attempt counts.
@@ -25,7 +25,7 @@ Still needed:
 - The teacher must review and approve the Danish starter lesson and the four German draft lessons. Until a lesson is published, learners see an empty state for that language.
 - The supplied song lesson has no audio attachment, and its commercial-song reference does not establish lyric/audio rights. No media source is bundled; only teacher-created or explicitly rights-cleared music and podcast sources should be published.
 - Review the new audio flow with the teacher and source owner, including actual permission evidence and player/transcript behavior for a first music and podcast lesson.
-- A language-specific diagnostic and multi-answer accepted-answer rules.
+- A language-specific diagnostic.
 - A richer teacher authoring UI or file importer, review history screen, and reversible unpublish action.
 - Production privacy controls, identity hardening, rate limiting, monitoring, accessibility/user testing, and PostgreSQL verification. See Deployment below for what exists today.
 - Kafka, Azure Cosmos/vector retrieval, and model integration; none is required for this small content-reviewed MVP.
