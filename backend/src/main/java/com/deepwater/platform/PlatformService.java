@@ -48,6 +48,28 @@ public class PlatformService {
         return session(account[0], account[1], account[2]);
     }
 
+    @Transactional
+    public Map<String, String> loginOrRegisterWithGoogle(String googleSub, String email, String name) {
+        // 1. Find by google_sub
+        var bySub = db.query("select id,name,email from accounts where google_sub=?",
+            (rs,r) -> new String[]{rs.getString(1),rs.getString(2),rs.getString(3)}, googleSub);
+        if (!bySub.isEmpty()) { var a = bySub.getFirst(); return session(a[0],a[1],a[2]); }
+        // 2. Find by email — link Google sub to existing account
+        var byEmail = db.query("select id,name,email from accounts where email=?",
+            (rs,r) -> new String[]{rs.getString(1),rs.getString(2),rs.getString(3)},
+            email.strip().toLowerCase());
+        if (!byEmail.isEmpty()) {
+            var a = byEmail.getFirst();
+            db.update("update accounts set google_sub=? where id=?", googleSub, a[0]);
+            return session(a[0],a[1],a[2]);
+        }
+        // 3. New account (no password_hash)
+        String id = UUID.randomUUID().toString();
+        db.update("insert into accounts(id,name,email,google_sub) values(?,?,?,?)",
+            id, name.strip(), email.strip().toLowerCase(), googleSub);
+        return session(id, name.strip(), email.strip().toLowerCase());
+    }
+
     public String requireAccount(String authorization) {
         if (authorization == null || !authorization.startsWith("Bearer ")) throw unauthorized();
         String token = authorization.substring(7).strip();

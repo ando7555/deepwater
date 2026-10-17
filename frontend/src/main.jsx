@@ -51,6 +51,8 @@ function Auth({ onLogin }) {
       <button disabled={busy}>{busy ? 'Please wait…' : mode === 'register' ? 'Create account' : 'Sign in'}</button>
     </form>
     {error && <p role="alert" className="error">{error}</p>}
+    <div className="auth-divider"><span>or</span></div>
+    <a href={`${API}/api/v1/auth/google`} className="google-btn">Continue with Google</a>
     <button className="link" onClick={() => { setError(''); setMode(mode === 'register' ? 'login' : 'register'); }}>{mode === 'register' ? 'Already have an account? Sign in' : 'Create an account'}</button>
   </section></main>;
 }
@@ -163,6 +165,21 @@ function App() {
   }
 
   useEffect(() => { if (user) loadHome(); }, [user]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (token) {
+      login({
+        token,
+        name: params.get('name') || '',
+        email: params.get('email') || '',
+        accountId: params.get('accountId') || '',
+        role: params.get('role') || 'LEARNER',
+      });
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   async function start(event) {
     event.preventDefault(); setBusy(true); setError(''); setNotice('');
