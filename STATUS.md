@@ -33,25 +33,29 @@ Still needed:
 
 ## Deployment
 
-The product owner reports (2026-10-17) that the app has been deployed on Railway. That deployment has not been independently verified: no deployed URL, Railway project file, or deploy log is recorded in the repository, and the items under "Not verified" below still apply until checked against the running services.
+Echo runs on Railway as two services, a backend and a frontend. The GitHub repository is connected to Railway, and Railway reports each deploy as a commit status on GitHub. That is the only deployment evidence checked so far. The live URLs were not reached from the review environment.
 
-Configured in code (commits 2686ec4, 36c59f3, 5b5e0b8, c819a67):
+Verified from Railway's commit statuses (checked 2026-10-17):
+
+- Backend (backend-production-c912.up.railway.app): deployed successfully at 49a136e, the current main head (merge of #101, 15:50 UTC). The previous main merge, dc04367 (#99, Google sign-in), also deployed successfully.
+- Frontend (frontend-production-3165.up.railway.app): last deployed successfully at 5b5e0b8 on 2026-10-12. Railway has not deployed it since. Four later commits changed frontend/ (aa12691, 143759f, 0a993ce, 150d992: Google sign-in and the accepted-answer hints), so the live frontend is behind main.
+- Deepwater CI passes on main. CI runs backend tests, bootJar and the frontend build. It does not build the Docker images or deploy.
+
+Configured in code (commits 2686ec4, 36c59f3, 5b5e0b8, c819a67, plus the Google sign-in settings from #99):
 
 - Root Dockerfile builds the backend jar with Gradle 9.1.0 on Temurin 25 and runs it with SERVER_ADDRESS=0.0.0.0. The port comes from Railway's PORT variable (local default 8081).
 - frontend/Dockerfile builds the Vite app with an optional VITE_API_URL build argument and serves it from nginx on port 80.
 - Database credentials fall back from DB_USER/DB_PASSWORD to Railway's PGUSER/PGPASSWORD. The JDBC URL still comes only from DB_URL.
 - Extra CORS origins can be added with DEEPWATER_CORS_ALLOWED_ORIGINS (comma-separated), next to the built-in localhost origins.
+- Google sign-in reads GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI and FRONTEND_BASE_URL. The defaults point to localhost.
 
-Verified:
+Not verified against the running services:
 
-- Deepwater CI passed on all three follow-up commits (runs 93, 94, 95 on main). CI runs backend tests, bootJar, and the frontend build. It does not build either Docker image or deploy anything.
-
-Not verified against the running deployment:
-
-- The public URLs of both Railway services, and that the backend health endpoint (/actuator/health) responds.
-- That DB_URL is set to a JDBC PostgreSQL URL. Railway's Postgres add-on provides DATABASE_URL and PG* variables, not DB_URL, so without it the backend falls back to an H2 file inside the container and data is lost on redeploy.
-- That VITE_API_URL is set to the backend's public URL at frontend build time. The nginx image has no /graphql proxy, so the empty default only works behind the Vite dev server.
-- That DEEPWATER_CORS_ALLOWED_ORIGINS includes the frontend's Railway domain, and DEEPWATER_TEACHER_EMAIL is set.
+- That the backend health endpoint (/actuator/health) responds and the frontend loads and reaches the backend's GraphQL API.
+- That DB_URL is set to a JDBC PostgreSQL URL. Railway's Postgres add-on provides DATABASE_URL and PG* variables, not DB_URL. Without DB_URL, the backend falls back to an H2 file inside the container, and data is lost on redeploy.
+- That VITE_API_URL was set to the backend's public URL when the frontend was built. The nginx image has no /graphql proxy, so the empty default only works behind the Vite dev server.
+- That DEEPWATER_CORS_ALLOWED_ORIGINS includes the frontend domain, DEEPWATER_TEACHER_EMAIL is set, and the Google sign-in variables point to the Railway URLs.
+- Why the frontend service is not redeploying on pushes to main (watch paths, auto-deploy setting or a failed build that reported no status).
 - Public-exposure settings: GraphiQL is enabled in all environments, and there is no rate limiting or monitoring yet.
 
 The project is not a public release and must not contain sensitive learner or relationship data. Any public deployment remains a separate decision after tests and review.
