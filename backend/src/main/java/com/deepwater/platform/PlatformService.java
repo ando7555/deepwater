@@ -17,7 +17,12 @@ public class PlatformService {
     private final BCryptPasswordEncoder passwords = new BCryptPasswordEncoder();
     @Value("${deepwater.teacher.email:}") private String teacherEmail;
 
-    public PlatformService(JdbcTemplate db) { this.db = db; }
+    private final LoginThrottle throttle;
+
+    public PlatformService(JdbcTemplate db, LoginThrottle throttle) {
+        this.db = db;
+        this.throttle = throttle;
+    }
 
     @Transactional
     public Map<String, String> register(String name, String email, String password) {
@@ -40,10 +45,17 @@ public class PlatformService {
     @Transactional
     public Map<String, String> login(String email, String password) {
         if (email == null || password == null) throw unauthorized();
+        String normalizedEmail = email.strip().toLowerCase();
+        if (throttle.isBlocked(normalizedEmail))
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Too many sign-in attempts. Wait 15 minutes and try again.");
         var found = db.query("select id,name,email,password_hash from accounts where email=?",
                 (rs, row) -> new String[]{rs.getString("id"), rs.getString("name"), rs.getString("email"), rs.getString("password_hash")},
-                email.strip().toLowerCase());
-        if (found.isEmpty() || !passwords.matches(password, found.getFirst()[3])) throw unauthorized();
+                normalizedEmail);
+        if (found.isEmpty() || !passwords.matches(password, found.getFirst()[3])) {
+            throttle.recordFailure(normalizedEmail);
+            throw unauthorized();
+        }
+        throttle.recordSuccess(normalizedEmail);
         var account = found.getFirst();
         return session(account[0], account[1], account[2]);
     }
@@ -56,8 +68,11 @@ public class PlatformService {
         String normalizedEmail = email.strip().toLowerCase();
         var byEmail = db.queryForList("select id from accounts where email=?", String.class, normalizedEmail);
         if (!byEmail.isEmpty()) {
-            // Google has verified this email, so it is safe to attach the Google identity to the existing account.
-            db.update("update accounts set google_sub=? where id=? and google_sub is null", googleSub, byEmail.getFirst());
+            // Google has verified this email; password sign-up has not. Whoever set the existing password may not own
+            // the address, so linking removes that password and signs out its sessions. The owner continues with Google.
+            String accountId = byEmail.getFirst();
+            if (db.update("update accounts set google_sub=?, password_hash=null where id=? and google_sub is null", googleSub, accountId) == 1)
+                db.update("delete from user_sessions where account_id=?", accountId);
             return byEmail.getFirst();
         }
         String displayName = name == null || name.isBlank() ? normalizedEmail.substring(0, normalizedEmail.indexOf('@')) : name.strip();
@@ -84,6 +99,28 @@ public class PlatformService {
         if (accounts.isEmpty() || db.update("delete from oauth_login_codes where code=?", code) != 1) throw unauthorized();
         var account = db.queryForMap("select id,name,email from accounts where id=?", accounts.getFirst());
         return session((String) account.get("id"), (String) account.get("name"), (String) account.get("email"));
+    }
+
+    /**
+     * Permanently deletes the signed-in account and its learning records. The person must retype their email.
+     * Only a random account id stays behind, in the audit log, to record that the deletion happened.
+     */
+    @Transactional
+    public void deleteAccount(String authorization, String confirmEmail) {
+        String accountId = requireAccount(authorization);
+        String email = db.queryForObject("select email from accounts where id=?", String.class, accountId);
+        if (confirmEmail == null || !email.equalsIgnoreCase(confirmEmail.strip()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Type your account email to confirm deletion.");
+        if ("TEACHER".equals(role(accountId)))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The teacher account owns published lessons and cannot be deleted here.");
+        db.update("update echo_lessons set created_by=null where created_by=?", accountId);
+        db.update("update echo_lessons set approved_by=null where approved_by=?", accountId);
+        for (String table : new String[]{"echo_audio_attempts", "echo_attempts", "echo_skill_states",
+                "echo_learner_profiles", "oauth_login_codes", "user_sessions"})
+            db.update("delete from " + table + " where account_id=?", accountId);
+        db.update("delete from accounts where id=?", accountId);
+        db.update("insert into audit_events(id,event_type,aggregate_id) values(?,?,?)",
+                UUID.randomUUID().toString(), "ACCOUNT_DELETED", accountId);
     }
 
     public String requireAccount(String authorization) {
