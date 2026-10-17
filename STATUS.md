@@ -38,7 +38,7 @@ Echo runs on Railway as two services, a backend and a frontend. The GitHub repos
 
 Verified from Railway's commit statuses (checked 2026-10-17):
 
-- Backend (backend-production-c912.up.railway.app): deployed successfully at 49a136e, the current main head (merge of #101, 15:50 UTC). The previous main merge, dc04367 (#99, Google sign-in), also deployed successfully.
+- Backend (backend-production-c912.up.railway.app): Railway redeploys it on every merge to main. Merges dc04367 (#99, Google sign-in) and 49a136e (#101, accepted answers) both deployed successfully. For the latest state, see the "deepwater - backend" status on main's newest commit.
 - Frontend (frontend-production-3165.up.railway.app): last deployed successfully at 5b5e0b8 on 2026-10-12. Railway has not deployed it since. Four later commits changed frontend/ (aa12691, 143759f, 0a993ce, 150d992: Google sign-in and the accepted-answer hints), so the live frontend is behind main.
 - Deepwater CI passes on main. CI runs backend tests, bootJar and the frontend build. It does not build the Docker images or deploy.
 
