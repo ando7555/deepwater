@@ -67,7 +67,7 @@ small{color:#b7a8a8;font-size:12px;line-height:1.5}
 .practice-button{justify-self:start;min-width:142px;padding:11px 16px}
 .feedback{margin-top:14px;padding:13px 15px;background:#39262b;border:1px solid #8a5754;border-radius:10px}
 .feedback-good{background:#1e342f;border-color:#4c8f73}
-.feedback b{color:#f2bd94}.feedback p{margin:5px 0 7px;color:#e1dce1}.feedback small{display:block}
+.feedback-hint{padding:9px 11px;border-left:3px solid #20c7fa;background:#1c2429;border-radius:0 8px 8px 0}.feedback b{color:#f2bd94}.feedback p{margin:5px 0 7px;color:#e1dce1}.feedback small{display:block}
 .progress{padding:23px;position:sticky;top:18px}
 .progress h2{font-size:27px;margin:12px 0 22px}
 .mastery{padding:15px;border:1px solid #584149;border-radius:12px;background:#21191d}

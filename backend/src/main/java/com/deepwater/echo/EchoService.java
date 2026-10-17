@@ -165,7 +165,7 @@ public class EchoService {
                     List<ExerciseOption> options = db.query("select option_key,option_text from echo_exercise_options where exercise_id=? order by sort_order",
                             (optionRs, optionRow) -> new ExerciseOption(optionRs.getString(1), optionRs.getString(2)), exerciseId);
                     return new TeacherExercise(exerciseRs.getInt("position"), exerciseRs.getString("task_type"),
-                            exerciseRs.getString("prompt"), exerciseRs.getString("expected_answer"),
+                            exerciseRs.getString("prompt"), exerciseRs.getString("expected_answer"), acceptedAnswers(exerciseId),
                             exerciseRs.getString("feedback_correct"), exerciseRs.getString("feedback_incorrect"), options);
                 }, lessonId);
         return new TeacherLesson(lessonId, rs.getString("language_code"), rs.getString("title"),
@@ -231,6 +231,7 @@ public class EchoService {
             db.update("insert into echo_exercises(id,lesson_id,position,task_type,prompt,expected_answer,feedback_correct,feedback_incorrect) values(?,?,?,?,?,?,?,?)",
                     exerciseId, id, position, exercise.taskType(), exercise.prompt().strip(), expectedAnswer,
                     safe(exercise.feedbackCorrect()), safe(exercise.feedbackIncorrect()));
+            saveAcceptedAnswers(db, exerciseId, exercise.acceptedAnswers());
             if (exercise.options() != null) {
                 int optionPosition = 0;
                 for (ExerciseOption option : exercise.options()) {
@@ -276,6 +277,9 @@ public class EchoService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transfer exercises must not define an automated expected answer.");
             if (!"TRANSFER".equals(exercise.taskType()) && blank(exercise.expectedAnswer(), 500))
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Graded exercises need an expected answer.");
+            if (exercise.acceptedAnswers() != null && (!"TEXT".equals(exercise.taskType()) || exercise.acceptedAnswers().size() > 10
+                    || exercise.acceptedAnswers().stream().anyMatch(answer -> blank(answer, 500))))
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only typed exercises take extra accepted answers: up to 10, each at most 500 characters.");
             if ("SELECT".equals(exercise.taskType())) {
                 if (exercise.options() == null || exercise.options().size() < 2 || exercise.options().size() > 10
                         || exercise.options().stream().anyMatch(option -> option == null || blank(option.key(), 16) || blank(option.text(), 500))
@@ -375,10 +379,16 @@ public class EchoService {
         if (transfer && transferSelfCheck == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Complete the self-check for your transfer answer.");
         boolean graded = !transfer;
-        boolean correct = graded && normalize(answer).equals(normalize(rule.expectedAnswer()));
+        List<String> accepted = new java.util.ArrayList<>();
+        if (graded) {
+            accepted.add(rule.expectedAnswer());
+            if ("TEXT".equals(rule.taskType())) accepted.addAll(acceptedAnswers(exerciseId));
+        }
+        boolean correct = graded && accepted.stream().anyMatch(expected -> normalize(answer).equals(normalize(expected)));
         String feedback = transfer
                 ? "Saved as your own transfer example. Echo does not automatically score free writing; compare your sentence with the pattern and your self-check."
                 : correct ? rule.feedbackCorrect() : rule.feedbackIncorrect();
+        String hint = graded && !correct && "TEXT".equals(rule.taskType()) ? AnswerHints.nearMiss(answer, accepted) : null;
         String storedAnswer = answer.strip();
         db.update("insert into echo_attempts(id,account_id,exercise_id,answer,is_correct,is_transfer) values(?,?,?,?,?,?)",
                 UUID.randomUUID().toString(), accountId, exerciseId, storedAnswer, graded ? correct : null, transfer);
@@ -409,7 +419,7 @@ public class EchoService {
         }
         db.update("insert into audit_events(id,event_type,aggregate_id) values(?,?,?)",
                 UUID.randomUUID().toString(), "ECHO_PRACTICE_SUBMITTED", accountId);
-        return new PracticeResult(exerciseId, storedAnswer, graded, graded ? correct : null, feedback,
+        return new PracticeResult(exerciseId, storedAnswer, graded, graded ? correct : null, feedback, hint,
                 mastery, nextReview == null ? null : nextReview.toString(), transfer);
     }
 
@@ -459,7 +469,19 @@ public class EchoService {
                 (rs, row) -> rs.getTimestamp(1).toInstant(), accountId, skillKey).stream().findFirst().orElse(null);
     }
 
-    private static String normalize(String value) {
+    private List<String> acceptedAnswers(String exerciseId) {
+        return db.queryForList("select answer_text from echo_exercise_answers where exercise_id=? order by sort_order", String.class, exerciseId);
+    }
+
+    /** Stores alternative correct answers for a typed exercise; the expected answer stays the primary one. */
+    public static void saveAcceptedAnswers(JdbcTemplate db, String exerciseId, List<String> answers) {
+        if (answers == null) return;
+        int position = 0;
+        for (String answer : answers)
+            db.update("insert into echo_exercise_answers(exercise_id,answer_text,sort_order) values(?,?,?)", exerciseId, answer.strip(), ++position);
+    }
+
+    static String normalize(String value) {
         if (value == null) return "";
         String lower = Normalizer.normalize(value.strip().toLowerCase(Locale.ROOT), Normalizer.Form.NFKC);
         return lower.replaceAll("[\\p{Punct}\\s]+", " ").strip();
@@ -490,9 +512,9 @@ public class EchoService {
                                      String focusPrompt, boolean transcriptAllowed, String transcriptText,
                                      String rightsBasis, Boolean linkAllowed, Boolean playbackAllowed,
                                      String rightsReference, String rightsExpiresAt) {}
-    public record ExerciseDraft(String taskType, String prompt, String expectedAnswer, String feedbackCorrect,
-                                String feedbackIncorrect, List<ExerciseOption> options) {}
-    public record TeacherExercise(int position, String taskType, String prompt, String expectedAnswer,
+    public record ExerciseDraft(String taskType, String prompt, String expectedAnswer, List<String> acceptedAnswers,
+                                String feedbackCorrect, String feedbackIncorrect, List<ExerciseOption> options) {}
+    public record TeacherExercise(int position, String taskType, String prompt, String expectedAnswer, List<String> acceptedAnswers,
                                   String feedbackCorrect, String feedbackIncorrect, List<ExerciseOption> options) {}
     public record TeacherLesson(String id, String languageCode, String title, String level, String topic, String objective,
                                 String explanation, String sourceReference, String skillKey, String reviewStatus, int version,
@@ -505,7 +527,7 @@ public class EchoService {
     public record AudioPracticeResult(boolean saved, String taskType, boolean transcriptUsed,
                                       int confidence, String feedback, String nextTaskType, boolean repeatSuggested) {}
     public record PracticeResult(String exerciseId, String answer, boolean graded, Boolean correct,
-                                 String feedback, double mastery, String nextReviewAt, boolean transfer) {}
+                                 String feedback, String hint, double mastery, String nextReviewAt, boolean transfer) {}
     private record ExerciseRule(String taskType, String expectedAnswer, String skillKey,
                                 String feedbackCorrect, String feedbackIncorrect) {}
     private record SkillState(double mastery, int correctStreak) {}
