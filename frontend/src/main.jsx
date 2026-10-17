@@ -17,6 +17,10 @@ async function gql(query, variables = {}, token = sessionStorage.getItem('deepwa
   return payload.data;
 }
 
+function Brand({ product = 'Echo' }) {
+  return <span className="brand"><img src="/brand/mark.svg" alt="" width="40" height="40" /><span className="brand-text"><b>{product}</b><small>by Deepwater</small></span></span>;
+}
+
 function Auth({ onLogin }) {
   const [mode, setMode] = useState('register');
   const [name, setName] = useState('');
@@ -39,11 +43,22 @@ function Auth({ onLogin }) {
     } catch (error) { setError(error.message); } finally { setBusy(false); }
   }
 
-  return <main className="auth-shell"><section className="access">
-    <img className="logo hero-logo" src="/deepwater-logo-warm.png" alt="Deepwater" />
-    <p className="eyebrow">THROUGH EXPRESSION, CONNECT THE WORLD</p>
-    <h1>Learn a pattern.<br />Make it yours.</h1>
-    <p>Echo helps you notice how a language works, practise it in context, and return to patterns that matter to you.</p>
+  return <main className="auth-shell">
+    <header className="auth-header"><Brand /></header>
+    <div className="auth-grid">
+    <section className="pitch">
+      <p className="eyebrow">Danish and German, one pattern at a time</p>
+      <h1>Hear the pattern.<br /><span>Make it yours.</span></h1>
+      <p className="pitch-lead">Echo shows you how a language works, lets you practise it in real situations, and schedules reviews so each pattern sticks.</p>
+      <ul className="pitch-points">
+        <li><b>Understand, don’t memorise</b><span>Every lesson explains why a sentence is built the way it is.</span></li>
+        <li><b>Reviewed by a teacher</b><span>Lessons are published only after a language teacher approves them.</span></li>
+        <li><b>Learn with real voices</b><span>Music and podcast lessons, used only with the creator’s permission.</span></li>
+      </ul>
+    </section>
+    <section className="access panel" aria-labelledby="access-title">
+    <h2 id="access-title">{mode === 'register' ? 'Create your Echo account' : 'Welcome back'}</h2>
+    <p className="access-sub">{mode === 'register' ? 'Choose a language and a goal after you sign up.' : 'Sign in to continue where you left off.'}</p>
     <form onSubmit={submit}>
       {mode === 'register' && <label>Your name<input required maxLength="160" autoComplete="name" value={name} onChange={event => setName(event.target.value)} /></label>}
       <label>Email<input required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} /></label>
@@ -52,7 +67,10 @@ function Auth({ onLogin }) {
     </form>
     {error && <p role="alert" className="error">{error}</p>}
     <button className="link" onClick={() => { setError(''); setMode(mode === 'register' ? 'login' : 'register'); }}>{mode === 'register' ? 'Already have an account? Sign in' : 'Create an account'}</button>
-  </section></main>;
+  </section>
+    </div>
+    <footer>Deepwater · Go deeper.</footer>
+  </main>;
 }
 
 const HOME_QUERY = `query EchoHome {
@@ -305,7 +323,7 @@ function App() {
 
   return <main className="app-shell">
     <header className="site-header">
-      <img className="logo" src="/deepwater-logo-warm.png" alt="Deepwater" />
+      <Brand />
       <div className="account"><span>{user.name}</span><button className="link" onClick={logout}>Sign out</button></div>
     </header>
 
@@ -411,7 +429,7 @@ function App() {
         </div>}
       </section>}
     </>}
-    <footer>Through expression, connect the world.</footer>
+    <footer>Echo by Deepwater · Go deeper.</footer>
   </main>;
 }
 
