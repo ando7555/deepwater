@@ -49,7 +49,8 @@ Register using that exact email, or sign out and sign back in if the account alr
     {
       "taskType": "TEXT",
       "prompt": "Complete a short teacher-checked sentence: ___",
-      "expectedAnswer": "the exact accepted answer",
+      "expectedAnswer": "the main accepted answer",
+      "acceptedAnswers": ["another correct answer", "a second correct variant"],
       "feedbackCorrect": "Explain the cue that makes the answer fit.",
       "feedbackIncorrect": "Offer a structural hint, not just the answer."
     },
@@ -61,7 +62,7 @@ Register using that exact email, or sign out and sign back in if the account alr
 }
 ```
 
-The sample sentences above are placeholders, not verified German teaching content. Replace them with examples you have checked before approving. `SELECT` and `TEXT` use a deterministic exact answer key; keep the expected answer aligned with the exercise. `TRANSFER` is stored for reflection and is not automatically graded.
+The sample sentences above are placeholders, not verified German teaching content. Replace them with examples you have checked before approving. `SELECT` and `TEXT` use a deterministic answer key; keep the expected answer aligned with the exercise. Matching ignores capitals, punctuation and extra spaces. For `TEXT`, list any other correct answers in the optional `acceptedAnswers` (up to 10). An answer that is close but not accepted (only the special letters differ, the right words are in the wrong order, or one letter is off) is still marked incorrect, and the learner sees a short suggestion labelled as automatic. The suggestion never reveals the answer. `TRANSFER` is stored for reflection and is not automatically graded.
 
 ## Create a music or podcast learning path
 

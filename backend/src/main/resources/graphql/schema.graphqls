@@ -54,6 +54,7 @@ input ExerciseDraftInput {
   taskType: String!
   prompt: String!
   expectedAnswer: String
+  acceptedAnswers: [String!]
   feedbackCorrect: String
   feedbackIncorrect: String
   options: [ExerciseOptionInput!]
@@ -124,6 +125,7 @@ type TeacherExercise {
   taskType: String!
   prompt: String!
   expectedAnswer: String
+  acceptedAnswers: [String!]!
   feedbackCorrect: String!
   feedbackIncorrect: String!
   options: [EchoExerciseOption!]!
@@ -186,6 +188,8 @@ type PracticeResult {
   graded: Boolean!
   correct: Boolean
   feedback: String!
+  "A tentative, rule-based suggestion for a near miss on a typed answer."
+  hint: String
   mastery: Float!
   nextReviewAt: String
   transfer: Boolean!

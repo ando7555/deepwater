@@ -119,6 +119,7 @@ small{color:var(--text-3);font-size:12px;line-height:1.5}
 .practice-button{justify-self:start;min-width:142px;padding:11px 16px}
 .feedback{margin-top:14px;padding:13px 15px;background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius-sm)}
 .feedback-good{background:var(--good-bg);border-color:var(--good-line)}
+.feedback-hint{padding:9px 11px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0}
 .feedback b{color:var(--text)}.feedback p{margin:5px 0 7px;color:var(--text-2)}.feedback small{display:block}
 
 /* Progress sidebar */
@@ -269,3 +270,7 @@ footer{text-align:center;color:var(--text-3);font-size:13px;letter-spacing:.04em
   .audio-steps{display:grid;grid-template-columns:1fr 1fr}.audio-form-grid{grid-template-columns:1fr}.audio-draft-form{padding:15px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+
+/* Google sign-in */
+.auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0 4px;color:var(--text-3);font-size:13px}.auth-divider::before,.auth-divider::after{content:'';flex:1;border-top:1px solid var(--line-soft)}
+.google-btn{display:block;text-align:center;padding:12px 20px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--deep);color:var(--text);font-weight:600;font-size:15px;text-decoration:none;transition:background .15s,border-color .15s}.google-btn:hover{background:var(--surface);border-color:var(--line-hover)}
