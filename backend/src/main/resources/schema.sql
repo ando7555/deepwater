@@ -132,4 +132,8 @@ create table if not exists echo_skill_states (
 -- Google OAuth support
 alter table accounts add column if not exists google_sub varchar(255);
 create unique index if not exists accounts_google_sub on accounts(google_sub);
-alter table accounts alter column password_hash varchar(100);
+alter table accounts alter column password_hash drop not null;
+create table if not exists oauth_login_codes (
+  code varchar(64) primary key, account_id varchar(36) not null references accounts(id),
+  expires_at timestamp with time zone not null
+);
