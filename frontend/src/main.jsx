@@ -17,6 +17,49 @@ async function gql(query, variables = {}, token = sessionStorage.getItem('deepwa
   return payload.data;
 }
 
+const THEMES = [
+  { id: 'deep', label: 'Deep blue', mark: '/brand/mark.svg' },
+  { id: 'amber', label: 'Amber', mark: '/brand/mark-amber.svg' },
+  { id: 'light', label: 'Light', mark: '/brand/mark-light.svg' },
+];
+
+function readTheme() {
+  try { return THEMES.some(theme => theme.id === localStorage.getItem('deepwater-theme')) ? localStorage.getItem('deepwater-theme') : 'deep'; } catch { return 'deep'; }
+}
+
+function applyTheme(id) {
+  if (id === 'deep') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', id);
+}
+
+function useTheme() {
+  const [theme, setTheme] = useState(readTheme);
+  useEffect(() => {
+    applyTheme(theme);
+    try { localStorage.setItem('deepwater-theme', theme); } catch { /* storage unavailable; theme still applies for this visit */ }
+    window.dispatchEvent(new CustomEvent('deepwater-theme', { detail: theme }));
+  }, [theme]);
+  useEffect(() => {
+    const sync = event => setTheme(event.detail);
+    window.addEventListener('deepwater-theme', sync);
+    return () => window.removeEventListener('deepwater-theme', sync);
+  }, []);
+  return [theme, setTheme];
+}
+
+function ThemeSwitch() {
+  const [theme, setTheme] = useTheme();
+  return <div className="theme-switch" role="group" aria-label="Color theme">
+    {THEMES.map(option => <button key={option.id} type="button" className={`swatch swatch-${option.id}`} aria-pressed={theme === option.id} aria-label={option.label} title={option.label} onClick={() => setTheme(option.id)} />)}
+  </div>;
+}
+
+function Brand({ product = 'Echo' }) {
+  const [theme] = useTheme();
+  const mark = THEMES.find(option => option.id === theme)?.mark ?? THEMES[0].mark;
+  return <span className="brand"><img src={mark} alt="" width="40" height="40" /><span className="brand-text"><b>{product}</b><small>by Deepwater</small></span></span>;
+}
+
 function Auth({ onLogin, message }) {
   const [mode, setMode] = useState('register');
   const [name, setName] = useState('');
@@ -59,11 +102,22 @@ function Auth({ onLogin, message }) {
     } catch (error) { setError(error.message); } finally { setBusy(false); }
   }
 
-  return <main className="auth-shell"><section className="access">
-    <img className="logo hero-logo" src="/deepwater-logo-warm.png" alt="Deepwater" />
-    <p className="eyebrow">THROUGH EXPRESSION, CONNECT THE WORLD</p>
-    <h1>Learn a pattern.<br />Make it yours.</h1>
-    <p>Echo helps you notice how a language works, practise it in context, and return to patterns that matter to you.</p>
+  return <main className="auth-shell">
+    <header className="auth-header"><Brand /><ThemeSwitch /></header>
+    <div className="auth-grid">
+    <section className="pitch">
+      <p className="eyebrow">Danish and German, one pattern at a time</p>
+      <h1>Hear the pattern.<br /><span>Make it yours.</span></h1>
+      <p className="pitch-lead">Echo shows you how a language works, lets you practise it in real situations, and schedules reviews so each pattern sticks.</p>
+      <ul className="pitch-points">
+        <li><b>Understand, don’t memorise</b><span>Every lesson explains why a sentence is built the way it is.</span></li>
+        <li><b>Reviewed by a teacher</b><span>Lessons are published only after a language teacher approves them.</span></li>
+        <li><b>Learn with real voices</b><span>Music and podcast lessons, used only with the creator’s permission.</span></li>
+      </ul>
+    </section>
+    <section className="access panel" aria-labelledby="access-title">
+    <h2 id="access-title">{mode === 'register' ? 'Create your Echo account' : 'Welcome back'}</h2>
+    <p className="access-sub">{mode === 'register' ? 'Choose a language and a goal after you sign up.' : 'Sign in to continue where you left off.'}</p>
     <form onSubmit={submit}>
       {mode === 'register' && <label>Your name<input required maxLength="160" autoComplete="name" value={name} onChange={event => setName(event.target.value)} /></label>}
       <label>Email<input required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} /></label>
@@ -75,7 +129,10 @@ function Auth({ onLogin, message }) {
     <div className="auth-divider"><span>or</span></div>
     <a href={`${API}/api/v1/auth/google`} className="google-btn">Continue with Google</a>
     <button className="link" onClick={() => { setError(''); setMode(mode === 'register' ? 'login' : 'register'); }}>{mode === 'register' ? 'Already have an account? Sign in' : 'Create an account'}</button>
-  </section></main>;
+  </section>
+    </div>
+    <footer>Deepwater · Go deeper.</footer>
+  </main>;
 }
 
 const HOME_QUERY = `query EchoHome {
@@ -358,8 +415,8 @@ function App() {
 
   return <main className="app-shell">
     <header className="site-header">
-      <img className="logo" src="/deepwater-logo-warm.png" alt="Deepwater" />
-      <div className="account"><span>{user.name}</span><button className="link" onClick={logout}>Sign out</button></div>
+      <Brand />
+      <div className="account"><ThemeSwitch /><span>{user.name}</span><button className="link" onClick={logout}>Sign out</button></div>
     </header>
 
     {error && <p role="alert" className="banner error">{error}</p>}
@@ -467,7 +524,7 @@ function App() {
       </section>}
     </>}
     <DeleteAccount email={user.email} onDeleted={logout} />
-    <footer>Through expression, connect the world.</footer>
+    <footer>Echo by Deepwater · Go deeper.</footer>
   </main>;
 }
 
@@ -508,4 +565,5 @@ function formatDate(value) {
   return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value));
 }
 
+applyTheme(readTheme());
 createRoot(document.getElementById('root')).render(<App />);
