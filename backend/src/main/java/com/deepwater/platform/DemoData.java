@@ -39,6 +39,7 @@ class DemoData {
                                       "feedback_correct,feedback_incorrect) values(?,?,?,?,?,?,?,?)",
                                     exerciseId, lesson.id(), position, exercise.taskType(), exercise.prompt(),
                                     exercise.expectedAnswer(), text(exercise.feedbackCorrect()), text(exercise.feedbackIncorrect()));
+                            com.deepwater.echo.EchoService.saveAcceptedAnswers(db, exerciseId, exercise.acceptedAnswers());
                             int optionPosition = 0;
                             for (OptionSeed option : exercise.options() == null ? List.<OptionSeed>of() : exercise.options()) {
                                 db.update("insert into echo_exercise_options(exercise_id,option_key,option_text,sort_order) values(?,?,?,?)",
@@ -66,7 +67,7 @@ class DemoData {
     record LessonSeed(String id, String languageCode, String title, String level, String topic,
                       String objective, String explanation, String sourceReference, String skillKey,
                       List<ExerciseSeed> exercises) {}
-    record ExerciseSeed(String taskType, String prompt, String expectedAnswer, String feedbackCorrect,
+    record ExerciseSeed(String taskType, String prompt, String expectedAnswer, List<String> acceptedAnswers, String feedbackCorrect,
                         String feedbackIncorrect, List<OptionSeed> options) {}
     record OptionSeed(String key, String text) {}
 }

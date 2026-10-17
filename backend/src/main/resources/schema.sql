@@ -61,6 +61,12 @@ create table if not exists echo_exercises (
   feedback_incorrect varchar(1000) not null,
   unique(lesson_id, position)
 );
+create table if not exists echo_exercise_answers (
+  exercise_id varchar(120) not null references echo_exercises(id),
+  answer_text varchar(500) not null,
+  sort_order integer not null,
+  primary key(exercise_id, sort_order)
+);
 create table if not exists echo_exercise_options (
   exercise_id varchar(120) not null references echo_exercises(id),
   option_key varchar(16) not null,
