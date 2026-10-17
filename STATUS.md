@@ -33,7 +33,7 @@ Still needed:
 
 ## Deployment
 
-Railway deployment is configured in the repository but not verified as running. No deployed URL, Railway project file, or deploy log is recorded in the repository, so nothing below should be read as "live".
+The product owner reports (2026-10-17) that the app has been deployed on Railway. That deployment has not been independently verified: no deployed URL, Railway project file, or deploy log is recorded in the repository, and the items under "Not verified" below still apply until checked against the running services.
 
 Configured in code (commits 2686ec4, 36c59f3, 5b5e0b8, c819a67):
 
@@ -46,9 +46,9 @@ Verified:
 
 - Deepwater CI passed on all three follow-up commits (runs 93, 94, 95 on main). CI runs backend tests, bootJar, and the frontend build. It does not build either Docker image or deploy anything.
 
-Not verified, and needed before calling it deployed:
+Not verified against the running deployment:
 
-- That both Railway services build and start, and the backend health endpoint (/actuator/health) responds.
+- The public URLs of both Railway services, and that the backend health endpoint (/actuator/health) responds.
 - That DB_URL is set to a JDBC PostgreSQL URL. Railway's Postgres add-on provides DATABASE_URL and PG* variables, not DB_URL, so without it the backend falls back to an H2 file inside the container and data is lost on redeploy.
 - That VITE_API_URL is set to the backend's public URL at frontend build time. The nginx image has no /graphql proxy, so the empty default only works behind the Vite dev server.
 - That DEEPWATER_CORS_ALLOWED_ORIGINS includes the frontend's Railway domain, and DEEPWATER_TEACHER_EMAIL is set.
