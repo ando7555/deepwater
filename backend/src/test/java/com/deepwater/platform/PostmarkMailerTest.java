@@ -1,6 +1,7 @@
 package com.deepwater.platform;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
@@ -47,6 +48,7 @@ class PostmarkMailerTest {
         ReflectionTestUtils.setField(mailer, "serverToken", "");
         ReflectionTestUtils.setField(mailer, "from", "");
         ReflectionTestUtils.setField(mailer, "apiUrl", "http://127.0.0.1:1/email");
-        mailer.sendVerification("learner@example.test", "Ana", "https://app.example.test/?verify_email=abc");
+        assertThatNoException().isThrownBy(() ->
+                mailer.sendVerification("learner@example.test", "Ana", "https://app.example.test/?verify_email=abc"));
     }
 }

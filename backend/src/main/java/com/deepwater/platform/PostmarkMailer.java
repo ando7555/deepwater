@@ -44,6 +44,9 @@ class PostmarkMailer implements VerificationMailer {
                     HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200)
                 log.warn("Postmark rejected the verification email with status {}: {}", response.statusCode(), response.body());
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            log.warn("Interrupted while sending a verification email through Postmark.");
         } catch (Exception ex) {
             log.warn("Could not reach Postmark to send a verification email: {}", ex.getMessage());
         }
