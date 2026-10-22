@@ -5,6 +5,6 @@ One file per GitHub issue: `docs/specs/<issue-number>-<capability>.md`, for exam
 until the issue exists.
 
 Specifications are written before code, from the template in
-`delivery-plugin/skills/spec-driven-delivery/references/spec-template.md`, usually with
-`/delivery-plugin:spec <issue>` or `/delivery-plugin:feature <issue>`. A pull request links the
+`deepwater-developer/skills/spec-driven-delivery/references/spec-template.md`, usually with
+`/deepwater-developer:spec <issue>` or `/deepwater-developer:feature <issue>`. A pull request links the
 specification it implements. See ADR-0001 in `docs/architecture/adr/`.

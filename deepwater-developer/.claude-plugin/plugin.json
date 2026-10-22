@@ -1,0 +1,11 @@
+{
+  "name": "deepwater-developer",
+  "displayName": "Deepwater developer",
+  "version": "0.1.0",
+  "description": "Spec-driven feature delivery for Java/Spring applications that expose one use-case model through MCP, REST, GraphQL and AG-UI adapters. Adds /deepwater-developer:feature, /deepwater-developer:spec, /deepwater-developer:dod and the spec-driven-feature agent.",
+  "author": { "name": "ando7555", "url": "https://github.com/ando7555" },
+  "repository": "https://github.com/ando7555/deepwater",
+  "homepage": "https://github.com/ando7555/deepwater/tree/main/deepwater-developer",
+  "license": "MIT",
+  "keywords": ["spring", "java", "ddd", "hexagonal", "spec-driven", "mcp", "graphql", "rest"]
+}

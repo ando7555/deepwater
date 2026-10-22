@@ -55,7 +55,7 @@ Cons:
 
 ## Decision
 
-Add `delivery-plugin/` (Claude Code plugin) and `.claude-plugin/marketplace.json` to the
+Add `deepwater-developer/` (Claude Code plugin) and `.claude-plugin/marketplace.json` to the
 repository. Specifications live in `docs/specs/<issue-number>-<capability>.md`; ADRs in
 `docs/architecture/adr/`. The plugin's agent and skills never commit or push.
 
@@ -71,10 +71,10 @@ repository. Specifications live in `docs/specs/<issue-number>-<capability>.md`; 
 
 ## Migration and rollback
 
-Introduced by adding files only; no runtime change. Rollback is deleting `delivery-plugin/`,
+Introduced by adding files only; no runtime change. Rollback is deleting `deepwater-developer/`,
 `.claude-plugin/marketplace.json` and this ADR.
 
 ## Evidence
 
-- `delivery-plugin/README.md` for installation and usage.
+- `deepwater-developer/README.md` for installation and usage.
 - `claude plugin validate` output in the pull request that introduces the plugin.

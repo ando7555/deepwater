@@ -1,4 +1,4 @@
-# Deepwater delivery plugin
+# Deepwater developer plugin
 
 A Claude Code plugin that runs the spec-driven delivery method for Java/Spring features: GitHub
 issue → inspection of existing code → specification → smallest vertical slice behind one use case →
@@ -9,10 +9,10 @@ Claude Code plugin for IntelliJ / JetBrains, which runs that same CLI in the IDE
 
 | Item | Invoke as | Does |
 | --- | --- | --- |
-| `feature` skill | `/delivery-plugin:feature 123` or `/delivery-plugin:feature "short description"` | Runs all phases (clarify, inspect, specify, implement, verify, report) in your session, pausing on open decisions |
-| `spec` skill | `/delivery-plugin:spec 123` | Writes only `docs/specs/<issue>-<capability>.md`; no code changes |
-| `dod` skill | `/delivery-plugin:dod [123]` | Checks the current branch against the definition of done and the spec |
-| `spec-driven-feature` agent | `@agent-delivery-plugin:spec-driven-feature implement issue 123`, or `claude --agent delivery-plugin:spec-driven-feature` | The same method as an autonomous subagent with read, search, edit and shell tools; it reports back instead of asking mid-way |
+| `feature` skill | `/deepwater-developer:feature 123` or `/deepwater-developer:feature "short description"` | Runs all phases (clarify, inspect, specify, implement, verify, report) in your session, pausing on open decisions |
+| `spec` skill | `/deepwater-developer:spec 123` | Writes only `docs/specs/<issue>-<capability>.md`; no code changes |
+| `dod` skill | `/deepwater-developer:dod [123]` | Checks the current branch against the definition of done and the spec |
+| `spec-driven-feature` agent | `@agent-deepwater-developer:spec-driven-feature implement issue 123`, or `claude --agent deepwater-developer:spec-driven-feature` | The same method as an autonomous subagent with read, search, edit and shell tools; it reports back instead of asking mid-way |
 | `spec-driven-delivery` skill | loaded automatically by the above | The method itself plus references: full architecture overview, spec template, ADR template, definition of done |
 
 The agent and skills never commit or push; you do that (or ask explicitly).
@@ -24,21 +24,21 @@ inside the IDE terminal. From the Deepwater project root:
 
 ```text
 /plugin marketplace add ando7555/deepwater
-/plugin install delivery-plugin@deepwater
+/plugin install deepwater-developer@deepwater
 ```
 
 Pick the **project** scope in the install panel so the plugin is recorded in `.claude/settings.json`
 for this repository. Newer builds (2.1.275+) can do it in one step:
 
 ```text
-/plugin install delivery-plugin --marketplace ando7555/deepwater
+/plugin install deepwater-developer --marketplace ando7555/deepwater
 ```
 
 From a shell instead:
 
 ```bash
 claude plugin marketplace add ando7555/deepwater --scope project
-claude plugin install delivery-plugin@deepwater --scope project
+claude plugin install deepwater-developer@deepwater --scope project
 ```
 
 For a private clone, the marketplace is fetched with your git credentials (`gh auth login` or an
@@ -48,11 +48,11 @@ after the plugin changes.
 ## Try it without installing
 
 ```bash
-claude --plugin-dir ./delivery-plugin
+claude --plugin-dir ./deepwater-developer
 ```
 
-Then `/delivery-plugin:feature 123`. After editing plugin files, `/reload-plugins`. Validate the
-manifests with `claude plugin validate ./delivery-plugin` and `claude plugin validate .`.
+Then `/deepwater-developer:feature 123`. After editing plugin files, `/reload-plugins`. Validate the
+manifests with `claude plugin validate ./deepwater-developer` and `claude plugin validate .`.
 
 ## Requirements
 
@@ -64,7 +64,7 @@ manifests with `claude plugin validate ./delivery-plugin` and `claude plugin val
 ## Layout
 
 ```text
-delivery-plugin/
+deepwater-developer/
 ├── .claude-plugin/plugin.json
 ├── agents/spec-driven-feature.md
 └── skills/
