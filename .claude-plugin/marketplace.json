@@ -1,0 +1,14 @@
+{
+  "name": "deepwater",
+  "owner": { "name": "ando7555" },
+  "description": "Claude Code plugins maintained in the Deepwater repository.",
+  "plugins": [
+    {
+      "name": "delivery-plugin",
+      "source": "./delivery-plugin",
+      "description": "Spec-driven feature delivery for Java/Spring: issue to specification to vertical slice to evidence.",
+      "category": "productivity",
+      "tags": ["spring", "ddd", "hexagonal", "spec-driven", "mcp"]
+    }
+  ]
+}
