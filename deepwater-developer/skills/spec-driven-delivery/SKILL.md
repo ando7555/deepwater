@@ -11,6 +11,7 @@ exposed through MCP, REST, GraphQL, AG-UI, messaging, or another interface.
 
 Use them together with the repository root `CLAUDE.md` or `AGENTS.md` when one exists. The root
 instructions remain authoritative for repository-specific build, security, and testing rules.
+Project-specific names and commands are kept out of this file, in the repository mapping (below).
 
 The full architecture behind this method is in
 `${CLAUDE_SKILL_DIR}/references/architecture-overview.md`. Read the section you need rather than
@@ -21,20 +22,11 @@ template (14), checklist (15), first implementation path (16).
 
 ## Repository mapping
 
-The overview uses generic names. In this repository they map as follows:
-
-| Overview term | Here |
-| --- | --- |
-| GitLab ticket / issue | GitHub issue (`gh issue view <n>`, or the GitHub MCP tools, or the text the user pastes) |
-| `documentation/specs/<ticket-id>-<capability>.md` | `docs/specs/<issue-number>-<capability>.md` |
-| `documentation/architecture/adr/` | `docs/architecture/adr/<nnnn>-<decision>.md` |
-| `api-contracts/graphql/` | `backend/src/main/resources/graphql/schema.graphqls` |
-| `api-contracts/openapi/`, `api-contracts/mcp/`, `api-contracts/ag-ui/` | Create `api-contracts/<protocol>/` only when that protocol gets its first consumer |
-| Maven module | Gradle subproject (`backend`); packages carry the boundaries today |
-| `mvn ... test` | `./gradlew :backend:test` (narrow with `--tests <ClassName>`) |
-| Platform-team pipeline | `.github/workflows/ci.yml` |
-
-If the repository differs from this table, trust the repository and say so in the specification.
+The overview uses generic names (ticket, `documentation/specs/`, `api-contracts/`, Maven module,
+pipeline). What they are in the current repository, and which commands verify a change there, is
+not part of this method: read `${CLAUDE_PLUGIN_ROOT}/deepwater/repository-mapping.md` before
+Step 2 and apply it. If the repository disagrees with that file, trust the repository and say so
+at the top of the specification.
 
 ## Non-negotiable rules
 
@@ -60,13 +52,8 @@ If the repository differs from this table, trust the repository and say so in th
 
 ## Working mode
 
-Before changing files, create or update:
-
-```text
-docs/specs/<issue-number>-<capability>.md
-```
-
-Use `${CLAUDE_SKILL_DIR}/references/spec-template.md`. The specification must define the
+Before changing files, create or update the feature specification at the path the repository
+mapping gives (for Deepwater: `docs/specs/<issue-number>-<capability>.md`). Use `${CLAUDE_SKILL_DIR}/references/spec-template.md`. The specification must define the
 requested behavior, existing behavior, contracts, acceptance criteria, security, observability,
 and test evidence. If the change is too small for a committed specification, record the same
 information in the GitHub issue and link it from the pull request.
@@ -271,9 +258,8 @@ adapter mapping and timeout tests; external dependency failure tests; idempotenc
 architecture dependency tests; AI schema, adversarial, fallback, and regression evaluations.
 
 Tests must use deterministic stubs, mocks, or test containers. Unit tests must not call real
-identity systems, model providers, external APIs, or production databases. Tests that share the
-default in-memory database must not leak state into each other; use a separate datasource URL when
-a test needs isolation.
+identity systems, model providers, external APIs, or production databases. Tests that share one
+in-memory database must not leak state into each other.
 
 ## Step 11: Security and data protection
 
@@ -300,13 +286,13 @@ circuit-breaker behavior, idempotency strategy, correlation propagation.
 
 ## Step 13: Required documentation
 
-For a feature change, update the appropriate artifacts:
+For a feature change, update the appropriate artifacts, at the paths the repository mapping gives:
 
 ```text
-docs/specs/<issue-number>-<capability>.md
-backend/src/main/resources/graphql/schema.graphqls   (or api-contracts/<protocol>/ once it exists)
-docs/architecture/adr/<nnnn>-<decision>.md
-README.md, STATUS.md or operational documentation
+the feature specification
+the interface contract of the protocol the issue requires
+an ADR, when the change needs one
+README, status or operational documentation
 ```
 
 Create an ADR (template: `${CLAUDE_SKILL_DIR}/references/adr-template.md`) when the change
@@ -320,15 +306,17 @@ Run the narrowest checks first:
 ```text
 1. Specification validation (every section filled or marked "none")
 2. Formatter check, if the repository has one
-3. Module-scoped compile           ./gradlew :backend:compileJava :backend:compileTestJava
-4. Domain/application tests        ./gradlew :backend:test --tests '<ClassName>'
+3. Module-scoped compile
+4. Domain/application tests (the focused test class)
 5. Adapter contract tests
 6. Security tests
 7. Integration tests
 8. Architecture tests, if present
-9. Full verification               ./gradlew :backend:test :backend:bootJar  (and cd frontend && npm ci && npm run build when the frontend changed)
+9. Full verification (the whole test suite and build)
 10. Dependency, secret, and container scans, where configured
 ```
+
+The commands for steps 3, 4 and 9 are listed in the repository mapping.
 
 Report actual command output. If a step cannot run (missing JDK, no network), say so rather than
 skipping silently.

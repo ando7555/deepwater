@@ -55,9 +55,12 @@ Cons:
 
 ## Decision
 
-Add `deepwater-developer/` (Claude Code plugin) and `.claude-plugin/marketplace.json` to the
-repository. Specifications live in `docs/specs/<issue-number>-<capability>.md`; ADRs in
-`docs/architecture/adr/`. The plugin's agent and skills never commit or push.
+Add `deepwater-developer/` to the repository as one self-contained module: the Claude Code plugin
+(skills, agent, references), its own marketplace manifest, and a `deepwater/` folder holding
+everything that is specific to this repository (repository mapping, spec convention, this ADR) so
+the generic method and the project-specific parts can be reviewed separately. Specifications live
+in `docs/specs/<issue-number>-<capability>.md`; ADRs in `docs/architecture/adr/`. The plugin's
+agent and skills never commit or push.
 
 ## Consequences
 
@@ -71,10 +74,9 @@ repository. Specifications live in `docs/specs/<issue-number>-<capability>.md`; 
 
 ## Migration and rollback
 
-Introduced by adding files only; no runtime change. Rollback is deleting `deepwater-developer/`,
-`.claude-plugin/marketplace.json` and this ADR.
+Introduced by adding one folder; no runtime change. Rollback is deleting `deepwater-developer/`.
 
 ## Evidence
 
-- `deepwater-developer/README.md` for installation and usage.
+- `deepwater-developer/README.md` and `USAGE.md` for installation and usage.
 - `claude plugin validate` output in the pull request that introduces the plugin.

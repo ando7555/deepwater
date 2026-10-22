@@ -1,93 +1,80 @@
-# Deepwater developer plugin
+# deepwater-developer
 
-A Claude Code plugin that runs the spec-driven delivery method for Java/Spring features: GitHub
-issue → inspection of existing code → specification → smallest vertical slice behind one use case →
-narrow-then-wide verification → definition of done. It works in the Claude Code CLI and in the
-Claude Code plugin for IntelliJ / JetBrains, which runs that same CLI in the IDE terminal.
+One self-contained module: a Claude Code plugin that runs the spec-driven delivery method for
+Java/Spring features (GitHub issue → inspection of existing code → specification → smallest
+vertical slice behind one use case → narrow-then-wide verification → definition of done), plus the
+Deepwater-specific settings it needs. It works in the Claude Code CLI and in the Claude Code
+plugin for IntelliJ / JetBrains, which runs that same CLI in the IDE.
 
-## What it adds
+**How to use it: see [USAGE.md](USAGE.md).**
+
+## What is in the module
+
+```text
+deepwater-developer/
+├── README.md                    this file
+├── USAGE.md                     step-by-step instructions
+├── .claude-plugin/
+│   ├── plugin.json              plugin manifest (name: deepwater-developer)
+│   ├── marketplace.json         makes this folder installable as a marketplace
+│   └── icon.png
+├── agents/
+│   └── spec-driven-feature.md   the method as an autonomous subagent
+├── skills/                      COMMON: the method, independent of any project
+│   ├── feature/SKILL.md         /deepwater-developer:feature <issue>
+│   ├── spec/SKILL.md            /deepwater-developer:spec <issue>
+│   ├── dod/SKILL.md             /deepwater-developer:dod [issue]
+│   └── spec-driven-delivery/
+│       ├── SKILL.md             the method (owner's agents.md, generic)
+│       └── references/
+│           ├── architecture-overview.md   the full spec-driven multi-interface architecture
+│           ├── spec-template.md
+│           ├── adr-template.md
+│           └── definition-of-done.md
+└── deepwater/                   PROJECT-SPECIFIC: everything true only of this repository
+    ├── repository-mapping.md    where specs, ADRs, contracts live; verification commands; current state
+    ├── specs-convention.md      naming of docs/specs/ files
+    └── adr-0001-spec-driven-delivery-plugin.md   why this form was chosen
+```
+
+The split is deliberate: `skills/` and `agents/` contain only the generic method and read the
+project-specific facts from `deepwater/repository-mapping.md`. To use the method in another
+repository, copy the module, replace the `deepwater/` folder, and point the skills at the new
+mapping file.
+
+## Commands and agent
 
 | Item | Invoke as | Does |
 | --- | --- | --- |
-| `feature` skill | `/deepwater-developer:feature 123` or `/deepwater-developer:feature "short description"` | Runs all phases (clarify, inspect, specify, implement, verify, report) in your session, pausing on open decisions |
-| `spec` skill | `/deepwater-developer:spec 123` | Writes only `docs/specs/<issue>-<capability>.md`; no code changes |
-| `dod` skill | `/deepwater-developer:dod [123]` | Checks the current branch against the definition of done and the spec |
-| `spec-driven-feature` agent | `@agent-deepwater-developer:spec-driven-feature implement issue 123`, or `claude --agent deepwater-developer:spec-driven-feature` | The same method as an autonomous subagent with read, search, edit and shell tools; it reports back instead of asking mid-way |
-| `spec-driven-delivery` skill | loaded automatically by the above | The method itself plus references: full architecture overview, spec template, ADR template, definition of done |
+| `feature` | `/deepwater-developer:feature 123` | All phases in your session: clarify, inspect, specify, implement, verify, report; pauses on open decisions |
+| `spec` | `/deepwater-developer:spec 123` | Only the specification; no code changes |
+| `dod` | `/deepwater-developer:dod [123]` | Checks the current branch against the definition of done and the spec |
+| `spec-driven-feature` agent | `@agent-deepwater-developer:spec-driven-feature implement issue 123` | The same method autonomously, with read, search, edit and shell tools |
 
-The agent and skills never commit or push; you do that (or ask explicitly).
+The agent and skills never commit or push.
 
-## Install in IntelliJ
+## Install
 
-The JetBrains plugin runs the `claude` CLI, so plugins are installed from the Claude Code prompt
-inside the IDE terminal. From the Deepwater project root:
+From the Claude Code prompt in IntelliJ or a terminal:
 
 ```text
-/plugin marketplace add ando7555/deepwater
+/plugin marketplace add <absolute path to>/deepwater/deepwater-developer
 /plugin install deepwater-developer@deepwater
 ```
 
-Pick the **project** scope in the install panel so the plugin is recorded in `.claude/settings.json`
-for this repository. Newer builds (2.1.275+) can do it in one step:
-
-```text
-/plugin install deepwater-developer --marketplace ando7555/deepwater
-```
-
-From a shell instead:
-
-```bash
-claude plugin marketplace add ando7555/deepwater --scope project
-claude plugin install deepwater-developer@deepwater --scope project
-```
-
-For a private clone, the marketplace is fetched with your git credentials (`gh auth login` or an
-SSH key). Third-party marketplaces do not auto-update: run `/plugin marketplace update deepwater`
-after the plugin changes.
-
-## Try it without installing
+Or, to try it without installing, from the repository root:
 
 ```bash
 claude --plugin-dir ./deepwater-developer
 ```
 
-Then `/deepwater-developer:feature 123`. After editing plugin files, `/reload-plugins`. Validate the
-manifests with `claude plugin validate ./deepwater-developer` and `claude plugin validate .`.
+Validate after changes: `claude plugin validate ./deepwater-developer`.
 
 ## Requirements
 
 - Claude Code CLI on `PATH` (IntelliJ: Settings → Tools → Claude Code → Claude command).
-- `gh` CLI authenticated, so the skills can read issues with `gh issue view`. Without it, paste the
-  issue text as the argument.
-- JDK 25 and Gradle for the verification phase (`./gradlew :backend:test`).
-
-## Layout
-
-```text
-deepwater-developer/
-├── .claude-plugin/plugin.json
-├── agents/spec-driven-feature.md
-└── skills/
-    ├── feature/SKILL.md
-    ├── spec/SKILL.md
-    ├── dod/SKILL.md
-    └── spec-driven-delivery/
-        ├── SKILL.md
-        └── references/
-            ├── architecture-overview.md
-            ├── spec-template.md
-            ├── adr-template.md
-            └── definition-of-done.md
-```
-
-The repository root `.claude-plugin/marketplace.json` makes `ando7555/deepwater` a marketplace that
-lists this plugin.
-
-## Mapping to this repository
-
-The method was written for a generic project (GitLab tickets, `documentation/`, Maven modules).
-`skills/spec-driven-delivery/SKILL.md` maps those to GitHub issues, `docs/specs/`,
-`docs/architecture/adr/`, the Gradle `backend` subproject and `.github/workflows/ci.yml`.
+- `gh` CLI authenticated, so the skills can read issues; otherwise paste the issue text.
+- The project's toolchain for the verification phase (Deepwater: JDK 25, Gradle wrapper, Node 22).
 
 ## Later: tools in Java
 

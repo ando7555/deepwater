@@ -11,8 +11,10 @@ Deliver this request with the `spec-driven-delivery` method, phase by phase, in 
 
 > $ARGUMENTS
 
-Work through the phases below. At the end of each phase, show a short summary and continue; stop
-and ask only when an open decision blocks the next phase or when a step cannot be undone.
+First read `${CLAUDE_PLUGIN_ROOT}/deepwater/repository-mapping.md`: it says where specs, ADRs and
+contracts live in this repository and which commands verify a change. Then work through the
+phases below. At the end of each phase, show a short summary and continue; stop and ask only when
+an open decision blocks the next phase or when a step cannot be undone.
 
 ## Phase A: Clarify
 
@@ -25,16 +27,15 @@ and ask only when an open decision blocks the next phase or when a step cannot b
 
 ## Phase B: Inspect
 
-- Read the root `CLAUDE.md` / `AGENTS.md`, `README.md`, `ARCHITECTURE.md`, `STATUS.md` when
-  present, then trace the code, contracts (`backend/src/main/resources/graphql/schema.graphqls`,
-  REST controllers), tests and CI the issue touches.
+- Read the root instruction files named in the repository mapping, then trace the code,
+  contracts, tests and CI the issue touches.
 - Classify each affected component: REUSE, EXTEND, WRAP, REFACTOR, REPLACE, NEW.
 
 ## Phase C: Specify
 
-- Write `docs/specs/<issue-number>-<capability>.md` from
+- Write the specification at the path the mapping gives, from
   `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-delivery/references/spec-template.md`.
-  With no issue number, use `docs/specs/draft-<capability>.md` and say so.
+  With no issue number, use the mapping's draft naming and say so.
 - Include Given/When/Then scenarios, contracts for only the interface the issue requires, the error
   contract, and the deterministic-versus-AI classification of each rule.
 - Show the open decisions to the user. If any blocks implementation, stop here and wait.
@@ -47,16 +48,9 @@ integration test. Keep adapters thin; one use case serves every protocol.
 
 ## Phase E: Verify
 
-Run the narrowest checks first and paste the real output:
-
-```text
-./gradlew :backend:compileJava :backend:compileTestJava
-./gradlew :backend:test --tests '<FocusedTestClass>'
-./gradlew :backend:test :backend:bootJar
-cd frontend && npm ci && npm run build      # only when the frontend changed
-```
-
-If a command cannot run in this environment, say which and why instead of skipping silently.
+Run the mapping's verification commands, narrowest first (compile, focused test class, full
+suite), and paste the real output. If a command cannot run in this environment, say which and why
+instead of skipping silently.
 
 ## Phase F: Report
 
