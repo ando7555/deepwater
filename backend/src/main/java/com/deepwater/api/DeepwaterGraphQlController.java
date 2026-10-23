@@ -68,6 +68,11 @@ public class DeepwaterGraphQlController {
         return echo.publish(platform.requireTeacher(context.get("authorization")), lessonId);
     }
 
+    @MutationMapping
+    TeacherLesson unpublishEchoLesson(@Argument String lessonId, GraphQLContext context) {
+        return echo.unpublish(platform.requireTeacher(context.get("authorization")), lessonId);
+    }
+
     private String account(GraphQLContext context) {
         return platform.requireAccount(context.get("authorization"));
     }
