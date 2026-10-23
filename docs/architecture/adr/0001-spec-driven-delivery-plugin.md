@@ -15,8 +15,10 @@ for it to run as a plugin with an agent and tools, usable from IntelliJ.
 
 ## Decision drivers
 
-- The method must run where the code is edited (IntelliJ) with real tools: read, search, edit,
-  Gradle, GitHub issues.
+- The method must run where the code is edited (IntelliJ or a terminal) with real tools: read,
+  search, edit, the project's build, the project's issue tracker.
+- The same plugin must serve other repositories, on GitHub or GitLab, without being copied and
+  edited.
 - Business logic must stay vendor-independent and behind ports; AI output is untrusted input.
 - Small team: no new runtime, service or API key handling for the delivery tooling itself.
 - The method should be versioned with the code and installable by anyone cloning the repository.
@@ -55,11 +57,13 @@ Cons:
 
 ## Decision
 
-Add `deepwater-developer/` to the repository as one self-contained module: the Claude Code plugin
-(skills, agent, references), its own marketplace manifest, and a `deepwater/` folder holding
-everything that is specific to this repository (repository mapping, spec convention, this ADR) so
-the generic method and the project-specific parts can be reviewed separately. Specifications live
-in `docs/specs/<issue-number>-<capability>.md`; ADRs in `docs/architecture/adr/`. The plugin's
+Add `deepwater-developer/` to the repository as one self-contained, project-independent module:
+the Claude Code plugin (skills, agent, references) and its own marketplace manifest. Nothing in
+the plugin names this repository, GitHub or Gradle; it works in any repository and reads tickets
+from GitHub, GitLab or pasted text. Everything that is specific to a repository lives in that
+repository, in `docs/delivery/repository-mapping.md`, created by `/deepwater-developer:init` and
+reviewed like any other document. Deepwater's own file is at that path. Specifications live in
+`docs/specs/<issue-number>-<capability>.md`; ADRs in `docs/architecture/adr/`. The plugin's
 agent and skills never commit or push.
 
 ## Consequences
@@ -74,7 +78,8 @@ agent and skills never commit or push.
 
 ## Migration and rollback
 
-Introduced by adding one folder; no runtime change. Rollback is deleting `deepwater-developer/`.
+Introduced by adding one folder and one settings file; no runtime change. Rollback is deleting
+`deepwater-developer/` and `docs/delivery/`.
 
 ## Evidence
 

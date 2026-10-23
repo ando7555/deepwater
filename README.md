@@ -25,9 +25,10 @@ and AI fashion remain later, separately gated applications.
 
 ## Building features with Claude Code
 
-The `deepwater-developer/` folder is a Claude Code plugin that turns a GitHub issue into a
-feature plan, code, and test evidence the way this project expects. Install it once, then type
-`/deepwater-developer:feature <issue number>` in Claude Code (CLI or the IntelliJ plugin).
+The `deepwater-developer/` folder is a Claude Code plugin that turns a ticket into a feature
+plan, code, and test evidence, plan first. It is not tied to this repository: install it once and
+it works in any project, with GitHub or GitLab issues or pasted text. This repository's own
+settings for it are in [docs/delivery/repository-mapping.md](docs/delivery/repository-mapping.md).
 Step-by-step instructions: [deepwater-developer/README.md](deepwater-developer/README.md).
 
 ## Run the local proof of flow

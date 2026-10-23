@@ -1,7 +1,7 @@
 # Feature plan
 
-> Copy this template to the specification path the repository mapping gives (for Deepwater:
-> `docs/specs/<issue-number>-<capability>.md`) before implementation.
+> Copy this template to the specification path the repository mapping gives (by default
+> `docs/specs/<ticket-id>-<capability>.md`) before implementation.
 > Complete the plan from the issue and repository evidence. Do not add credentials,
 > tokens, personal data, or production payloads.
 

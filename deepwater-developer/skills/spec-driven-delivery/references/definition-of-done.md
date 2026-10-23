@@ -2,7 +2,7 @@
 
 A feature is complete only when:
 
-- [ ] The GitHub issue and specification agree.
+- [ ] The ticket and specification agree.
 - [ ] Existing behavior was inspected and classified (REUSE / EXTEND / WRAP / REFACTOR / REPLACE / NEW).
 - [ ] The bounded context and data owner are documented.
 - [ ] One application use case owns the workflow.

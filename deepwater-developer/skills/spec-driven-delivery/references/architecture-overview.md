@@ -1,8 +1,9 @@
 # Spec-driven multi-interface architecture
 
 > Reference material for the `spec-driven-delivery` skill. Written for a generic Java/Spring
-> project; the SKILL.md "Repository mapping" table says how its placeholders (GitLab ticket,
-> `documentation/`, Maven modules) map onto this repository (GitHub issue, `docs/`, Gradle).
+> project. What its placeholders (ticket, `documentation/`, Maven modules) are in a given
+> repository is written in that repository's `docs/delivery/repository-mapping.md`, or derived
+> from the repository when that file does not exist yet.
 
 ## Purpose
 

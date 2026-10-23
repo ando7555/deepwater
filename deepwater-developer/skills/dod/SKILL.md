@@ -1,7 +1,7 @@
 ---
 name: dod
-description: Check the current branch's changes against the spec-driven definition of done and the specification they implement, and report what is met, what is not, and what to fix. Use when the user says "/dod", "is this done", "review against the spec" or before opening a pull request.
-argument-hint: [issue-number or spec path]
+description: Check the current branch's changes against the spec-driven definition of done and the specification they implement, and report what is met, what is not, and what to fix. Use when the user says "/dod", "is this done", "review against the spec" or before opening a merge or pull request.
+argument-hint: [ticket number or specification path]
 disable-model-invocation: true
 skills:
   - spec-driven-delivery
@@ -10,11 +10,15 @@ skills:
 Review the working tree and branch changes against the definition of done.
 
 Target: $ARGUMENTS (when empty, find the specification in the specs folder named by
-`${CLAUDE_PLUGIN_ROOT}/deepwater/repository-mapping.md` that matches the changed files, or say
-that none exists).
+`docs/delivery/repository-mapping.md` that matches the changed files, or say that none exists).
+If the mapping file does not exist, derive the specs folder and the verification commands with
+the discovery rules at the end of
+`${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-delivery/references/repository-mapping-template.md`
+and say so.
 
-1. Run `git status --short` and `git diff --stat main...HEAD` (fall back to `git diff --stat` when
-   there is no `main`). List the changed files.
+1. Find the default branch (`main` or `master`, from `git symbolic-ref refs/remotes/origin/HEAD`
+   when available). Run `git status --short` and `git diff --stat <default>...HEAD` (fall back
+   to `git diff --stat` when there is no default branch). List the changed files.
 2. Read the matching specification (a feature plan). If none exists, that is the first finding.
    Compare its section 17 checklist and section 14 evidence with what the branch contains.
 3. For each line of
@@ -26,5 +30,5 @@ that none exists).
    docs or logs.
 4. Run the mapping's verification commands, narrowest first, and paste the result lines. Say
    plainly if a command could not run.
-5. Report findings ordered by severity, then the list of fixes needed before a pull request. Do
-   not fix, commit or push unless the user asks.
+5. Report findings ordered by severity, then the list of fixes needed before a merge or pull
+   request. Do not fix, commit or push unless the user asks.

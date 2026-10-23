@@ -1,13 +1,15 @@
 ---
 name: spec-driven-delivery
-description: The method for turning a GitHub issue into a Java/Spring feature that may be exposed through MCP, REST, GraphQL or AG-UI. Load before planning, specifying, implementing or reviewing any feature in this repository. Covers clarify, inspect, bounded context, use case, ports and adapters, contracts, deterministic-vs-AI, vertical slice, KISS/YAGNI/DRY, tests, security, errors, documentation, validation and the definition of done.
+description: The method for turning a ticket (a GitHub issue, a GitLab issue or a pasted description) into a Java/Spring feature that may be exposed through MCP, REST, GraphQL or AG-UI, in any repository. Load before planning, specifying, implementing or reviewing a feature. Covers clarify, inspect, bounded context, use case, ports and adapters, contracts, deterministic-vs-AI, vertical slice, KISS/YAGNI/DRY, tests, security, errors, documentation, validation and the definition of done.
 user-invocable: false
 ---
 
 # Spec-driven delivery
 
-These instructions define how to implement a GitHub issue as a Java/Spring feature that may be
-exposed through MCP, REST, GraphQL, AG-UI, messaging, or another interface.
+These instructions define how to implement a ticket as a Java/Spring feature that may be
+exposed through MCP, REST, GraphQL, AG-UI, messaging, or another interface. A **ticket** is a
+GitHub issue, a GitLab issue, or a description the user pasted; the method does not depend on
+which.
 
 Use them together with the repository root `CLAUDE.md` or `AGENTS.md` when one exists. The root
 instructions remain authoritative for repository-specific build, security, and testing rules.
@@ -22,17 +24,27 @@ template (14), checklist (15), first implementation path (16).
 
 ## Repository mapping
 
-The overview uses generic names (ticket, `documentation/specs/`, `api-contracts/`, Maven module,
+The overview uses generic names (ticket, `documentation/specs/`, `api-contracts/`, module,
 pipeline). What they are in the current repository, and which commands verify a change there, is
-not part of this method: read `${CLAUDE_PLUGIN_ROOT}/deepwater/repository-mapping.md` before
-Step 2 and apply it. If the repository disagrees with that file, trust the repository and say so
-at the top of the specification.
+not part of this method. It comes from the repository itself, in this order:
+
+1. `docs/delivery/repository-mapping.md` at the repository root, when it exists. Read it before
+   Step 2 and apply it. If the repository disagrees with that file, trust the repository and say
+   so at the top of the specification.
+2. Otherwise derive the mapping from the repository with the discovery rules at the end of
+   `${CLAUDE_SKILL_DIR}/references/repository-mapping-template.md`, say that you did, and offer
+   `/deepwater-developer:init` so the result is saved for the next run and the next person.
+
+How to read a ticket is one line of that mapping: GitHub repositories use
+`gh issue view <n> --comments`, GitLab repositories use `glab issue view <n> --comments`, and
+when neither CLI is available or the tracker is something else, the user pastes the ticket text.
+Never guess a ticket's content: fetch it or ask for it.
 
 ## Non-negotiable rules
 
 - Start from a written specification. Do not start from a controller, MCP tool, prompt, database
   table, or external client.
-- Read the GitHub issue, relevant code, contracts, tests, architecture decisions, and deployment
+- Read the ticket, relevant code, contracts, tests, architecture decisions, and deployment
   configuration before designing a change.
 - Never commit or push unless the user explicitly requests it.
 - Never add credentials, tokens, client secrets, personal data, or production payloads to code,
@@ -53,17 +65,17 @@ at the top of the specification.
 ## Working mode
 
 Before changing files, create or update the feature specification at the path the repository
-mapping gives (for Deepwater: `docs/specs/<issue-number>-<capability>.md`). Use the 18-section
+mapping gives (by default `docs/specs/<ticket-id>-<capability>.md`). Use the 18-section
 feature plan `${CLAUDE_SKILL_DIR}/references/feature-plan-template.md`: ticket metadata, business
 outcome, actors and interfaces, existing-system discovery with reuse decisions, specification,
 acceptance scenarios, DDD design, interface contracts, AI behavior, implementation plan,
 KISS/YAGNI/DRY review, security, observability, test evidence, ADR and migration, risks,
 definition of done, review record. If the change is too small for a committed specification, record the same
-information in the GitHub issue and link it from the pull request.
+information in the ticket and link it from the merge or pull request.
 
 ## Step 1: Clarify the issue
 
-Extract the following from the GitHub issue:
+Extract the following from the ticket:
 
 - Business problem.
 - Desired user outcome.

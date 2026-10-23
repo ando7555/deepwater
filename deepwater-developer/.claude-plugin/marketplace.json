@@ -8,7 +8,7 @@
     {
       "name": "deepwater-developer",
       "source": "./",
-      "description": "Spec-driven feature delivery for Java/Spring: issue to specification to vertical slice to evidence.",
+      "description": "Spec-driven feature delivery for Java/Spring, in any repository: ticket (GitHub, GitLab or pasted) to specification to vertical slice to evidence.",
       "category": "productivity",
       "tags": [
         "spring",
