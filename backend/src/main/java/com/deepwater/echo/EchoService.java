@@ -208,7 +208,7 @@ public class EchoService {
         int version = 1;
         int sortOrder;
         if (draft.revisionOf() != null && !draft.revisionOf().isBlank()) {
-            var parent = db.query("select version,sort_order from echo_lessons where id=? and review_status='PUBLISHED' and language_code=?",
+            var parent = db.query("select version,sort_order from echo_lessons where id=? and review_status in ('PUBLISHED','UNPUBLISHED') and language_code=?",
                     (rs, row) -> new LessonOrder(rs.getInt("version"), rs.getInt("sort_order")), draft.revisionOf(), draft.languageCode())
                     .stream().findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The lesson being revised was not found."));
             version = parent.version() + 1;
@@ -250,19 +250,47 @@ public class EchoService {
 
     @Transactional
     public TeacherLesson publish(String teacherId, String lessonId) {
-        var revisionRows = db.query("select revision_of from echo_lessons where id=? and review_status='DRAFT'", (rs, row) -> rs.getString(1), lessonId);
-        if (revisionRows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Draft lesson not found.");
+        var rows = db.query("select revision_of,review_status from echo_lessons where id=? and review_status in ('DRAFT','UNPUBLISHED')",
+                (rs, row) -> new PublishSource(rs.getString("revision_of"), LessonStatus.valueOf(rs.getString("review_status"))), lessonId);
+        if (rows.isEmpty()) {
+            int newer = db.queryForObject("select count(*) from echo_lessons where revision_of=? and review_status='PUBLISHED'", Integer.class, lessonId);
+            if (newer > 0) throw new ResponseStatusException(HttpStatus.CONFLICT, "A newer revision of this lesson is published.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Draft lesson not found.");
+        }
+        PublishSource source = rows.getFirst();
         validateAudioForPublication(lessonId);
-        String parentId = revisionRows.getFirst();
-        if (parentId != null) {
-            int archived = db.update("update echo_lessons set review_status='ARCHIVED' where id=? and review_status='PUBLISHED'", parentId);
+        // Only a new revision replaces its parent; republishing a withdrawn lesson leaves its lineage alone.
+        if (source.status() == LessonStatus.DRAFT && source.parentId() != null) {
+            int archived = db.update("update echo_lessons set review_status='ARCHIVED' where id=? and review_status in ('PUBLISHED','UNPUBLISHED')", source.parentId());
             if (archived != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "This revision is no longer based on the current published lesson.");
         }
-        int updated = db.update("update echo_lessons set review_status='PUBLISHED',content_status='Teacher-approved and published',approved_by=?,approved_at=current_timestamp where id=? and review_status='DRAFT'",
-                teacherId, lessonId);
+        int updated = db.update("update echo_lessons set review_status='PUBLISHED',content_status='Teacher-approved and published',approved_by=?,approved_at=current_timestamp where id=? and review_status=?",
+                teacherId, lessonId, source.status().name());
         if (updated != 1) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Draft lesson not found.");
+        if (source.status() == LessonStatus.UNPUBLISHED) audit("ECHO_LESSON_REPUBLISHED", lessonId);
         return teacherLessons(teacherId).stream().filter(lesson -> lesson.id().equals(lessonId)).findFirst().orElseThrow();
     }
+
+    /** Withdraws a published lesson from learners; attempts, mastery and review dates are left untouched. */
+    @Transactional
+    public TeacherLesson unpublish(String teacherId, String lessonId) {
+        if (lessonId == null || lessonId.isBlank() || lessonId.length() > 120)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choose a lesson to unpublish.");
+        int updated = db.update("update echo_lessons set review_status='UNPUBLISHED',content_status='Unpublished by teacher' where id=? and review_status='PUBLISHED'", lessonId);
+        if (updated != 1) {
+            int exists = db.queryForObject("select count(*) from echo_lessons where id=?", Integer.class, lessonId);
+            if (exists == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Published lesson not found.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Only a published lesson can be unpublished.");
+        }
+        audit("ECHO_LESSON_UNPUBLISHED", lessonId);
+        return teacherLessons(teacherId).stream().filter(lesson -> lesson.id().equals(lessonId)).findFirst().orElseThrow();
+    }
+
+    private void audit(String eventType, String aggregateId) {
+        db.update("insert into audit_events(id,event_type,aggregate_id) values(?,?,?)", UUID.randomUUID().toString(), eventType, aggregateId);
+    }
+
+    private record PublishSource(String parentId, LessonStatus status) {}
 
     private void validateDraft(LessonDraft draft) {
         if (draft == null || (!"da".equals(draft.languageCode()) && !"de".equals(draft.languageCode())) || blank(draft.title(), 240)
@@ -370,7 +398,7 @@ public class EchoService {
         if (answer == null || answer.isBlank() || answer.length() > 2000)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Enter an answer of at most 2000 characters.");
         var rows = db.query("select e.task_type,e.expected_answer,l.skill_key,e.feedback_correct,e.feedback_incorrect " +
-                        "from echo_exercises e join echo_lessons l on l.id=e.lesson_id where e.id=?",
+                        "from echo_exercises e join echo_lessons l on l.id=e.lesson_id where e.id=? and l.review_status='PUBLISHED'",
                 (rs, row) -> new ExerciseRule(rs.getString("task_type"), rs.getString("expected_answer"),
                         rs.getString("skill_key"), rs.getString("feedback_correct"), rs.getString("feedback_incorrect")), exerciseId);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Learning exercise not found.");
