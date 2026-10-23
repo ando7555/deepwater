@@ -17,9 +17,11 @@ Produce the specification only, using the `spec-driven-delivery` method, for:
    `gh` is unavailable, ask the user to paste the issue text.
 3. Inspect the existing behavior the issue touches (entry points, use cases, domain rules,
    clients, tests, CI) and classify each component REUSE / EXTEND / WRAP / REFACTOR / REPLACE / NEW.
-4. Write the specification at the mapped path from
-   `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-delivery/references/spec-template.md`. Fill every
-   section or mark it "none"; never leave template placeholders.
+4. Write the specification at the mapped path from the 18-section feature plan
+   `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-delivery/references/feature-plan-template.md`. Fill
+   sections 1 to 13, 15 and 16 with status `READY_FOR_REVIEW` (or `DRAFT` while questions are open);
+   leave 14, 17 and 18 for implementation. Mark a section "not applicable" rather than leaving
+   placeholders.
 5. Decide for every rule whether it is deterministic (domain), a workflow (use case), external
    (port) or needs AI (orchestration with schema validation), and say why.
 6. Finish with the list of open decisions for the product owner and a one-line recommendation on

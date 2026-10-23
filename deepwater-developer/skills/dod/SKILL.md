@@ -15,7 +15,8 @@ that none exists).
 
 1. Run `git status --short` and `git diff --stat main...HEAD` (fall back to `git diff --stat` when
    there is no `main`). List the changed files.
-2. Read the matching specification. If none exists, that is the first finding.
+2. Read the matching specification (a feature plan). If none exists, that is the first finding.
+   Compare its section 17 checklist and section 14 evidence with what the branch contains.
 3. For each line of
    `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-delivery/references/definition-of-done.md`, mark it
    **met**, **not met** or **not applicable**, with the file or test that proves it. Specifically

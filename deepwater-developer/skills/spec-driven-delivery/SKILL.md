@@ -53,9 +53,12 @@ at the top of the specification.
 ## Working mode
 
 Before changing files, create or update the feature specification at the path the repository
-mapping gives (for Deepwater: `docs/specs/<issue-number>-<capability>.md`). Use `${CLAUDE_SKILL_DIR}/references/spec-template.md`. The specification must define the
-requested behavior, existing behavior, contracts, acceptance criteria, security, observability,
-and test evidence. If the change is too small for a committed specification, record the same
+mapping gives (for Deepwater: `docs/specs/<issue-number>-<capability>.md`). Use the 18-section
+feature plan `${CLAUDE_SKILL_DIR}/references/feature-plan-template.md`: ticket metadata, business
+outcome, actors and interfaces, existing-system discovery with reuse decisions, specification,
+acceptance scenarios, DDD design, interface contracts, AI behavior, implementation plan,
+KISS/YAGNI/DRY review, security, observability, test evidence, ADR and migration, risks,
+definition of done, review record. If the change is too small for a committed specification, record the same
 information in the GitHub issue and link it from the pull request.
 
 ## Step 1: Clarify the issue

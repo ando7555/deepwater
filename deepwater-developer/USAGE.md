@@ -49,10 +49,10 @@ What happens, phase by phase, in your session:
 | --- | --- | --- |
 | A Clarify | Reads the issue and comments, extracts problem, outcome, actors, scope, interface, constraints; lists unknowns | Answer questions it cannot resolve from the issue |
 | B Inspect | Reads `README.md`, `ARCHITECTURE.md`, `STATUS.md`, the GraphQL schema, services and tests the issue touches; classifies each as REUSE / EXTEND / WRAP / REFACTOR / REPLACE / NEW | Nothing, unless it misread something |
-| C Specify | Writes `docs/specs/107-<capability>.md` with business rules, contracts, error contract, Given/When/Then scenarios and open decisions | Read the spec. Decide the open decisions. This is the main review point |
+| C Specify | Writes `docs/specs/107-<capability>.md` as the 18-section feature plan: metadata, outcome, actors, existing-system discovery and reuse decisions, business rules and contracts, Given/When/Then scenarios, DDD design, AI classification, implementation plan, KISS/YAGNI/DRY, security, observability, risks and open questions | Read the plan. Decide the open questions. This is the main review point |
 | D Implement | Domain rule → use case → fake port → tests → the one required adapter → contract test → real adapter | Nothing; it stops if a decision blocks it |
 | E Verify | Runs `./gradlew :backend:compileJava`, the focused test class, then the full `:backend:test` and pastes the real output | Read the output |
-| F Report | Files changed, test output, definition-of-done lines met / not met, remaining open decisions | Review the diff in IntelliJ, then commit and push yourself, or say "commit and push" |
+| F Report | Ticks section 17 of the plan, fills the review record, then reports files changed, test output, definition-of-done lines met / not met, remaining open decisions | Review the diff in IntelliJ, then commit and push yourself, or say "commit and push" |
 
 You can pass a description instead of a number (`/deepwater-developer:feature "accept
 several answers for typed exercises"`); the spec is then written as `docs/specs/draft-<capability>.md`.

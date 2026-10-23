@@ -33,9 +33,12 @@ an open decision blocks the next phase or when a step cannot be undone.
 
 ## Phase C: Specify
 
-- Write the specification at the path the mapping gives, from
-  `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-delivery/references/spec-template.md`.
-  With no issue number, use the mapping's draft naming and say so.
+- Write the specification at the path the mapping gives, from the 18-section feature plan
+  `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-delivery/references/feature-plan-template.md`.
+  Fill sections 1 to 13, 15 and 16 now (status `DRAFT`); section 10 is the implementation plan
+  for Phase D; sections 14, 17 and 18 are completed in Phases E and F. Mark a section
+  "not applicable" rather than leaving placeholders. With no issue number, use the mapping's draft
+  naming and say so.
 - Include Given/When/Then scenarios, contracts for only the interface the issue requires, the error
   contract, and the deterministic-versus-AI classification of each rule.
 - Show the open decisions to the user. If any blocks implementation, stop here and wait.
@@ -50,10 +53,12 @@ integration test. Keep adapters thin; one use case serves every protocol.
 
 Run the mapping's verification commands, narrowest first (compile, focused test class, full
 suite), and paste the real output. If a command cannot run in this environment, say which and why
-instead of skipping silently.
+instead of skipping silently. Record the commands and results in section 14 of the plan.
 
 ## Phase F: Report
 
-Give: files changed, specification path, test output, each line of
+Tick what is true in section 17 of the plan, fill section 18 with the pull request link once it
+exists, and set the status to `IMPLEMENTING` or `DONE`. Then give: files changed, specification
+path, test output, each line of
 `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-delivery/references/definition-of-done.md` marked met or
 not met, and remaining open decisions. Do not commit or push unless the user asks.

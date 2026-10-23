@@ -28,7 +28,7 @@ deepwater-developer/
 │       ├── SKILL.md             the method (owner's agents.md, generic)
 │       └── references/
 │           ├── architecture-overview.md   the full spec-driven multi-interface architecture
-│           ├── spec-template.md
+│           ├── feature-plan-template.md   the 18-section spec every feature starts from
 │           ├── adr-template.md
 │           └── definition-of-done.md
 └── deepwater/                   PROJECT-SPECIFIC: everything true only of this repository
