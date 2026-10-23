@@ -78,5 +78,5 @@ Introduced by adding one folder; no runtime change. Rollback is deleting `deepwa
 
 ## Evidence
 
-- `deepwater-developer/README.md` and `USAGE.md` for installation and usage.
+- `deepwater-developer/README.md` for installation and usage.
 - `claude plugin validate` output in the pull request that introduces the plugin.

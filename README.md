@@ -23,6 +23,13 @@ and AI fashion remain later, separately gated applications.
 - [Implementation status and known gaps](STATUS.md)
 - [Teacher workflow and coding guide](TEACHER_GUIDE.md)
 
+## Building features with Claude Code
+
+The `deepwater-developer/` folder is a Claude Code plugin that turns a GitHub issue into a
+feature plan, code, and test evidence the way this project expects. Install it once, then type
+`/deepwater-developer:feature <issue number>` in Claude Code (CLI or the IntelliJ plugin).
+Step-by-step instructions: [deepwater-developer/README.md](deepwater-developer/README.md).
+
 ## Run the local proof of flow
 
 Requirements: Java 25 and Node.js/npm.
