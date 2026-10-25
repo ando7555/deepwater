@@ -2,7 +2,7 @@
   "name": "deepwater-developer",
   "displayName": "Deepwater developer",
   "version": "0.2.0",
-  "description": "A mentor that teaches while it works. Includes the course \"Become an AI engineer\" (placement, nine modules with labs in your own repository, progress and a certificate with evidence) and spec-driven feature delivery for Java/Spring in any repository (tickets from GitHub, GitLab or pasted text). Provider-independent AI design for Claude, OpenAI and any OpenAI-compatible service. Adds /deepwater-developer:course, :init, :feature, :spec, :dod and the spec-driven-feature agent; skills also load in other assistants through AGENTS.md.",
+  "description": "A mentor that teaches while it works. Includes the course \"Become an AI engineer\" (placement, nine modules with labs in your own repository, progress and a certificate with evidence) and spec-driven feature delivery for Java/Spring in any repository (tickets from GitHub, GitLab or pasted text). Provider-independent AI design for Claude, OpenAI and any OpenAI-compatible service. Adds /deepwater-developer:help (plain-language guidance, beginner page START-HERE.md), :course, :init, :feature, :spec, :dod and the spec-driven-feature agent; skills also load in other assistants through AGENTS.md.",
   "author": {
     "name": "ando7555",
     "url": "https://github.com/ando7555"

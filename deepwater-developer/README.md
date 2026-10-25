@@ -1,5 +1,10 @@
 # deepwater-developer: the manual
 
+> **New here? Read [START-HERE.md](START-HERE.md) first.** It is one page in simple words:
+> what this is, what you need, how to install it in five checked steps, which command to type
+> for what you want, and what to do when something goes wrong. Stuck at any point? Type
+> `/deepwater-developer:help` and ask in your own words.
+
 This is for anyone who has to turn a ticket into working code and would like the careful parts
 done properly: reading what already exists, writing the plan down, writing the tests, running
 them, and telling the truth about the result. The plugin makes Claude Code work that way, in any
@@ -84,8 +89,8 @@ record the choice in the repository's shared settings, and that is a team decisi
 install step.) You should see `Successfully installed plugin: deepwater-developer@deepwater`.
 
 **Step 6. Make sure it worked.** Type `/deepwater-` in the text box and stop there. Claude Code
-completes commands as you type, so a small list should appear with five entries:
-`/deepwater-developer:course`, `:init`, `:feature`, `:spec` and `:dod`. That list is your proof. If it stays
+completes commands as you type, so a small list should appear with six entries:
+`/deepwater-developer:help`, `:course`, `:init`, `:feature`, `:spec` and `:dod`. That list is your proof. If it stays
 empty, nothing is broken for good: type `/plugin`, look at the **Errors** tab, and see part 7 for
 the two usual causes.
 
@@ -371,6 +376,7 @@ compiled and tested Java reference.
 ```text
 deepwater-developer/
 ├── README.md                     this manual
+├── START-HERE.md                 the one-page beginner guide
 ├── .claude-plugin/               plugin manifest, marketplace manifest, icon
 ├── AGENTS.md                     how other assistants (Codex, OpenCode, Cursor) use these skills
 ├── agents/spec-driven-feature.md the background agent
@@ -378,6 +384,7 @@ deepwater-developer/
     ├── course/                   /deepwater-developer:course, progress and certificate templates
     │   └── courses/ai-engineer/  the course: README (syllabus) + modules 00 to 08
     ├── mentor/                   how the plugin talks: the mentor voice, loaded by every command
+    ├── help/                     /deepwater-developer:help, plain-language answers and next steps
     ├── ai-provider-integration/  provider-independent AI: design, provider table, Java reference
     ├── init/  feature/  spec/  dod/   the four delivery commands
     └── spec-driven-delivery/     the method itself + references:

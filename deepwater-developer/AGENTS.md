@@ -11,6 +11,7 @@ assistant how to use it when it is not running as a Claude Code plugin.
 | --- | --- | --- |
 | `skills/course/` | A mentor-led course. First course: **Become an AI engineer** (`skills/course/courses/ai-engineer/`) | "Run the deepwater-developer course for me" |
 | `skills/mentor/` | How to talk to the person: a patient senior colleague who teaches | (used by all the others) |
+| `skills/help/` | Plain-language help: what to type next, what an error means. Beginner page: `START-HERE.md` | "Help me, I'm new to this" |
 | `skills/ai-provider-integration/` | Provider-independent AI in an application: one port, adapters for Claude, OpenAI and OpenAI-compatible services, a compiled Java reference | "Add a model call to this project without tying it to one vendor" |
 | `skills/spec-driven-delivery/` | The delivery method: ticket → specification → smallest slice → tests → definition of done | (used by the commands below) |
 | `skills/init/`, `skills/spec/`, `skills/feature/`, `skills/dod/` | The four delivery commands | "Follow skills/feature/SKILL.md for ticket 42" |
@@ -31,7 +32,7 @@ the folders under `skills/` into the assistant's skills folder, or point the ass
 `AGENTS.md`.
 
 - **Claude Code:** install as a plugin (see `README.md`). Commands appear as
-  `/deepwater-developer:course`, `:init`, `:spec`, `:feature`, `:dod`.
+  `/deepwater-developer:help`, `:course`, `:init`, `:spec`, `:feature`, `:dod`.
 - **Cursor:** reads project skills from `.cursor/skills/` and `.agents/skills/`, and for
   compatibility also `.claude/skills/` (Cursor documentation, "Agent Skills", checked 2026-10-25).
 - **OpenAI Codex, OpenCode and others** that support Agent Skills: copy the `skills/` folders into
