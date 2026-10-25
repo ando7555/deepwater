@@ -231,6 +231,12 @@ define a strict output schema; validate model output before use; add adversarial
 evaluations; define timeout, cost, token, fallback, and safety limits; require human approval for
 consequential changes; never expose chain-of-thought or sensitive prompts.
 
+The model gateway is provider-independent: Claude, OpenAI, any OpenAI-compatible service (Ollama,
+OpenRouter, Groq, Mistral, Gemini's compatible endpoint, company gateways) and a fake for tests sit
+behind the same port, and configuration chooses. The `ai-provider-integration` skill has the
+design, a compiled reference implementation and the provider table; use it rather than wiring a
+vendor SDK into a use case.
+
 ## Step 8: Implement the smallest vertical slice
 
 Implement in this order:

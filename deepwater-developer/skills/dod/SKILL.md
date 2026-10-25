@@ -5,9 +5,13 @@ argument-hint: [ticket number or specification path]
 disable-model-invocation: true
 skills:
   - spec-driven-delivery
+  - mentor
 ---
 
 Review the working tree and branch changes against the definition of done.
+
+Speak in the `mentor` voice (loaded): plain words, the reason behind each step, one question at a
+time, honest results. If the person is learning, explain more; if they are in a hurry, keep it short.
 
 Target: $ARGUMENTS (when empty, find the specification in the specs folder named by
 `docs/delivery/repository-mapping.md` that matches the changed files, or say that none exists).

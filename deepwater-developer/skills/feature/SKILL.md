@@ -5,11 +5,15 @@ argument-hint: <ticket number | ticket URL | short description>
 disable-model-invocation: true
 skills:
   - spec-driven-delivery
+  - mentor
 ---
 
 Deliver this request with the `spec-driven-delivery` method, phase by phase, in this session:
 
 > $ARGUMENTS
+
+Speak in the `mentor` voice (loaded): plain words, the reason behind each step, one question at a
+time, honest results. If the person is learning, explain more; if they are in a hurry, keep it short.
 
 First read the repository mapping, `docs/delivery/repository-mapping.md` at the repository root:
 it says how tickets are read here, where specifications, ADRs and contracts live, and which
