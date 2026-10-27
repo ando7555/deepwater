@@ -23,6 +23,14 @@ and AI fashion remain later, separately gated applications.
 - [Implementation status and known gaps](STATUS.md)
 - [Teacher workflow and coding guide](TEACHER_GUIDE.md)
 
+## Building features with Claude Code
+
+The `deepwater-developer/` folder is a Claude Code plugin that turns a ticket into a feature
+plan, code, and test evidence, plan first. It is not tied to this repository: install it once and
+it works in any project, with GitHub or GitLab issues or pasted text. This repository's own
+settings for it are in [docs/delivery/repository-mapping.md](docs/delivery/repository-mapping.md).
+Step-by-step instructions: [deepwater-developer/README.md](deepwater-developer/README.md).
+
 ## Run the local proof of flow
 
 Requirements: Java 25 and Node.js/npm.
