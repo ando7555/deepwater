@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 /** Deterministic first-slice Echo learning flow; no model-generated grading. */
 @Service
 public class EchoService {
+    private static final String INSERT_AUDIT_EVENT = "insert into audit_events(id,event_type,aggregate_id) values(?,?,?)";
     private static final int[] REVIEW_INTERVALS = {1, 3, 7, 14};
 
     private final JdbcTemplate db;
@@ -287,7 +288,7 @@ public class EchoService {
     }
 
     private void audit(String eventType, String aggregateId) {
-        db.update("insert into audit_events(id,event_type,aggregate_id) values(?,?,?)", UUID.randomUUID().toString(), eventType, aggregateId);
+        db.update(INSERT_AUDIT_EVENT, UUID.randomUUID().toString(), eventType, aggregateId);
     }
 
     private record PublishSource(String parentId, LessonStatus status) {}
@@ -445,8 +446,7 @@ public class EchoService {
             mastery = currentMastery(accountId, rule.skillKey());
             nextReview = currentReview(accountId, rule.skillKey());
         }
-        db.update("insert into audit_events(id,event_type,aggregate_id) values(?,?,?)",
-                UUID.randomUUID().toString(), "ECHO_PRACTICE_SUBMITTED", accountId);
+        audit("ECHO_PRACTICE_SUBMITTED", accountId);
         return new PracticeResult(exerciseId, storedAnswer, graded, graded ? correct : null, feedback, hint,
                 mastery, nextReview == null ? null : nextReview.toString(), transfer);
     }
@@ -469,8 +469,7 @@ public class EchoService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This lesson does not have permission to display a transcript.");
         db.update("insert into echo_audio_attempts(id,account_id,lesson_id,task_type,response_chars,transcript_used,confidence) values(?,?,?,?,?,?,?)",
                 UUID.randomUUID().toString(), accountId, lessonId, taskType, answer.strip().length(), transcriptUsed, confidence);
-        db.update("insert into audit_events(id,event_type,aggregate_id) values(?,?,?)",
-                UUID.randomUUID().toString(), "ECHO_AUDIO_EVIDENCE_SAVED", accountId);
+        audit("ECHO_AUDIO_EVIDENCE_SAVED", accountId);
         boolean repeatGist = "GIST".equals(taskType) && confidence <= 2;
         return new AudioPracticeResult(true, taskType, transcriptUsed, confidence,
                 repeatGist ? "Saved. Your confidence was low, so try the first listen once more; use the context prompt as a clue before moving on."
