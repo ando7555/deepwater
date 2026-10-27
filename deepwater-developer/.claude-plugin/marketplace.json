@@ -8,12 +8,13 @@
     {
       "name": "deepwater-developer",
       "source": "./",
-      "description": "Spec-driven feature delivery for Java/Spring, in any repository: ticket (GitHub, GitLab or pasted) to specification to vertical slice to evidence.",
+      "description": "A mentor plugin: the course \"Become an AI engineer\" and spec-driven feature delivery for Java/Spring in any repository, with provider-independent AI design.",
       "category": "productivity",
       "tags": [
+        "course",
+        "mentor",
+        "ai-engineering",
         "spring",
-        "ddd",
-        "hexagonal",
         "spec-driven",
         "mcp"
       ]

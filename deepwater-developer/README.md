@@ -1,5 +1,10 @@
 # deepwater-developer: the manual
 
+> **New here? Read [START-HERE.md](START-HERE.md) first.** It is one page in simple words:
+> what this is, what you need, how to install it in five checked steps, which command to type
+> for what you want, and what to do when something goes wrong. Stuck at any point? Type
+> `/deepwater-developer:help` and ask in your own words.
+
 This is for anyone who has to turn a ticket into working code and would like the careful parts
 done properly: reading what already exists, writing the plan down, writing the tests, running
 them, and telling the truth about the result. The plugin makes Claude Code work that way, in any
@@ -7,8 +12,15 @@ repository, whether your tickets live on GitHub, on GitLab, or in a message some
 stay the developer. You answer its questions, you read the plan, you decide when the code is good
 enough, and you are the one who commits.
 
+It is also a teacher. The plugin talks to you like a patient senior colleague: it explains why
+each step exists, asks one question at a time, and checks that you understood. And it comes with
+a course, **Become an AI engineer**, that a mentor runs with you inside your own project, from
+your first model call to a shipped AI feature and a certificate with evidence. The AI parts work
+with any provider: Claude, OpenAI, a model on your own laptop with Ollama, or your company's
+gateway.
+
 If you have never used Claude Code, that is fine. This manual assumes nothing. The first read
-takes about ten minutes. After that, part 3 is the only part you will come back to.
+takes about ten minutes. After that, parts 3 and 4 are the only parts you will come back to.
 
 ---
 
@@ -77,9 +89,9 @@ record the choice in the repository's shared settings, and that is a team decisi
 install step.) You should see `Successfully installed plugin: deepwater-developer@deepwater`.
 
 **Step 6. Make sure it worked.** Type `/deepwater-` in the text box and stop there. Claude Code
-completes commands as you type, so a small list should appear with four entries:
-`/deepwater-developer:init`, `:feature`, `:spec` and `:dod`. That list is your proof. If it stays
-empty, nothing is broken for good: type `/plugin`, look at the **Errors** tab, and see part 6 for
+completes commands as you type, so a small list should appear with six entries:
+`/deepwater-developer:help`, `:course`, `:init`, `:feature`, `:spec` and `:dod`. That list is your proof. If it stays
+empty, nothing is broken for good: type `/plugin`, look at the **Errors** tab, and see part 7 for
 the two usual causes.
 
 ### The first time in a project: tell it about the repository
@@ -112,7 +124,49 @@ The Deepwater repository already has its file at
 [`docs/delivery/repository-mapping.md`](../docs/delivery/repository-mapping.md); it is a good
 example of what a filled-in one looks like.
 
-## 3. Using it: from a ticket to reviewed code
+## 3. Learning with a mentor: the AI-engineer course
+
+If you are new to AI engineering, or want to get properly good at it, start here. Type:
+
+```text
+/deepwater-developer:course
+```
+
+**You see:** a short, friendly conversation. The mentor asks your name, what you build today,
+what you have already done with AI, which model access you have (an API key, a company gateway,
+Ollama on your laptop, or nothing yet; all four work), and how much time you have per week. Then
+it proposes a path through the nine modules and asks if that suits you.
+
+**You do:** answer in your own words, agree or change the path. From then on every session
+teaches one small step: why it matters, the idea, a lab in your own repository where *you* write
+the code, and a few questions to check you really understood. The mentor runs your tests to see
+the truth, records what you showed in `~/.deepwater-developer/progress.md`, and ends each session
+with what you did, what you learned, and the next step. Next time, type the same command and it
+picks up where you stopped.
+
+| # | Module | What you can do afterwards |
+| --- | --- | --- |
+| 00 | Welcome and setup | Keys in the right place, a problem worth solving |
+| 01 | How language models behave | Reason about tokens, context, cost and why answers vary |
+| 02 | Call any model from Java | One port, adapters for Claude, OpenAI, Ollama and others, tests without a network (**Level 1**) |
+| 03 | Prompts as code and structured output | Versioned prompts, validated JSON, defence against prompt injection |
+| 04 | Evaluate before you trust | An eval set, a baseline, decisions by numbers (**Level 2**) |
+| 05 | Retrieval with provenance | Grounded answers that cite their sources (optional) |
+| 06 | Tools, agents and MCP | Tool loops with limits, human approval, when *not* to build an agent |
+| 07 | Production: safety, cost, failure | Timeouts, fallbacks, cost limits, clean logs, a runbook (**Level 3**) |
+| 08 | Capstone | One real AI feature shipped with the delivery commands, and your **certificate** |
+
+Other things you can type: `/deepwater-developer:course status` (where am I),
+`... module 4` (jump, after a short check), `... check` (a quick review), `... certificate` (when
+everything is done). The certificate lists the evidence for every module and your capstone pull
+request. It is a personal learning record, not an accredited qualification; its value is the
+evidence behind it.
+
+Two promises: the mentor never asks you for an API key in the chat (keys go in environment
+variables; if you paste one by accident it will tell you to revoke it), and labs use made-up or
+public data only.
+
+## 4. Using it: from a ticket to reviewed code
 
 Here is the honest shape of the work. You give the plugin a ticket. It goes through six steps, A
 to F, and at two of them it genuinely needs you: at the start, if the ticket is unclear, and at
@@ -122,13 +176,13 @@ The order matters more than it looks. Understand the problem, look at what alrea
 the plan down, then code, then proof, then a report. That is the order a careful senior developer
 follows, and it is the order that keeps a codebase in one piece as it grows.
 
-### 3.1 Find the ticket number
+### 4.1 Find the ticket number
 
 Open the ticket in your browser. On GitHub the number is in the title, after the `#`:
 `Customers can archive an order #42`. On GitLab it is just under the title: `#42`. The number is
 `42`. The ticket's web address works too.
 
-### 3.2 Start
+### 4.2 Start
 
 In the Claude Code text box, type:
 
@@ -139,7 +193,7 @@ In the Claude Code text box, type:
 and press Enter. From here on, each step below tells you what appears on your screen and what, if
 anything, is expected from you.
 
-### 3.3 Step A: Claude restates the ticket
+### 4.3 Step A: Claude restates the ticket
 
 **You see:** first the ticket being fetched with the GitHub or GitLab CLI (or a request to paste
 the text, if that CLI is not set up). Then a short summary in its own words: the problem, the
@@ -153,7 +207,7 @@ continues on its own.
 Why it restates first: most wasted work on a feature comes from building the wrong thing well.
 Thirty seconds of reading the summary catches that before any code exists.
 
-### 3.4 Step B: Claude looks at the existing code
+### 4.4 Step B: Claude looks at the existing code
 
 **You see:** a list of the files it read (services, contracts, tests, the pipeline) and, for each
 part the ticket touches, one word: REUSE, EXTEND, WRAP, REFACTOR, REPLACE or NEW, with the reason.
@@ -162,7 +216,7 @@ part the ticket touches, one word: REUSE, EXTEND, WRAP, REFACTOR, REPLACE or NEW
 common. Then say so, for example `The order status already exists in OrderService.ship, reuse
 it.` It will take that on board and adjust.
 
-### 3.5 Step C: Claude writes the plan and waits for you
+### 4.5 Step C: Claude writes the plan and waits for you
 
 **You see:** `Plan written to docs/specs/42-archive-order.md` (or wherever your repository files
 its plans), followed by a list of open questions, or "No blocking questions. Continue?"
@@ -183,7 +237,7 @@ box, for example `Section 5: archived orders must still be visible to support st
 updates the plan. When you are satisfied, type `continue`. If a question blocks the work, Claude
 will not continue until you answer it, and that is on purpose.
 
-### 3.6 Step D: Claude writes the code
+### 4.6 Step D: Claude writes the code
 
 **You see:** files appear and change one by one, in the panel and in your IDE's local changes
 view. The order is deliberate: domain rule → use case → fake port → tests → the one adapter the
@@ -193,7 +247,7 @@ feature can later be offered over another protocol, or to an AI agent, without b
 
 **You do:** nothing. This can take a few minutes, and that is normal.
 
-### 3.7 Step E: Claude runs the tests
+### 4.7 Step E: Claude runs the tests
 
 **You see:** the actual commands and their actual output, not a summary. The commands are the
 ones from your repository's settings file, for example
@@ -205,7 +259,7 @@ of pretending. A missing JDK is a fact to report, not something to paper over.
 **You do:** read the output. "Tests pass" is only worth something when you can see the line that
 says so. Green means the scenarios from section 6 pass.
 
-### 3.8 Step F: Claude reports, and hands the work back to you
+### 4.8 Step F: Claude reports, and hands the work back to you
 
 **You see:** a summary: files changed, test results, the definition-of-done list from section 17
 of the plan with each line ticked or not, and anything still open.
@@ -217,7 +271,7 @@ always do, or type `commit and push` and Claude does it for you. Then open the m
 pull request and paste the plan path (`docs/specs/42-archive-order.md`) into its description, so
 the reviewer can read the plan next to the code.
 
-### 3.9 The other commands
+### 4.9 The other commands
 
 Sometimes you want less than the whole journey.
 
@@ -237,7 +291,7 @@ background, stops at the plan only if a question blocks it, and reports at the e
 small, well-described ticket. For anything with judgement in it, the step-by-step command is the
 better choice.
 
-## 4. What a session looks like
+## 5. What a session looks like
 
 So you know the rhythm before you start:
 
@@ -267,7 +321,7 @@ claude: Step D. Created ArchiveOrder.java, ArchiveOrderTest.java; changed OrderS
 
 The ticket, file names and numbers above are made up to show the shape. Yours will differ.
 
-## 5. What the plugin will never do
+## 6. What the plugin will never do
 
 These are promises written into the plugin's own instructions, and they are the reason you can
 let it work without watching every line.
@@ -284,7 +338,7 @@ let it work without watching every line.
 - **Write secrets, tokens, personal data or production data into code, tests or docs.** Not even
   as an example.
 
-## 6. When something goes wrong
+## 7. When something goes wrong
 
 Almost everything here comes down to one of two things: the path was wrong at install time, or a
 tool is missing on your machine. Neither one damages anything.
@@ -302,15 +356,37 @@ tool is missing on your machine. Neither one damages anything.
 If your problem is not in this table, say what you see in the Claude Code text box. It usually
 knows what went wrong with its own plugin.
 
-## 7. For maintainers: what is inside the folder
+## 8. Using it with other AI assistants and AI providers
+
+**Other coding assistants.** The course, the mentor and the delivery method are plain Markdown in
+the open Agent Skills format, so they also work in assistants such as OpenAI Codex, OpenCode and
+Cursor. [`AGENTS.md`](AGENTS.md) explains how to load them there; the short version is "copy the
+`skills/` folders into the assistant's skills folder, or tell it to read `AGENTS.md`".
+
+**AI providers in your own code.** When your application needs a model, the plugin designs it so
+you are not tied to one vendor: your code talks to one small interface, and adapters for Claude,
+OpenAI, any OpenAI-compatible service (Ollama, OpenRouter, Groq, Mistral, Gemini, company
+gateways) and a fake for tests sit behind it. Switching provider is a configuration change. Ask
+for it in plain words ("add a model call to this project, provider-independent") or see
+[`skills/ai-provider-integration/`](skills/ai-provider-integration/SKILL.md), which includes a
+compiled and tested Java reference.
+
+## 9. For maintainers: what is inside the folder
 
 ```text
 deepwater-developer/
 ├── README.md                     this manual
+├── START-HERE.md                 the one-page beginner guide
 ├── .claude-plugin/               plugin manifest, marketplace manifest, icon
+├── AGENTS.md                     how other assistants (Codex, OpenCode, Cursor) use these skills
 ├── agents/spec-driven-feature.md the background agent
 └── skills/                       the method; no project, tracker or build tool is hardcoded
-    ├── init/  feature/  spec/  dod/   the four commands
+    ├── course/                   /deepwater-developer:course, progress and certificate templates
+    │   └── courses/ai-engineer/  the course: README (syllabus) + modules 00 to 08
+    ├── mentor/                   how the plugin talks: the mentor voice, loaded by every command
+    ├── help/                     /deepwater-developer:help, plain-language answers and next steps
+    ├── ai-provider-integration/  provider-independent AI: design, provider table, Java reference
+    ├── init/  feature/  spec/  dod/   the four delivery commands
     └── spec-driven-delivery/     the method itself + references:
         └── references/           architecture-overview.md, feature-plan-template.md,
                                   repository-mapping-template.md (with the discovery rules),
@@ -320,8 +396,9 @@ deepwater-developer/
 Everything that is specific to one repository lives in that repository, in
 `docs/delivery/repository-mapping.md`, written by `/deepwater-developer:init` from the template
 and its discovery rules. That is the file to edit when a project moves its plans, changes its
-build, or switches tracker. To change how the method itself works, edit the files under `skills/`,
-then run `claude plugin validate ./deepwater-developer` in the Terminal tab.
+build, or switches tracker. To change how the method or the course works, edit the files under `skills/`; a new course is a
+new folder under `skills/course/courses/` with a README and module files. Afterwards
+run `claude plugin validate ./deepwater-developer` in the Terminal tab.
 
 If something in this manual was unclear to you, that is a bug in the manual. It is a Markdown file
 like any other: fix it, or open a ticket and say which sentence lost you.

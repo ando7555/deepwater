@@ -3,9 +3,14 @@ name: init
 description: Create or refresh this repository's settings file for the spec-driven delivery method (docs/delivery/repository-mapping.md) by inspecting the repository, with no build run: ticket source (GitHub, GitLab or pasted text), where specifications and ADRs live, build and test commands, pipeline, current state. Use when the user says "/init", "set up the plugin for this repository", or when another command reports that the mapping file is missing.
 argument-hint: [optional notes, for example "specs live in documentation/specs"]
 disable-model-invocation: true
+skills:
+  - mentor
 ---
 
 Set up this repository for the spec-driven delivery method.
+
+Speak in the `mentor` voice (loaded): plain words, the reason behind each step, one question at a
+time, honest results. If the person is learning, explain more; if they are in a hurry, keep it short.
 
 Notes from the user: $ARGUMENTS
 

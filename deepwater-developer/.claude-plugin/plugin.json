@@ -1,11 +1,30 @@
 {
   "name": "deepwater-developer",
   "displayName": "Deepwater developer",
-  "version": "0.1.0",
-  "description": "Spec-driven feature delivery for Java/Spring applications that expose one use-case model through MCP, REST, GraphQL and AG-UI adapters. Works in any repository: tickets come from GitHub, GitLab or pasted text, and project settings live in the repository (docs/delivery/repository-mapping.md, created by /deepwater-developer:init). Adds /deepwater-developer:init, :feature, :spec, :dod and the spec-driven-feature agent.",
-  "author": { "name": "ando7555", "url": "https://github.com/ando7555" },
+  "version": "0.2.0",
+  "description": "A mentor that teaches while it works. Includes the course \"Become an AI engineer\" (placement, nine modules with labs in your own repository, progress and a certificate with evidence) and spec-driven feature delivery for Java/Spring in any repository (tickets from GitHub, GitLab or pasted text). Provider-independent AI design for Claude, OpenAI and any OpenAI-compatible service. Adds /deepwater-developer:help (plain-language guidance, beginner page START-HERE.md), :course, :init, :feature, :spec, :dod and the spec-driven-feature agent; skills also load in other assistants through AGENTS.md.",
+  "author": {
+    "name": "ando7555",
+    "url": "https://github.com/ando7555"
+  },
   "repository": "https://github.com/ando7555/deepwater",
   "homepage": "https://github.com/ando7555/deepwater/tree/main/deepwater-developer",
   "license": "MIT",
-  "keywords": ["spring", "java", "ddd", "hexagonal", "spec-driven", "mcp", "graphql", "rest", "github", "gitlab"]
+  "keywords": [
+    "course",
+    "mentor",
+    "ai-engineering",
+    "llm",
+    "openai",
+    "claude",
+    "ollama",
+    "spring",
+    "java",
+    "ddd",
+    "hexagonal",
+    "spec-driven",
+    "mcp",
+    "github",
+    "gitlab"
+  ]
 }
