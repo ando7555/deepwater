@@ -106,7 +106,13 @@ page. No song or podcast corpus is bundled with the repository.
 
 ## Revise a published lesson
 
-Create a new draft with the same fields and add `"revisionOf": "<published-lesson-id>"`. Copy the id from the teacher queue. The API assigns the next version number and preserves lesson order. Publishing the revision archives its parent so learners see the newly approved version only. The older row remains in the teacher queue for traceability. A draft cannot be edited in place in this slice; create a fresh draft or a revision.
+Create a new draft with the same fields and add `"revisionOf": "<published-lesson-id>"` (an unpublished lesson can be revised too). Copy the id from the teacher queue. The API assigns the next version number and preserves lesson order. Publishing the revision archives its parent so learners see the newly approved version only. The older row remains in the teacher queue for traceability. A draft cannot be edited in place in this slice; create a fresh draft or a revision.
+
+## Unpublish and publish again
+
+If a published lesson turns out to be wrong, or the rights to its audio are in doubt, select **Unpublish** on it in the teacher queue and confirm. Learners stop seeing the lesson at once and can no longer answer its exercises. Their earlier answers, mastery and review dates are kept. The lesson stays in your queue with the status `UNPUBLISHED`.
+
+Select **Publish again** to bring it back. Audio lessons have their rights checked again first, so a lapsed rights date blocks republishing. If you published a revision in the meantime, the unpublished original is archived and cannot return; the revision is the current version.
 
 ## Where the code lives
 

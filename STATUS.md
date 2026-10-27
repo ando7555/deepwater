@@ -10,6 +10,7 @@ Implemented:
 - One Danish starter lesson and four German lessons (V2 word order, sein, articles, café orders) imported as teacher-only drafts on an empty database. The seed loader reads every file in echo/catalog/.
 - Structured lesson drafts with language, source reference, skill key, learning explanation, objectives, and typed exercises.
 - Explicit teacher publication, immutable revision creation, version numbers, and archiving of the previous published revision.
+- Reversible unpublish (#106): the teacher can withdraw a published lesson (status `UNPUBLISHED`, separate from `ARCHIVED`) and publish it again after the audio rights are re-checked. Learners stop seeing it and can no longer submit answers to it; their attempts and review dates are kept. Practice answers are now accepted only for published lessons.
 - Authenticated learner filtering so drafts are hidden; absent course content is shown as an honest empty state.
 - Deterministic exercise grading and per-account practice history/review estimates. Typed exercises accept several teacher-listed answers, and near misses (special letters, word order, one-letter typo) get a tentative suggestion without revealing the answer.
 - Teacher audio authoring for music and podcasts, with editorial bands from A0–A1 through C1–C2, separate listening-demand ratings, source/provenance and rights fields, and before-listening/gist/focus prompts.
@@ -27,7 +28,7 @@ Still needed:
 - The supplied song lesson has no audio attachment, and its commercial-song reference does not establish lyric/audio rights. No media source is bundled; only teacher-created or explicitly rights-cleared music and podcast sources should be published.
 - Review the new audio flow with the teacher and source owner, including actual permission evidence and player/transcript behavior for a first music and podcast lesson.
 - A language-specific diagnostic.
-- A richer teacher authoring UI or file importer, review history screen, and reversible unpublish action.
+- A richer teacher authoring UI or file importer and a review history screen.
 - Data export, wider rate limiting (per IP, registration), monitoring, accessibility/user testing, and PostgreSQL verification. See Deployment below for what runs today.
 - Kafka, Azure Cosmos/vector retrieval, and model integration; none is required for this small content-reviewed MVP.
 - Amber and AI fashion remain separately scoped later products.

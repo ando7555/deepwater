@@ -10,6 +10,7 @@ type Mutation {
   submitEchoAudioEvidence(lessonId: ID!, taskType: String!, answer: String!, transcriptUsed: Boolean!, confidence: Int!): AudioPracticeResult!
   saveEchoLessonDraft(input: LessonDraftInput!): TeacherLesson!
   publishEchoLesson(lessonId: ID!): TeacherLesson!
+  unpublishEchoLesson(lessonId: ID!): TeacherLesson!
 }
 
 input LessonDraftInput {
