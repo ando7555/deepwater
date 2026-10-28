@@ -282,3 +282,18 @@ footer{text-align:center;color:var(--text-3);font-size:13px;letter-spacing:.04em
 .delete-account p{margin:0}
 .delete-account button{justify-self:start;background:var(--warn-line);color:#fff;box-shadow:none}
 :root[data-theme="light"] .delete-account button:not(.link):not(.swatch){background:#b3392d}
+
+/* 3D language globe: drag to turn, tap a pin to pick a language */
+.globe{margin:0 0 18px;display:grid;justify-items:start;gap:8px}
+.globe canvas{display:block;max-width:100%;height:auto!important;aspect-ratio:1;touch-action:none;cursor:grab;filter:drop-shadow(0 18px 40px var(--accent-shadow))}
+.globe canvas:active{cursor:grabbing}
+.globe figcaption{display:grid;gap:6px}
+.globe-hint{font-size:12px;letter-spacing:.06em;color:var(--text-3)}
+.globe-pins{display:flex;flex-wrap:wrap;gap:4px 12px}
+.globe-pin{font-size:13px;padding:2px 0;color:var(--text-2)}
+.globe-pin.active{color:var(--accent);font-weight:700}
+.welcome-row>div:first-child{flex:1;min-width:0}
+.welcome-row .globe{margin:0;justify-items:center;flex:0 0 auto;max-width:200px}
+.welcome-row .globe figcaption{justify-items:center;text-align:center}
+.onboarding .globe{justify-items:center;margin-top:8px}
+.onboarding .globe figcaption{justify-items:center;text-align:center}

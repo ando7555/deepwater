@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import Globe from './Globe.jsx';
 import './style.css';
 
 // Empty VITE_API_URL keeps API calls on the frontend origin, where Vite can proxy them.
@@ -67,6 +68,13 @@ function Auth({ onLogin, message }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [language, setLanguage] = useState(() => sessionStorage.getItem('deepwater-language') || 'da');
+
+  // A pin picked on the globe before sign-up becomes the default language in onboarding.
+  function pickLanguage(pin) {
+    setLanguage(pin.languageCode);
+    sessionStorage.setItem('deepwater-language', pin.languageCode);
+  }
 
   // Google sign-in returns here with a one-time code (or an error) that is exchanged for a session.
   useEffect(() => {
@@ -106,6 +114,7 @@ function Auth({ onLogin, message }) {
     <header className="auth-header"><Brand /><ThemeSwitch /></header>
     <div className="auth-grid">
     <section className="pitch">
+      <Globe size={300} activeLanguage={language} onSelect={pickLanguage} />
       <p className="eyebrow">Danish and German, one pattern at a time</p>
       <h1>Hear the pattern.<br /><span>Make it yours.</span></h1>
       <p className="pitch-lead">Echo shows you how a language works, lets you practise it in real situations, and schedules reviews so each pattern sticks.</p>
@@ -201,7 +210,7 @@ function App() {
   const [user, setUser] = useState(() => { try { return JSON.parse(sessionStorage.getItem('deepwater-user')); } catch { return null; } });
   const [home, setHome] = useState(null);
   const [goal, setGoal] = useState('');
-  const [languageCode, setLanguageCode] = useState('da');
+  const [languageCode, setLanguageCode] = useState(() => sessionStorage.getItem('deepwater-language') || 'da');
   const [selfReportedLevel, setSelfReportedLevel] = useState('new');
   const [answers, setAnswers] = useState({});
   const [selfChecks, setSelfChecks] = useState({});
@@ -438,6 +447,7 @@ function App() {
     {home && !home.onboarded && <section className="onboarding panel">
       <p className="eyebrow">ECHO · YOUR LANGUAGE START</p>
       <h1>Start with what you want to say.</h1>
+      <Globe size={240} activeLanguage={languageCode} onSelect={pin => setLanguageCode(pin.languageCode)} />
       <p className="intro">Choose a language and tell Echo what you want to be able to express. Your self-described experience sets a gentle starting point.</p>
       <form onSubmit={start}>
         <label>Language<select value={languageCode} onChange={event => setLanguageCode(event.target.value)}><option value="da">Danish</option><option value="de">German</option></select></label>
@@ -455,7 +465,8 @@ function App() {
       <section className="welcome">
         <div className="welcome-row"><div><p className="eyebrow">ECHO · {home.profile.languageCode === 'de' ? 'GERMAN' : 'DANISH'} · LEARN THROUGH EXPRESSION</p>
         <h1>Make the pattern yours.</h1>
-        <p className="intro">{home.nextAction}</p></div><label className="language-switch">Learning language<select value={home.profile.languageCode} onChange={event => chooseLanguage(event.target.value)}><option value="da">Danish</option><option value="de">German</option></select></label></div>
+        <p className="intro">{home.nextAction}</p></div><Globe size={180} showPinList={false} activeLanguage={home.profile.languageCode}
+          onSelect={pin => pin.languageCode !== home.profile.languageCode && chooseLanguage(pin.languageCode)} /><label className="language-switch">Learning language<select value={home.profile.languageCode} onChange={event => chooseLanguage(event.target.value)}><option value="da">Danish</option><option value="de">German</option></select></label></div>
         <div className="route-note"><b>{startingRoute} route</b><span>{ROUTE_COPY}</span></div>
       </section>
 
