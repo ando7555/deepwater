@@ -1,7 +1,7 @@
 # Ideas from Amalie Teaches and Duolingo for Echo
 
 Date: 2026-10-28. Requested by the product owner: take useful content and UI ideas from
-amalieteaches.com (not its visual style), add a moving 3D globe in Deepwater style, and take
+amalieteaches.com (not its visual style), add a moving 3D element in Deepwater style (the owner first said a globe, then clarified: the Deepwater logo in 3D, not a globe), and take
 Duolingo-like features "the paradoxical way": turn Duolingo's known drawbacks into Echo strengths.
 
 Status legend: **Built** = in this PR. **Proposal** = not built, needs an owner decision.
@@ -35,11 +35,11 @@ Visual style (olive and cream colours, script logo, stock photos) is deliberatel
 
 | Idea | Echo version | Status |
 |---|---|---|
-| Draggable globe with pins | Dotted 3D globe in Deepwater blue (follows the Echo, Amber and light themes). Pins mark where Echo's languages are official: Danish in Copenhagen and Tórshavn, German in Berlin, Vienna and Zürich. Dashed routes join cities of the same language. Tapping a pin **picks that language**: on sign-up it becomes the onboarding default, in onboarding it sets the language, on the home page it switches the learning language. A row of text buttons does the same for keyboard and screen-reader users. Auto-rotation stops on hover and for `prefers-reduced-motion`. | Built |
+| Draggable 3D hero on the home page | The **Deepwater mark in 3D** instead of a globe: the lid, the two water layers (drawn as dots) and the sounding line with five nodes, turning slowly and draggable. It follows the Echo, Amber and light themes. On the learner home page it doubles as a **depth gauge**: the lit nodes show mastery of the current lesson ("50% deep in this lesson"). Auto-rotation stops on hover and for `prefers-reduced-motion`. | Built |
 | Practice by skill (Read, Listen, Speak, Write) | A "Practice" entry point that lets the learner choose a skill. Echo already has recognition (multiple choice), typed answers and listening (audio lessons with gist and focus steps); Speak would need speech capture and a grading decision. | Proposal |
 | Learner-made flashcards | Let learners save a sentence from a lesson as a card that enters the same spaced-review schedule as lessons. | Proposal |
 | Matching warm-up | A one-minute matching round from items that are due for review, before the main lesson. | Proposal |
-| Four-item navigation | Practice, Lessons, Explore (globe and culture), and Progress instead of Games (see Duolingo below). | Proposal |
+| Four-item navigation | Practice, Lessons, Explore (culture and real voices), and Progress instead of Games (see Duolingo below). | Proposal |
 
 ## Duolingo drawbacks turned into Echo strengths (Proposal)
 
@@ -70,4 +70,3 @@ Owner's screenshots of amalieteaches.com, shared in the project thread on 2026-1
 3. Technology Assisted Language Education (2024): https://doaj.org/article/cb110689f72d4ec09a48037fba7b99ac
 4. "Does Duolingo Work?": https://jatck.substack.com/p/does-duolingo-work
 5. Podcast analysis (anecdotal): https://www.podengine.ai/articles/we-analyzed-300-podcasts-on-duolingoheres-the-core-debate
-- Globe land data: Natural Earth 1:50m land (public domain), via the world-atlas npm package.
