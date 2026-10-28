@@ -66,8 +66,39 @@ and keep the idea open for Amber. **Built:**
 | Matching warm-up | A one-minute round from your own cards | Needs at least three cards. Uses due cards first. Nothing is graded or stored. |
 | Calm progress | Depth, patterns mastered, reviews ready, accuracy, cards settled | No streaks, no leagues. The 3D mark shows the average practice estimate across the language's lessons. |
 
-Not built: speech capture or pronunciation grading, saving a card straight from a lesson,
-a matching mode that uses teacher content, and reminders or notifications.
+Not built: speech capture or pronunciation grading, a matching mode that uses teacher content,
+and reminders or notifications.
+
+## Second round: profile and memory-based practice (Built)
+
+The owner asked (2026-10-28) for a profile page, a phone number at sign-up, more interactive
+and memory-based practice, and a product that is "better than Busuu, Memrise, Amalie Teaches
+or Duolingo". This round builds:
+
+- **Profile:** name, optional phone (normalised, 6–15 digits), city and country where the
+  person lives, first language, and why they are learning. The details are stored in
+  `person_profiles` on the Deepwater account rather than in Echo, so a future Amber profile
+  can reuse them. They are private, never shown to others, and deleted with the account.
+  The sign-up form also takes an optional phone number.
+- **Daily review:** one mixed session of due cards and graded exercises, interleaved, with a
+  progress bar and a summary at the end.
+- **Typing from memory** (recall, not just recognition), with forgiving checks: case,
+  punctuation and one small slip are allowed, but æ, ø and å must be right.
+- **Hear it:** the browser's own voice reads phrases aloud in Danish or German.
+- **Keyboard shortcuts:** Space, 1, 2 and H.
+- **One tap to save a missed answer as a card.**
+- **Memory meter:** an estimated chance of recall from a simple forgetting curve. It is an
+  estimate for motivation, not a measurement.
+
+**Not claimed:** Echo has not been compared with these apps on any learner. The intended
+differences are design choices, to be validated with users:
+
+| Their common pattern | Echo's choice |
+|---|---|
+| Streaks and leagues (Duolingo) | No streaks. A miss steps back one level, never to zero. |
+| Large generic decks (Memrise) | Teacher-reviewed lessons plus the learner's own phrases from real life. |
+| Course-first structure (Busuu) | Pattern explanations, transfer to your own sentences, and calm spaced review. |
+| Video teacher brand (Amalie Teaches, from screenshots) | Real voices from music and podcasts, used only with the creator's permission. |
 
 ## Keeping the idea open for Amber (Proposal)
 

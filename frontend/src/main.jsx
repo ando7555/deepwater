@@ -5,6 +5,8 @@ import ExerciseCard from './ExerciseCard.jsx';
 import PracticeHub from './PracticeHub.jsx';
 import PhraseCards, { MatchingWarmUp } from './PhraseCards.jsx';
 import CalmProgress from './CalmProgress.jsx';
+import DailyReview from './DailyReview.jsx';
+import ProfilePage from './ProfilePage.jsx';
 import { API, gql, formatDate } from './api.js';
 import './style.css';
 
@@ -56,6 +58,7 @@ function Auth({ onLogin, message }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -85,7 +88,7 @@ function Auth({ onLogin, message }) {
       const endpoint = mode === 'register' ? 'register' : 'login';
       const response = await fetch(`${API}/api/v1/auth/${endpoint}`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mode === 'register' ? { name, email, password } : { email, password }),
+        body: JSON.stringify(mode === 'register' ? { name, email, password, phone } : { email, password }),
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.detail || body.message || 'Sign in failed.');
@@ -104,6 +107,8 @@ function Auth({ onLogin, message }) {
       <ul className="pitch-points">
         <li><b>Understand, don’t memorise</b><span>Every lesson explains why a sentence is built the way it is.</span></li>
         <li><b>Reviewed by a teacher</b><span>Lessons are published only after a language teacher approves them.</span></li>
+        <li><b>Built around your memory</b><span>Type phrases from memory, hear them read aloud, and see each one come back just before you’d forget it.</span></li>
+        <li><b>No streak guilt</b><span>Miss a day and your reviews simply move. A slip steps back one level, never to zero.</span></li>
         <li><b>Learn with real voices</b><span>Music and podcast lessons, used only with the creator’s permission.</span></li>
       </ul>
     </section>
@@ -113,6 +118,7 @@ function Auth({ onLogin, message }) {
     <form onSubmit={submit}>
       {mode === 'register' && <label>Your name<input required maxLength="160" autoComplete="name" value={name} onChange={event => setName(event.target.value)} /></label>}
       <label>Email<input required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} /></label>
+      {mode === 'register' && <label><span>Phone <small className="optional">optional</small></span><input type="tel" maxLength="24" autoComplete="tel" placeholder="+45 12 34 56 78" value={phone} onChange={event => setPhone(event.target.value)} /><small>Only for your account. Never shown to others or used for marketing.</small></label>}
       <label>Password<input required type="password" minLength="12" maxLength="72" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} value={password} onChange={event => setPassword(event.target.value)} /><small>Use 12–72 characters.</small></label>
       <button disabled={busy}>{busy ? 'Please wait…' : mode === 'register' ? 'Create account' : 'Sign in'}</button>
     </form>
@@ -218,6 +224,7 @@ function App() {
   const [tab, setTab] = useState('today');
   const [cards, setCards] = useState([]);
   const [warmUp, setWarmUp] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
 
   function login(account) {
     sessionStorage.setItem('deepwater-token', account.token);
@@ -277,10 +284,11 @@ function App() {
 
   useEffect(() => { if (home?.onboarded) loadCards(); }, [home?.onboarded, home?.profile?.languageCode]);
 
-  async function saveCard(front, back) {
+  async function saveCard(front, back, lessonId = null) {
     setBusy(true); setError(''); setNotice('');
     try {
-      await gql(`mutation($front:String!,$back:String!){ saveEchoCard(front:$front, back:$back) { id } }`, { front, back });
+      await gql(`mutation($front:String!,$back:String!,$lessonId:ID){ saveEchoCard(front:$front, back:$back, lessonId:$lessonId) { id } }`,
+        { front: front.slice(0, 300), back: back.slice(0, 300), lessonId });
       await loadCards(); setNotice('Card saved. It’s ready for its first review.');
       return true;
     } catch (saveError) { setError(saveError.message); return false; }
@@ -300,6 +308,15 @@ function App() {
     setError('');
     try { await gql(`mutation($id:ID!){ deleteEchoCard(cardId:$id) }`, { id: card.id }); await loadCards(); }
     catch (deleteError) { setError(deleteError.message); }
+  }
+
+  function lessonOf(exercise) {
+    return home?.lessons.find(item => item.exercises.some(candidate => candidate.id === exercise.id));
+  }
+
+  // A missed answer becomes a card: the prompt on the front, the teacher's feedback on the back.
+  function saveMissAsCard(exercise, result) {
+    return saveCard(exercise.prompt, result.feedback, lessonOf(exercise)?.id || null);
   }
 
   function openLesson(lessonId) {
@@ -448,7 +465,7 @@ function App() {
       languageName={home.profile.languageCode === 'de' ? 'German' : 'Danish'}
       answer={answers[exercise.id]} setAnswer={value => setAnswers(current => ({ ...current, [exercise.id]: value }))}
       selfCheck={selfChecks[exercise.id]} setSelfCheck={value => setSelfChecks(current => ({ ...current, [exercise.id]: value }))}
-      result={results[exercise.id]} busy={busy} onSubmit={submitExercise} />;
+      result={results[exercise.id]} busy={busy} onSubmit={submitExercise} onSaveCard={saveMissAsCard} />;
   }
 
   const filteredLessons = (home?.lessons || []).filter(item =>
@@ -457,6 +474,7 @@ function App() {
   const recommendedAudio = filteredLessons.find(item => item.id === home?.recommendedAudioLessonId) || null;
   const lesson = filteredLessons.find(item => item.id === selectedLessonId) || recommendedAudio || filteredLessons[0];
   const percent = lesson ? Math.round(lesson.mastery * 100) : 0;
+  const dueCount = cards.filter(card => card.due).length + (home?.lessons || []).filter(item => item.due && !item.audio).length;
   const startingRoute = home?.profile?.startingRoute;
   const orderedExercises = lesson?.exercises ? [...lesson.exercises].sort((a, b) => {
     if (startingRoute === 'CHALLENGE') return (a.taskType === 'TRANSFER' ? -1 : 0) - (b.taskType === 'TRANSFER' ? -1 : 0) || a.position - b.position;
@@ -466,7 +484,7 @@ function App() {
   return <main className="app-shell">
     <header className="site-header">
       <Brand />
-      <div className="account"><ThemeSwitch /><span>{user.name}</span><button className="link" onClick={logout}>Sign out</button></div>
+      <div className="account"><ThemeSwitch /><button type="button" className="link account-name" onClick={() => setTab('profile')}>{user.name}</button><button className="link" onClick={logout}>Sign out</button></div>
     </header>
 
     {error && <p role="alert" className="banner error">{error}</p>}
@@ -503,18 +521,31 @@ function App() {
       </section>
 
       <nav className="learn-tabs" aria-label="Echo sections">
-        {[['today', 'Today'], ['practice', 'Practice'], ['cards', 'My cards'], ['progress', 'Progress']].map(([id, label]) =>
+        {[['today', 'Today'], ['practice', 'Practice'], ['cards', 'My cards'], ['progress', 'Progress'], ['profile', 'Profile']].map(([id, label]) =>
           <button type="button" key={id} className={tab === id ? 'active' : ''} aria-current={tab === id ? 'page' : undefined}
             onClick={() => setTab(id)}>{label}{id === 'cards' && cards.some(card => card.due) ? ` · ${cards.filter(card => card.due).length}` : ''}</button>)}
       </nav>
 
-      {warmUp && <MatchingWarmUp cards={cards} onClose={() => setWarmUp(false)} />}
+      {!reviewing && tab !== 'profile' && <div className="review-launch">
+        <div><b>{dueCount ? `${dueCount} ${dueCount === 1 ? 'thing is' : 'things are'} ready to review` : 'Your memory is up to date'}</b>
+          <span>{dueCount ? 'A short mixed session of cards and exercises. About five minutes.' : 'Practise anyway, or add a card from something you heard today.'}</span></div>
+        <button type="button" onClick={() => setReviewing(true)}>Start daily review</button>
+      </div>}
+
+      {reviewing && <DailyReview lessons={home.lessons} cards={cards} languageCode={home.profile.languageCode} results={results}
+        renderExercise={renderExercise} onReviewCard={reviewCard} busy={busy} onClose={() => setReviewing(false)} />}
+
+      {warmUp && <MatchingWarmUp cards={cards} languageCode={home.profile.languageCode} onClose={() => setWarmUp(false)} />}
+
+      {tab === 'profile' && <ProfilePage home={home} cards={cards} onSaved={saved => {
+        const next = { ...user, name: saved.name }; setUser(next); sessionStorage.setItem('deepwater-user', JSON.stringify(next));
+      }} />}
 
       {tab === 'practice' && <PracticeHub lessons={home.lessons} renderExercise={renderExercise} onOpenLesson={openLesson}
         dueCards={cards.filter(card => card.due).length} onReviewCards={() => setTab('cards')}
         canWarmUp={cards.length >= 3} onWarmUp={() => setWarmUp(true)} />}
 
-      {tab === 'cards' && <PhraseCards cards={cards} languageName={home.profile.languageCode === 'de' ? 'German' : 'Danish'}
+      {tab === 'cards' && <PhraseCards cards={cards} languageCode={home.profile.languageCode} languageName={home.profile.languageCode === 'de' ? 'German' : 'Danish'}
         busy={busy} onSave={saveCard} onReview={reviewCard} onDelete={deleteCard} />}
 
       {tab === 'progress' && <CalmProgress home={home} cards={cards} />}

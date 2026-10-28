@@ -8,6 +8,9 @@ import com.deepwater.echo.EchoService.AudioPracticeResult;
 import com.deepwater.echo.EchoService.PracticeResult;
 import com.deepwater.echo.EchoService.LessonDraft;
 import com.deepwater.echo.EchoService.TeacherLesson;
+import com.deepwater.platform.PersonProfileService;
+import com.deepwater.platform.PersonProfileService.PersonProfile;
+import com.deepwater.platform.PersonProfileService.PersonProfileInput;
 import com.deepwater.platform.PlatformService;
 import graphql.GraphQLContext;
 import java.util.List;
@@ -21,9 +24,21 @@ public class DeepwaterGraphQlController {
     private final EchoService echo;
     private final EchoCardService cards;
     private final PlatformService platform;
+    private final PersonProfileService profiles;
 
-    public DeepwaterGraphQlController(EchoService echo, EchoCardService cards, PlatformService platform) {
-        this.echo = echo; this.cards = cards; this.platform = platform;
+    public DeepwaterGraphQlController(EchoService echo, EchoCardService cards, PlatformService platform,
+                                      PersonProfileService profiles) {
+        this.echo = echo; this.cards = cards; this.platform = platform; this.profiles = profiles;
+    }
+
+    @QueryMapping
+    PersonProfile myProfile(GraphQLContext context) {
+        return profiles.profile(account(context));
+    }
+
+    @MutationMapping
+    PersonProfile updateMyProfile(@Argument PersonProfileInput input, GraphQLContext context) {
+        return profiles.update(account(context), input);
     }
 
     @QueryMapping

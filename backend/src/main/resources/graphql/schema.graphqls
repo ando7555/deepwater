@@ -3,6 +3,8 @@ type Query {
   teacherLessons: [TeacherLesson!]!
   "The signed-in learner's phrase cards for their current language, due cards first."
   echoCards: [EchoCard!]!
+  "The signed-in person's own details. Shared by all Deepwater products; never shown to other people."
+  myProfile: PersonProfile!
 }
 
 type Mutation {
@@ -17,6 +19,7 @@ type Mutation {
   "knewIt moves the card up one box; a miss moves it down one box, never back to the start."
   reviewEchoCard(cardId: ID!, knewIt: Boolean!): EchoCard!
   deleteEchoCard(cardId: ID!): Boolean!
+  updateMyProfile(input: PersonProfileInput!): PersonProfile!
 }
 
 input LessonDraftInput {
@@ -220,4 +223,23 @@ type EchoCard {
   box: Int!
   nextReviewAt: String!
   due: Boolean!
+}
+
+type PersonProfile {
+  name: String!
+  email: String!
+  emailVerified: Boolean!
+  phone: String
+  city: String
+  country: String
+  nativeLanguage: String
+  about: String
+}
+input PersonProfileInput {
+  name: String!
+  phone: String
+  city: String
+  country: String
+  nativeLanguage: String
+  about: String
 }

@@ -38,17 +38,22 @@ public class AuthController {
     private final PlatformService platform;
     private final GoogleAuthService google;
     private final EmailVerificationService verification;
+    private final PersonProfileService profiles;
     @Value("${deepwater.frontend.base-url:http://localhost:5173}") private String frontendBaseUrl;
 
-    public AuthController(PlatformService platform, GoogleAuthService google, EmailVerificationService verification) {
+    public AuthController(PlatformService platform, GoogleAuthService google, EmailVerificationService verification,
+                          PersonProfileService profiles) {
         this.platform = platform;
         this.google = google;
         this.verification = verification;
+        this.profiles = profiles;
     }
 
     @PostMapping("/register")
     Map<String, String> register(@RequestBody Credentials body) {
+        String phone = profiles.normalizePhone(body.phone());
         var session = platform.register(body.name(), body.email(), body.password());
+        profiles.savePhone(session.get("accountId"), phone);
         verification.sendVerification(session.get("accountId"));
         return session;
     }
@@ -142,7 +147,7 @@ public class AuthController {
                 + java.net.URLEncoder.encode(value, StandardCharsets.UTF_8));
     }
 
-    record Credentials(String name, String email, String password) {}
+    record Credentials(String name, String email, String password, String phone) {}
     record LoginCode(String code) {}
     record DeleteRequest(String confirmEmail) {}
     record VerifyRequest(String token) {}
