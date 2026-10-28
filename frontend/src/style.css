@@ -333,7 +333,7 @@ footer{text-align:center;color:var(--text-3);font-size:13px;letter-spacing:.04em
 button.secondary{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1px var(--line-hover)}
 :root[data-theme="light"] button.secondary:not(.link):not(.swatch){background:transparent;color:var(--text)}
 .card-list{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:8px}
-.card-list li{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-items:center;gap:16px;padding:12px 16px;border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:var(--surface-glass)}
+.card-list li{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto auto auto;align-items:center;gap:16px;padding:12px 16px;border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:var(--surface-glass)}
 .card-list li div{display:grid;gap:2px}.card-list li span{font-size:13px;color:var(--text-2)}
 .card-list small{color:var(--text-3);font-size:12px}
 .card-depth{display:inline-flex;gap:4px}
@@ -369,8 +369,67 @@ button.secondary{background:transparent;color:var(--text);box-shadow:inset 0 0 0
   .progress-hero{grid-template-columns:1fr;justify-items:center;text-align:center}.calm-stats{grid-template-columns:1fr 1fr}
 }
 @media(max-width:600px){
-  .learn-tabs{width:100%;border-radius:16px;flex-wrap:nowrap}.learn-tabs button{flex:1;padding:9px 4px;font-size:13px;letter-spacing:0}
+  .learn-tabs{width:100%;border-radius:16px;flex-wrap:nowrap;overflow-x:auto}.learn-tabs button{flex:1;padding:9px 4px;font-size:13px;letter-spacing:0}
   .mode-card{min-height:170px}.matching-grid{grid-template-columns:1fr}
-  .card-list li{grid-template-columns:1fr auto;gap:8px 12px}
+  .card-list li{grid-template-columns:1fr auto auto;gap:8px 12px}.card-list li>div{grid-column:1/-1}
   .pattern-list li{grid-template-columns:1fr;gap:4px}.pattern-list small{text-align:left}
 }
+
+/* Memory tools: read-aloud, memory meter, typed recall, keyboard hints */
+.hear-button{display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--accent);box-shadow:inset 0 0 0 1px var(--line-hover);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600}
+.hear-button svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+:root[data-theme="light"] .hear-button:not(.link):not(.swatch){background:transparent;color:var(--accent)}
+.memory-meter{display:inline-grid;gap:3px;min-width:92px}
+.memory-track{height:5px;border-radius:5px;background:var(--surface-3);overflow:hidden}
+.memory-track span{display:block;height:100%;background:linear-gradient(90deg,var(--accent-2),var(--accent))}
+.memory-meter small{font-size:11px;color:var(--text-3)}
+.memory-meter.fading .memory-track span{background:linear-gradient(90deg,var(--coral),var(--amber))}
+kbd{font:600 10px 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;border-radius:5px;border:1px solid currentColor;opacity:.65}
+.cards-panel-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.segmented{display:inline-flex;padding:3px;border-radius:999px;border:1px solid var(--line-soft);background:var(--deep)}
+.segmented button{background:transparent;color:var(--text-2);box-shadow:none;padding:6px 12px;border-radius:999px;font-size:13px}
+.segmented button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-text)}
+:root[data-theme="light"] .segmented button:not(.link):not(.swatch){background:transparent;color:var(--text-2)}
+:root[data-theme="light"] .segmented button[aria-pressed="true"]:not(.link):not(.swatch){background:var(--accent-soft);color:var(--accent-deep)}
+.card-prompt{font:500 20px 'DM Sans',sans-serif;color:var(--text);margin:4px 0}
+.recall-form{display:flex;gap:8px;width:100%;max-width:440px}
+.recall-form input{flex:1;font-size:18px;text-align:center}
+.recall-result{display:grid;gap:2px;justify-items:center}
+.recall-result.exact b,.recall-result.close b{color:var(--good)}
+.recall-result.miss b{color:var(--warn)}
+.shortcut-hint{color:var(--text-3);font-size:12px}
+.save-card{display:block;margin:4px 0 6px;padding:4px 0}
+
+/* Daily review */
+.review-launch{max-width:850px;margin:0 auto 22px;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 20px;border-radius:var(--radius);
+  border:1px solid var(--line-hover);background:linear-gradient(100deg,var(--accent-soft),transparent)}
+.review-launch div{display:grid;gap:3px}.review-launch span{font-size:14px;color:var(--text-2)}
+.daily-review{max-width:850px;margin:0 auto 26px;padding:22px;display:grid;gap:14px}
+.daily-review .progress-track{margin:0}
+.next-button{margin-top:12px}
+.session-summary p{margin:4px 0}
+
+/* Profile */
+.account-name{color:var(--text-2);font-weight:600}
+.profile-page{max-width:900px;margin:0 auto 32px;display:grid;gap:18px}
+.profile-card{display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;padding:24px}
+.avatar{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;font:700 30px 'Space Grotesk',sans-serif;color:var(--accent-ink);
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 0 0 6px var(--accent-ring)}
+.profile-summary h2{font-size:clamp(28px,4vw,38px);margin:6px 0}
+.profile-summary p{margin:4px 0}
+.profile-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
+.profile-form{padding:24px}
+.profile-form h3{margin:0 0 16px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-grid label{display:grid;gap:7px;font-weight:600;font-size:14px}
+.form-grid label small,.optional{font-weight:500;color:var(--text-3);font-size:12px}
+.form-grid .wide{grid-column:1/-1}
+.profile-actions{display:flex;align-items:center;gap:14px;margin-top:18px}
+.saved-note{color:var(--good);font-weight:600}
+.privacy-note{font-size:13px;margin:16px 0 0;padding:12px 14px;border-radius:var(--radius-sm);background:var(--deep);border:1px solid var(--line-soft)}
+
+@media(max-width:700px){
+  .profile-card{grid-template-columns:1fr;justify-items:center;text-align:center}.profile-meta{justify-content:center}
+  .form-grid{grid-template-columns:1fr}.review-launch{flex-direction:column;align-items:stretch}
+}
+.card-list .hear-button{justify-self:start}

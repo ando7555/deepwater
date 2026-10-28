@@ -167,3 +167,14 @@ create table if not exists echo_cards (
   created_at timestamp with time zone not null default current_timestamp
 );
 create index if not exists echo_cards_account_language on echo_cards(account_id, language_code, next_review_at);
+
+-- Optional personal details owned by the Deepwater account (shared by Echo and future products).
+create table if not exists person_profiles (
+  account_id varchar(36) primary key references accounts(id),
+  phone varchar(16),
+  city varchar(120),
+  country varchar(80),
+  native_language varchar(60),
+  about varchar(500),
+  updated_at timestamp with time zone not null default current_timestamp
+);
