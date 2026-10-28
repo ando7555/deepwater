@@ -152,3 +152,18 @@ create table if not exists email_verification_tokens (
   expires_at timestamp with time zone not null,
   created_at timestamp with time zone not null default current_timestamp
 );
+
+-- Phrase cards learners write for themselves, reviewed on a calm Leitner schedule (box 0–5).
+create table if not exists echo_cards (
+  id varchar(36) primary key,
+  account_id varchar(36) not null references accounts(id),
+  language_code varchar(8) not null,
+  front varchar(300) not null,
+  back varchar(300) not null,
+  lesson_id varchar(120) references echo_lessons(id),
+  review_box integer not null default 0,
+  next_review_at timestamp with time zone not null,
+  reviewed_at timestamp with time zone,
+  created_at timestamp with time zone not null default current_timestamp
+);
+create index if not exists echo_cards_account_language on echo_cards(account_id, language_code, next_review_at);

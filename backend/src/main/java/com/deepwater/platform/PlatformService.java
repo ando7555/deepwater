@@ -117,7 +117,7 @@ public class PlatformService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "The teacher account owns published lessons and cannot be deleted here.");
         db.update("update echo_lessons set created_by=null where created_by=?", accountId);
         db.update("update echo_lessons set approved_by=null where approved_by=?", accountId);
-        for (String table : new String[]{"echo_audio_attempts", "echo_attempts", "echo_skill_states",
+        for (String table : new String[]{"echo_cards", "echo_audio_attempts", "echo_attempts", "echo_skill_states",
                 "echo_learner_profiles", "oauth_login_codes", "email_verification_tokens", "user_sessions"})
             db.update("delete from " + table + " where account_id=?", accountId);
         db.update("delete from accounts where id=?", accountId);

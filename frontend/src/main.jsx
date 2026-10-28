@@ -1,21 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import DeepwaterMark3D from './DeepwaterMark3D.jsx';
+import ExerciseCard from './ExerciseCard.jsx';
+import PracticeHub from './PracticeHub.jsx';
+import PhraseCards, { MatchingWarmUp } from './PhraseCards.jsx';
+import CalmProgress from './CalmProgress.jsx';
+import { API, gql, formatDate } from './api.js';
 import './style.css';
-
-// Empty VITE_API_URL keeps API calls on the frontend origin, where Vite can proxy them.
-const API = import.meta.env.VITE_API_URL ?? '';
-const GRAPHQL = `${API}/graphql`;
-
-async function gql(query, variables = {}, token = sessionStorage.getItem('deepwater-token')) {
-  const response = await fetch(GRAPHQL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: JSON.stringify({ query, variables }),
-  });
-  const payload = await response.json();
-  if (!response.ok || payload.errors?.length) throw new Error(payload.errors?.[0]?.message || 'The request could not be completed.');
-  return payload.data;
-}
 
 const THEMES = [
   { id: 'deep', label: 'Deep blue', mark: '/brand/mark.svg' },
@@ -106,6 +97,7 @@ function Auth({ onLogin, message }) {
     <header className="auth-header"><Brand /><ThemeSwitch /></header>
     <div className="auth-grid">
     <section className="pitch">
+      <DeepwaterMark3D size={260} label="Deepwater mark in 3D. Drag to turn it." />
       <p className="eyebrow">Danish and German, one pattern at a time</p>
       <h1>Hear the pattern.<br /><span>Make it yours.</span></h1>
       <p className="pitch-lead">Echo shows you how a language works, lets you practise it in real situations, and schedules reviews so each pattern sticks.</p>
@@ -223,6 +215,9 @@ function App() {
   const [audioConfidence, setAudioConfidence] = useState({});
   const [transcriptShown, setTranscriptShown] = useState({});
   const [audioResults, setAudioResults] = useState({});
+  const [tab, setTab] = useState('today');
+  const [cards, setCards] = useState([]);
+  const [warmUp, setWarmUp] = useState(false);
 
   function login(account) {
     sessionStorage.setItem('deepwater-token', account.token);
@@ -273,6 +268,43 @@ function App() {
   }
 
   useEffect(() => { if (user) loadHome(); }, [user]);
+
+  const CARD_FIELDS = 'id front back lessonId box nextReviewAt due';
+  async function loadCards() {
+    try { setCards((await gql(`query { echoCards { ${CARD_FIELDS} } }`)).echoCards); }
+    catch (cardsError) { setError(cardsError.message); }
+  }
+
+  useEffect(() => { if (home?.onboarded) loadCards(); }, [home?.onboarded, home?.profile?.languageCode]);
+
+  async function saveCard(front, back) {
+    setBusy(true); setError(''); setNotice('');
+    try {
+      await gql(`mutation($front:String!,$back:String!){ saveEchoCard(front:$front, back:$back) { id } }`, { front, back });
+      await loadCards(); setNotice('Card saved. It’s ready for its first review.');
+      return true;
+    } catch (saveError) { setError(saveError.message); return false; }
+    finally { setBusy(false); }
+  }
+
+  async function reviewCard(card, knewIt) {
+    setBusy(true); setError('');
+    try {
+      await gql(`mutation($id:ID!,$knewIt:Boolean!){ reviewEchoCard(cardId:$id, knewIt:$knewIt) { id } }`, { id: card.id, knewIt });
+      await loadCards();
+    } catch (reviewError) { setError(reviewError.message); }
+    finally { setBusy(false); }
+  }
+
+  async function deleteCard(card) {
+    setError('');
+    try { await gql(`mutation($id:ID!){ deleteEchoCard(cardId:$id) }`, { id: card.id }); await loadCards(); }
+    catch (deleteError) { setError(deleteError.message); }
+  }
+
+  function openLesson(lessonId) {
+    setAudioFilter('ALL'); setBandFilter('ALL'); setSelectedLessonId(lessonId); setTab('today');
+  }
 
   async function start(event) {
     event.preventDefault(); setBusy(true); setError(''); setNotice('');
@@ -411,6 +443,14 @@ function App() {
 
   if (!user) return <Auth onLogin={login} message={verifyMessage} />;
 
+  function renderExercise(exercise, step, heading) {
+    return <ExerciseCard key={exercise.id} exercise={exercise} step={step} heading={heading}
+      languageName={home.profile.languageCode === 'de' ? 'German' : 'Danish'}
+      answer={answers[exercise.id]} setAnswer={value => setAnswers(current => ({ ...current, [exercise.id]: value }))}
+      selfCheck={selfChecks[exercise.id]} setSelfCheck={value => setSelfChecks(current => ({ ...current, [exercise.id]: value }))}
+      result={results[exercise.id]} busy={busy} onSubmit={submitExercise} />;
+  }
+
   const filteredLessons = (home?.lessons || []).filter(item =>
     (audioFilter === 'ALL' || item.audio?.mediaType === audioFilter)
     && (bandFilter === 'ALL' || item.audio?.editorialBand === bandFilter));
@@ -455,11 +495,31 @@ function App() {
       <section className="welcome">
         <div className="welcome-row"><div><p className="eyebrow">ECHO · {home.profile.languageCode === 'de' ? 'GERMAN' : 'DANISH'} · LEARN THROUGH EXPRESSION</p>
         <h1>Make the pattern yours.</h1>
-        <p className="intro">{home.nextAction}</p></div><label className="language-switch">Learning language<select value={home.profile.languageCode} onChange={event => chooseLanguage(event.target.value)}><option value="da">Danish</option><option value="de">German</option></select></label></div>
+        <p className="intro">{home.nextAction}</p></div>{lesson && <figure className="depth-mark">
+          <DeepwaterMark3D size={170} depth={lesson.mastery} label={`Depth gauge: ${percent}% mastered in ${lesson.title}`} />
+          <figcaption>{percent}% deep in this lesson</figcaption>
+        </figure>}<label className="language-switch">Learning language<select value={home.profile.languageCode} onChange={event => chooseLanguage(event.target.value)}><option value="da">Danish</option><option value="de">German</option></select></label></div>
         <div className="route-note"><b>{startingRoute} route</b><span>{ROUTE_COPY}</span></div>
       </section>
 
-      <div className="workspace-grid">
+      <nav className="learn-tabs" aria-label="Echo sections">
+        {[['today', 'Today'], ['practice', 'Practice'], ['cards', 'My cards'], ['progress', 'Progress']].map(([id, label]) =>
+          <button type="button" key={id} className={tab === id ? 'active' : ''} aria-current={tab === id ? 'page' : undefined}
+            onClick={() => setTab(id)}>{label}{id === 'cards' && cards.some(card => card.due) ? ` · ${cards.filter(card => card.due).length}` : ''}</button>)}
+      </nav>
+
+      {warmUp && <MatchingWarmUp cards={cards} onClose={() => setWarmUp(false)} />}
+
+      {tab === 'practice' && <PracticeHub lessons={home.lessons} renderExercise={renderExercise} onOpenLesson={openLesson}
+        dueCards={cards.filter(card => card.due).length} onReviewCards={() => setTab('cards')}
+        canWarmUp={cards.length >= 3} onWarmUp={() => setWarmUp(true)} />}
+
+      {tab === 'cards' && <PhraseCards cards={cards} languageName={home.profile.languageCode === 'de' ? 'German' : 'Danish'}
+        busy={busy} onSave={saveCard} onReview={reviewCard} onDelete={deleteCard} />}
+
+      {tab === 'progress' && <CalmProgress home={home} cards={cards} />}
+
+      {tab === 'today' && <div className="workspace-grid">
         <section className="lesson panel">
           <div className="audio-library-filters">
             <div><span className="eyebrow">LEARN WITH REAL VOICES</span><h3>Music &amp; podcasts</h3></div>
@@ -498,19 +558,7 @@ function App() {
             <div className="explanation"><span className="eyebrow">NOTICE THE STRUCTURE</span><p>{lesson.explanation}</p></div>
             <div className="source-note"><b>Lesson source</b><span>{lesson.sourceReference}</span><small>{lesson.contentStatus}. No private class messages, song lyrics, or unlicensed images are included.</small></div>
             {!lesson.audio && <div className="exercise-list"><h3>Try the pattern</h3>
-              {orderedExercises.map((exercise, index) => <article className="exercise" key={exercise.id}>
-                <div className="exercise-heading"><span className="step">{index + 1}</span><span>{exercise.taskType === 'TRANSFER' ? 'YOUR OWN EXAMPLE' : 'PRACTICE'}</span>{exercise.lastCorrect !== null && exercise.lastCorrect !== undefined && <span className={`attempt-state ${exercise.lastCorrect ? 'good' : 'retry'}`}>{exercise.lastCorrect ? 'Correct last time' : 'Try again'}</span>}</div>
-                <h4>{exercise.prompt}</h4>
-                <form onSubmit={event => submitExercise(event, exercise)}>
-                  {exercise.taskType === 'SELECT' && <fieldset className="exercise-options"><legend className="visually-hidden">Choose one answer</legend>{exercise.options.map(option => <label className="choice" key={option.key}><input type="radio" name={exercise.id} required checked={answers[exercise.id] === option.key} onChange={() => setAnswers(current => ({ ...current, [exercise.id]: option.key }))} /><span><b>{option.key}.</b> {option.text}</span></label>)}</fieldset>}
-                  {exercise.taskType !== 'SELECT' && <label className="answer-label">{exercise.taskType === 'TRANSFER' ? 'Your sentence' : 'Missing word'}
-                    {exercise.taskType === 'TRANSFER' ? <textarea required maxLength="500" value={answers[exercise.id] || ''} onChange={event => setAnswers(current => ({ ...current, [exercise.id]: event.target.value }))} placeholder={`Write a new sentence in ${home.profile.languageCode === 'de' ? 'German' : 'Danish'}…`} /> : <input required maxLength="200" value={answers[exercise.id] || ''} onChange={event => setAnswers(current => ({ ...current, [exercise.id]: event.target.value }))} autoComplete="off" />}
-                  </label>}
-                  {exercise.taskType === 'TRANSFER' && <label className="choice self-check"><input type="checkbox" checked={Boolean(selfChecks[exercise.id])} onChange={event => setSelfChecks(current => ({ ...current, [exercise.id]: event.target.checked }))} /><span>I checked my example against the pattern.</span></label>}
-                  <button className="practice-button" disabled={busy || (exercise.taskType === 'TRANSFER' && !selfChecks[exercise.id])}>{busy ? 'Saving…' : exercise.taskType === 'TRANSFER' ? 'Save my example' : 'Check answer'}</button>
-                </form>
-                {results[exercise.id] && <div className={`feedback ${results[exercise.id].graded && results[exercise.id].correct ? 'feedback-good' : ''}`} role="status"><b>{results[exercise.id].graded ? results[exercise.id].correct ? 'That’s it' : 'Let’s look again' : 'Saved for reflection'}</b><p>{results[exercise.id].feedback}</p>{results[exercise.id].hint && <p className="feedback-hint"><b>Suggestion:</b> {results[exercise.id].hint} <small>(automatic, may be wrong)</small></p>}{results[exercise.id].graded && <small>Practice estimate: {Math.round(results[exercise.id].mastery * 100)}% · Next review {formatDate(results[exercise.id].nextReviewAt)}</small>}</div>}
-              </article>)}
+              {orderedExercises.map((exercise, index) => renderExercise(exercise, index + 1))}
             </div>}
           </>}
           {!lesson && <div className="empty-course"><span className="eyebrow">{home.profile.languageCode === 'de' ? 'GERMAN' : 'DANISH'} COURSE</span><h2>Your course is waiting for teacher review.</h2><p>{home.nextAction} Your teacher adds source material, checks every explanation and exercise, then publishes it here. No unreviewed or AI-generated lessons are shown as course content.</p></div>}
@@ -523,7 +571,7 @@ function App() {
           <div className="review-card"><span className="eyebrow">NEXT REVIEW</span><b>{lesson?.due ? 'Ready when you are' : lesson?.nextReviewAt ? formatDate(lesson.nextReviewAt) : 'After your first check'}</b><p>{lesson?.due ? 'This pattern is ready for another short practice.' : 'Correct answers extend the interval; a missed answer brings it closer.'}</p></div>
           <div className="method-note"><b>How Echo adapts</b><p>Your chosen experience level sets a guided start. Correct and missed answers update a simple practice estimate and a 1 / 3 / 7 / 14-day review interval. Your free-writing example is saved without automatic grading.</p></div>
         </aside>
-      </div>
+      </div>}
       {user.role === 'TEACHER' && <section className="teacher panel">
         <div className="teacher-heading"><div><p className="eyebrow">TEACHER WORKSPACE</p><h2>Review and publish Echo lessons</h2><p>Only your configured teacher account can save drafts or approve publication.</p></div><button className="practice-button" onClick={async () => { setTeacherMode(!teacherMode); if (!teacherMode) { try { await loadTeacherLessons(); } catch (e) { setError(e.message); } } }}>{teacherMode ? 'Hide workspace' : 'Open workspace'}</button></div>
         {teacherMode && <div className="teacher-content">
@@ -568,11 +616,6 @@ function DeleteAccount({ email, onDeleted }) {
       {error && <p role="alert" className="error">{error}</p>}
     </form>
   </details>;
-}
-
-function formatDate(value) {
-  if (!value) return 'tomorrow';
-  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value));
 }
 
 applyTheme(readTheme());

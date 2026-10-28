@@ -1,6 +1,8 @@
 type Query {
   echoHome: EchoHome!
   teacherLessons: [TeacherLesson!]!
+  "The signed-in learner's phrase cards for their current language, due cards first."
+  echoCards: [EchoCard!]!
 }
 
 type Mutation {
@@ -11,6 +13,10 @@ type Mutation {
   saveEchoLessonDraft(input: LessonDraftInput!): TeacherLesson!
   publishEchoLesson(lessonId: ID!): TeacherLesson!
   unpublishEchoLesson(lessonId: ID!): TeacherLesson!
+  saveEchoCard(front: String!, back: String!, lessonId: ID): EchoCard!
+  "knewIt moves the card up one box; a miss moves it down one box, never back to the start."
+  reviewEchoCard(cardId: ID!, knewIt: Boolean!): EchoCard!
+  deleteEchoCard(cardId: ID!): Boolean!
 }
 
 input LessonDraftInput {
@@ -203,4 +209,15 @@ type AudioPracticeResult {
   nextTaskType: String!
   repeatSuggested: Boolean!
   feedback: String!
+}
+
+type EchoCard {
+  id: ID!
+  front: String!
+  back: String!
+  lessonId: ID
+  "0 = new or missed, 5 = well known."
+  box: Int!
+  nextReviewAt: String!
+  due: Boolean!
 }
