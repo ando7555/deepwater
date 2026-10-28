@@ -36,12 +36,12 @@ Visual style (olive and cream colours, script logo, stock photos) is deliberatel
 | Idea | Echo version | Status |
 |---|---|---|
 | Draggable 3D hero on the home page | The **Deepwater mark in 3D** instead of a globe: the lid, the two water layers (drawn as dots) and the sounding line with five nodes, turning slowly and draggable. It follows the Echo, Amber and light themes. On the learner home page it doubles as a **depth gauge**: the lit nodes show mastery of the current lesson ("50% deep in this lesson"). Auto-rotation stops on hover and for `prefers-reduced-motion`. | Built |
-| Practice by skill (Read, Listen, Speak, Write) | A "Practice" entry point that lets the learner choose a skill. Echo already has recognition (multiple choice), typed answers and listening (audio lessons with gist and focus steps); Speak would need speech capture and a grading decision. | Proposal |
-| Learner-made flashcards | Let learners save a sentence from a lesson as a card that enters the same spaced-review schedule as lessons. | Proposal |
-| Matching warm-up | A one-minute matching round from items that are due for review, before the main lesson. | Proposal |
-| Four-item navigation | Practice, Lessons, Explore (culture and real voices), and Progress instead of Games (see Duolingo below). | Proposal |
+| Practice by skill (Read, Listen, Speak, Write) | Practice hub over existing task types (see below). | Built |
+| Learner-made flashcards | My cards with a calm five-box schedule (see below). | Built |
+| Matching warm-up | A one-minute matching round from the learner's own cards. | Built |
+| Four-item navigation | Today, Practice, My cards and Progress. No Games tab (see Duolingo below). | Built |
 
-## Duolingo drawbacks turned into Echo strengths (Proposal)
+## Duolingo drawbacks turned into Echo strengths (principles; the calm-progress and no-reset parts are built)
 
 | Duolingo drawback | Evidence | Echo's opposite |
 |---|---|---|
@@ -53,10 +53,44 @@ Visual style (olive and cream colours, script logo, stock photos) is deliberatel
 | AI conversation practice feels canned. | Podcast analysis, anecdotal [5] | **Teacher-reviewed AI.** AI drafts exercises, and a teacher approves them before learners see them (the plan already in the architecture docs). |
 | Games and leagues compete for attention. | Learner studies [1][2] | **Calm by default.** Short warm-ups are fine, but there are no leaderboards. Progress is compared with your past self only. |
 
+## Echo MVP capabilities built on this PR
+
+The owner asked (2026-10-28) to turn these ideas into capabilities that make a good Echo MVP
+and keep the idea open for Amber. **Built:**
+
+| Capability | What the learner gets | How it works |
+|---|---|---|
+| Section tabs | Today, Practice, My cards, Progress | The existing lesson view is now "Today". |
+| Practice hub | Choose Read, Listen, Speak or Write | Reuses graded task types: Read = SELECT, Write = TEXT, Speak = TRANSFER, Listen = audio lessons. Due and weakest lessons come first. Speak does not record or grade the voice; the learner says the sentence aloud, writes it and self-checks, as TRANSFER already does. |
+| My cards | Save your own phrases and review them | New `echo_cards` table and GraphQL `echoCards`, `saveEchoCard`, `reviewEchoCard`, `deleteEchoCard`. Five-box Leitner schedule: 1, 3, 7, 14, 30 days. "Not yet" moves a card back **one** box, never to the start. Cards belong to one learner and one language and are deleted with the account. |
+| Matching warm-up | A one-minute round from your own cards | Needs at least three cards. Uses due cards first. Nothing is graded or stored. |
+| Calm progress | Depth, patterns mastered, reviews ready, accuracy, cards settled | No streaks, no leagues. The 3D mark shows the average practice estimate across the language's lessons. |
+
+Not built: speech capture or pronunciation grading, saving a card straight from a lesson,
+a matching mode that uses teacher content, and reminders or notifications.
+
+## Keeping the idea open for Amber (Proposal)
+
+Amber is the future connections product. People can join it without Echo, and it receives
+only opt-in, coarse Echo signals (owner decisions, 2026-10-17). Nothing below is built for Amber.
+
+- **Shared now:** `DeepwaterMark3D` and the calm-progress pattern read the theme tokens,
+  so they already render in Amber's warm theme. `ExerciseCard`, `PracticeHub` and the card
+  review take their content as props and contain no Echo-only logic.
+- **Same principles, different product:** depth over volume, no streak guilt, and a miss
+  that steps back instead of resetting. For Amber this could mean no infinite feed, no
+  swipe streaks, and slow, consent-first introductions.
+- **Possible reuse, to decide later:** a practice hub for conversation skills, such as
+  asking a good first question, and saved "conversation starters" on the same calm
+  schedule. Practising in Danish could be an opt-in coarse signal Amber may show.
+- **Deliberately not generalised yet:** the card tables stay `echo_*`. Following the project
+  rule "generalise only when evidence supports it", a shared module should wait until
+  Amber has a confirmed use for it.
+
 ## Suggested next step
 
-Pick one proposal for a spec. The smallest valuable one is probably the **Practice hub with
-Read, Listen and Write** (Speak later), because Echo's backend already grades those task types.
+Measure whether learners return for due reviews without streak pressure, for example the
+share of due cards and lessons reviewed within two days. Then pick the next proposal.
 
 To read the full site, add `amalieteaches.com` and `www.amalieteaches.com` to the cloud
 environment's allowed domains and start a new thread.

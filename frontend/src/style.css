@@ -291,3 +291,86 @@ footer{text-align:center;color:var(--text-3);font-size:13px;letter-spacing:.04em
 .welcome-row>div:first-child{flex:1;min-width:0}
 .depth-mark{margin:0;display:grid;justify-items:center;gap:2px;flex:0 0 auto}
 .depth-mark figcaption{font-size:12px;letter-spacing:.06em;color:var(--text-3)}
+
+/* Section tabs */
+.learn-tabs{display:flex;gap:6px;flex-wrap:wrap;max-width:850px;margin:0 auto 24px;padding:6px;border:1px solid var(--line-soft);border-radius:999px;background:var(--surface-glass);width:fit-content}
+.learn-tabs button{white-space:nowrap;background:transparent;color:var(--text-2);box-shadow:none;border-radius:999px;padding:9px 18px;font-weight:600;letter-spacing:.04em}
+.learn-tabs button.active{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 0 0 0 1px var(--line-hover)}
+:root[data-theme="light"] .learn-tabs button:not(.link):not(.swatch){background:transparent;color:var(--text-2)}
+:root[data-theme="light"] .learn-tabs button.active:not(.link):not(.swatch){background:var(--accent-soft);color:var(--accent-deep)}
+
+/* Practice hub */
+.practice-hub,.phrase-cards,.calm-progress{max-width:1100px;margin:0 auto 32px}
+.practice-intro{max-width:720px;margin:0 auto 22px;text-align:center}
+.practice-intro h2{font-size:clamp(28px,4vw,40px);margin:10px 0}
+.mode-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.mode-card{display:grid;align-content:end;justify-items:start;gap:6px;min-height:210px;padding:20px;text-align:left;border-radius:20px;
+  background:linear-gradient(170deg,var(--surface-2),var(--deep));color:var(--text);border:1px solid var(--line-soft);box-shadow:var(--shadow);position:relative}
+.mode-card svg{position:absolute;top:16px;left:16px;width:40px;height:40px;padding:9px;border-radius:12px;background:var(--accent-soft);fill:none;stroke:var(--accent);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.mode-card b{font:700 24px 'Space Grotesk',sans-serif}
+.mode-card span{font-size:14px;color:var(--text-2);font-weight:500}
+.mode-card small{font-size:11px;letter-spacing:.08em;color:var(--text-3);font-weight:600}
+.mode-card.active{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-ring),var(--shadow)}
+:root[data-theme="light"] .mode-card:not(.link):not(.swatch){background:linear-gradient(170deg,#ffffff,var(--surface));color:var(--text)}
+.practice-shortcuts{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:14px 4px 0;padding-top:12px;border-top:1px solid var(--line-soft)}
+.practice-shortcuts .link:disabled{color:var(--text-3);cursor:not-allowed}
+.practice-list{margin-top:26px}
+.practice-source{margin:18px 0 6px;font-size:12px;letter-spacing:.06em;color:var(--text-3)}
+.practice-note{font-size:14px}
+.listen-item{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 16px;margin-top:10px;border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:var(--deep)}
+.listen-item div{display:grid;gap:3px}.listen-item span{font-size:13px;color:var(--text-3)}
+
+/* My cards */
+.cards-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:18px}
+.cards-panel{padding:24px;display:grid;gap:14px;align-content:start}
+.cards-panel h3{margin:0}
+.cards-panel label{display:grid;gap:7px;font-weight:600;font-size:14px}
+.card-review{display:grid;gap:12px;justify-items:center;text-align:center;padding:18px;border-radius:var(--radius);background:var(--deep);border:1px solid var(--line-soft)}
+.card-review.empty{justify-items:start;text-align:left}
+.card-front{font:600 26px 'Space Grotesk',sans-serif;color:var(--text);margin:4px 0}
+.card-back{font-size:18px;margin:0;color:var(--accent-text)}
+.card-actions{display:flex;gap:10px}
+button.secondary{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1px var(--line-hover)}
+:root[data-theme="light"] button.secondary:not(.link):not(.swatch){background:transparent;color:var(--text)}
+.card-list{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:8px}
+.card-list li{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-items:center;gap:16px;padding:12px 16px;border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:var(--surface-glass)}
+.card-list li div{display:grid;gap:2px}.card-list li span{font-size:13px;color:var(--text-2)}
+.card-list small{color:var(--text-3);font-size:12px}
+.card-depth{display:inline-flex;gap:4px}
+.card-depth i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.card-depth i.on{background:var(--accent);box-shadow:0 0 6px var(--accent-shadow-strong)}
+.danger-link{color:var(--warn)}
+
+/* Matching warm-up */
+.matching{max-width:850px;margin:0 auto 26px;padding:22px}
+.matching-heading{display:flex;justify-content:space-between;align-items:start}
+.matching-heading h3{margin:6px 0 14px}
+.matching-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.matching-grid>div{display:grid;gap:8px}
+.match-item{background:var(--deep);color:var(--text);box-shadow:inset 0 0 0 1px var(--line-soft);text-align:left;font-weight:500}
+.match-item.picked{box-shadow:inset 0 0 0 2px var(--accent)}
+.match-item.miss{box-shadow:inset 0 0 0 2px var(--warn-line)}
+.match-item.matched{opacity:.35}
+:root[data-theme="light"] .match-item:not(.link):not(.swatch){background:#fff;color:var(--text)}
+
+/* Calm progress */
+.progress-hero{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;padding:24px}
+.progress-hero h2{font-size:clamp(32px,4vw,48px);margin:8px 0}
+.calm-rule{padding:10px 14px;border-radius:var(--radius-sm);background:var(--good-bg);border:1px solid var(--good-line);color:var(--text)}
+.calm-stats{grid-template-columns:repeat(3,minmax(0,1fr));margin:18px 0}
+.calm-stats small{font-size:14px;color:var(--text-3)}
+.pattern-list{list-style:none;padding:0;margin:0 0 10px;display:grid;gap:10px}
+.pattern-list li{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,2fr) 110px;gap:14px;align-items:center}
+.pattern-list .progress-track{margin:0}
+.pattern-list small{color:var(--text-3);text-align:right}
+
+@media(max-width:850px){
+  .mode-grid{grid-template-columns:1fr 1fr}.cards-layout{grid-template-columns:1fr}
+  .progress-hero{grid-template-columns:1fr;justify-items:center;text-align:center}.calm-stats{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .learn-tabs{width:100%;border-radius:16px;flex-wrap:nowrap}.learn-tabs button{flex:1;padding:9px 4px;font-size:13px;letter-spacing:0}
+  .mode-card{min-height:170px}.matching-grid{grid-template-columns:1fr}
+  .card-list li{grid-template-columns:1fr auto;gap:8px 12px}
+  .pattern-list li{grid-template-columns:1fr;gap:4px}.pattern-list small{text-align:left}
+}

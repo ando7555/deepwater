@@ -1,5 +1,7 @@
 package com.deepwater.api;
 
+import com.deepwater.echo.EchoCardService;
+import com.deepwater.echo.EchoCardService.EchoCard;
 import com.deepwater.echo.EchoService;
 import com.deepwater.echo.EchoService.EchoHome;
 import com.deepwater.echo.EchoService.AudioPracticeResult;
@@ -17,10 +19,11 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class DeepwaterGraphQlController {
     private final EchoService echo;
+    private final EchoCardService cards;
     private final PlatformService platform;
 
-    public DeepwaterGraphQlController(EchoService echo, PlatformService platform) {
-        this.echo = echo; this.platform = platform;
+    public DeepwaterGraphQlController(EchoService echo, EchoCardService cards, PlatformService platform) {
+        this.echo = echo; this.cards = cards; this.platform = platform;
     }
 
     @QueryMapping
@@ -71,6 +74,26 @@ public class DeepwaterGraphQlController {
     @MutationMapping
     TeacherLesson unpublishEchoLesson(@Argument String lessonId, GraphQLContext context) {
         return echo.unpublish(platform.requireTeacher(context.get("authorization")), lessonId);
+    }
+
+    @QueryMapping
+    List<EchoCard> echoCards(GraphQLContext context) {
+        return cards.cards(account(context));
+    }
+
+    @MutationMapping
+    EchoCard saveEchoCard(@Argument String front, @Argument String back, @Argument String lessonId, GraphQLContext context) {
+        return cards.save(account(context), front, back, lessonId);
+    }
+
+    @MutationMapping
+    EchoCard reviewEchoCard(@Argument String cardId, @Argument Boolean knewIt, GraphQLContext context) {
+        return cards.review(account(context), cardId, Boolean.TRUE.equals(knewIt));
+    }
+
+    @MutationMapping
+    boolean deleteEchoCard(@Argument String cardId, GraphQLContext context) {
+        return cards.delete(account(context), cardId);
     }
 
     private String account(GraphQLContext context) {
