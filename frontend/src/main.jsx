@@ -484,7 +484,10 @@ function App() {
   return <main className="app-shell">
     <header className="site-header">
       <Brand />
-      <div className="account"><ThemeSwitch /><button type="button" className="link account-name" onClick={() => setTab('profile')}>{user.name}</button><button className="link" onClick={logout}>Sign out</button></div>
+      <div className="account"><ThemeSwitch /><button type="button" className={`account-chip${tab === 'profile' ? ' active' : ''}`} aria-current={tab === 'profile' ? 'page' : undefined}
+        onClick={() => { setReviewing(false); setWarmUp(false); setTab('profile'); }} aria-label={`Your profile: ${user.name}`}>
+        <span className="account-avatar" aria-hidden="true">{(user.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0].toUpperCase()).join('')}</span>
+        <span className="account-label">{user.name}</span></button><button className="link" onClick={logout}>Sign out</button></div>
     </header>
 
     {error && <p role="alert" className="banner error">{error}</p>}
@@ -509,7 +512,14 @@ function App() {
       </form>
     </section>}
 
-    {home?.onboarded && <>
+    {home?.onboarded && tab === 'profile' && <>
+      <button type="button" className="link back-link" onClick={() => setTab('today')}>← Back to learning</button>
+      <ProfilePage home={home} cards={cards} onSaved={saved => {
+        const next = { ...user, name: saved.name }; setUser(next); sessionStorage.setItem('deepwater-user', JSON.stringify(next));
+      }} />
+    </>}
+
+    {home?.onboarded && tab !== 'profile' && <>
       <section className="welcome">
         <div className="welcome-row"><div><p className="eyebrow">ECHO · {home.profile.languageCode === 'de' ? 'GERMAN' : 'DANISH'} · LEARN THROUGH EXPRESSION</p>
         <h1>Make the pattern yours.</h1>
@@ -521,12 +531,12 @@ function App() {
       </section>
 
       <nav className="learn-tabs" aria-label="Echo sections">
-        {[['today', 'Today'], ['practice', 'Practice'], ['cards', 'My cards'], ['progress', 'Progress'], ['profile', 'Profile']].map(([id, label]) =>
+        {[['today', 'Today'], ['practice', 'Practice'], ['cards', 'My cards'], ['progress', 'Progress']].map(([id, label]) =>
           <button type="button" key={id} className={tab === id ? 'active' : ''} aria-current={tab === id ? 'page' : undefined}
             onClick={() => setTab(id)}>{label}{id === 'cards' && cards.some(card => card.due) ? ` · ${cards.filter(card => card.due).length}` : ''}</button>)}
       </nav>
 
-      {!reviewing && tab !== 'profile' && <div className="review-launch">
+      {!reviewing && <div className="review-launch">
         <div><b>{dueCount ? `${dueCount} ${dueCount === 1 ? 'thing is' : 'things are'} ready to review` : 'Your memory is up to date'}</b>
           <span>{dueCount ? 'A short mixed session of cards and exercises. About five minutes.' : 'Practise anyway, or add a card from something you heard today.'}</span></div>
         <button type="button" onClick={() => setReviewing(true)}>Start daily review</button>
@@ -536,10 +546,6 @@ function App() {
         renderExercise={renderExercise} onReviewCard={reviewCard} busy={busy} onClose={() => setReviewing(false)} />}
 
       {warmUp && <MatchingWarmUp cards={cards} languageCode={home.profile.languageCode} onClose={() => setWarmUp(false)} />}
-
-      {tab === 'profile' && <ProfilePage home={home} cards={cards} onSaved={saved => {
-        const next = { ...user, name: saved.name }; setUser(next); sessionStorage.setItem('deepwater-user', JSON.stringify(next));
-      }} />}
 
       {tab === 'practice' && <PracticeHub lessons={home.lessons} renderExercise={renderExercise} onOpenLesson={openLesson}
         dueCards={cards.filter(card => card.due).length} onReviewCards={() => setTab('cards')}
@@ -612,7 +618,7 @@ function App() {
         </div>}
       </section>}
     </>}
-    <DeleteAccount email={user.email} onDeleted={logout} />
+    {(tab === 'profile' || !home?.onboarded) && <DeleteAccount email={user.email} onDeleted={logout} />}
     <footer>Echo by Deepwater · Go deeper.</footer>
   </main>;
 }
