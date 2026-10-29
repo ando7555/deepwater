@@ -1,0 +1,53 @@
+{
+  "id": "da-10-plans",
+  "languageCode": "da",
+  "title": "Talk about plans with skal",
+  "level": "A1 · getting around",
+  "topic": "Plans",
+  "objective": "Talk about plans with skal + infinitive and a time phrase.",
+  "explanation": "Danes use “skal” for plans: “Jeg skal arbejde i morgen.” (I'm working tomorrow.) The second verb stays in the infinitive, without “at”. If you start with the time, the verb is still second: “I morgen skal jeg arbejde.” “Hvad skal du i weekenden?” is the classic Friday question.",
+  "sourceReference": "Deepwater original starter course (2026-10-29), written for Echo; teacher review required before publishing.",
+  "skillKey": "danish.verb.skal-plans",
+  "sortOrder": 10,
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "“Tomorrow I'm going to the cinema.”",
+      "expectedAnswer": "B",
+      "feedbackCorrect": "Right: time first, then skal, then jeg.",
+      "feedbackIncorrect": "After a time phrase the verb comes second: “I morgen skal jeg …”.",
+      "options": [
+        {
+          "key": "A",
+          "text": "I morgen jeg skal i biografen."
+        },
+        {
+          "key": "B",
+          "text": "I morgen skal jeg i biografen."
+        },
+        {
+          "key": "C",
+          "text": "Jeg i morgen skal i biografen."
+        }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete: “Jeg skal ___ min mor.” (I'm going to visit my mother — at besøge)",
+      "expectedAnswer": "besøge",
+      "feedbackCorrect": "Correct: after skal, use the infinitive “besøge”.",
+      "feedbackIncorrect": "After skal, use the infinitive without at: “besøge”."
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Ask: “What are you doing at the weekend?” — “Hvad ___ du i weekenden?”",
+      "expectedAnswer": "skal",
+      "feedbackCorrect": "Correct: “Hvad skal du i weekenden?”",
+      "feedbackIncorrect": "Use “skal” for plans."
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "Write three sentences about your plans this week, starting at least one with a time phrase (i morgen, på lørdag, i aften)."
+    }
+  ]
+}

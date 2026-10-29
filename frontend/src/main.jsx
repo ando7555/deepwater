@@ -5,6 +5,7 @@ import ExerciseCard from './ExerciseCard.jsx';
 import PracticeHub from './PracticeHub.jsx';
 import PhraseCards, { MatchingWarmUp } from './PhraseCards.jsx';
 import { scheduleNote } from './cardTools.js';
+import CoursePath from './CoursePath.jsx';
 import CalmProgress from './CalmProgress.jsx';
 import DailyReview from './DailyReview.jsx';
 import ProfilePage from './ProfilePage.jsx';
@@ -485,6 +486,7 @@ function App() {
   const filteredLessons = (home?.lessons || []).filter(item =>
     (audioFilter === 'ALL' || item.audio?.mediaType === audioFilter)
     && (bandFilter === 'ALL' || item.audio?.editorialBand === bandFilter));
+  const hasAudio = (home?.lessons || []).some(item => item.audio);
   const recommendedAudio = filteredLessons.find(item => item.id === home?.recommendedAudioLessonId) || null;
   const lesson = filteredLessons.find(item => item.id === selectedLessonId) || recommendedAudio || filteredLessons[0];
   const percent = lesson ? Math.round(lesson.mastery * 100) : 0;
@@ -570,14 +572,18 @@ function App() {
 
       {tab === 'progress' && <CalmProgress home={home} cards={cards} />}
 
+      {tab === 'today' && <CoursePath lessons={home.lessons} currentId={lesson?.id} onOpen={id => {
+        openLesson(id); requestAnimationFrame(() => document.getElementById('lesson-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      }} />}
+
       {tab === 'today' && <div className="workspace-grid">
-        <section className="lesson panel">
-          <div className="audio-library-filters">
+        <section className="lesson panel" id="lesson-panel">
+          {hasAudio && <div className="audio-library-filters">
             <div><span className="eyebrow">LEARN WITH REAL VOICES</span><h3>Music &amp; podcasts</h3></div>
             <label>Medium<select value={audioFilter} onChange={event => setAudioFilter(event.target.value)}><option value="ALL">All lessons</option><option value="MUSIC">Music</option><option value="PODCAST">Podcasts</option></select></label>
             <label>Suggested level<select value={bandFilter} onChange={event => setBandFilter(event.target.value)}><option value="ALL">All levels</option>{Object.entries(BAND_LABELS).map(([key, value]) => <option value={key} key={key}>{value}</option>)}</select></label>
-          </div>
-          {home.lessons.length > 1 && filteredLessons.length > 0 && <label className="lesson-picker">Choose a lesson<select value={lesson?.id || ''} onChange={event => setSelectedLessonId(event.target.value)}>{filteredLessons.map(item => <option key={item.id} value={item.id}>{item.audio ? `${item.audio.mediaType} · ${BAND_LABELS[item.audio.editorialBand]} · ` : ''}{item.title}</option>)}</select></label>}
+          </div>}
+          {hasAudio && home.lessons.length > 1 && filteredLessons.length > 0 && <label className="lesson-picker">Choose a lesson<select value={lesson?.id || ''} onChange={event => setSelectedLessonId(event.target.value)}>{filteredLessons.map(item => <option key={item.id} value={item.id}>{item.audio ? `${item.audio.mediaType} · ${BAND_LABELS[item.audio.editorialBand]} · ` : ''}{item.title}</option>)}</select></label>}
           {filteredLessons.length === 0 && <div className="audio-empty"><b>{audioFilter === 'ALL' ? 'No approved lessons for this language yet.' : `No approved ${audioFilter.toLowerCase()} lessons in this level yet.`}</b><p>Your teacher is building a reviewed collection. Choose another filter, or return when new material is approved.</p></div>}
           {lesson && <>
             <div className="lesson-topline"><span className="pill">{lesson.level}</span><span className="pill soft">{lesson.topic}</span></div>

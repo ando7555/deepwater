@@ -2,12 +2,13 @@
   "id": "v2-time-first",
   "languageCode": "da",
   "title": "Start with time. Put the verb second.",
-  "level": "A0 · beginner",
+  "level": "A1 · first sentences",
   "topic": "Danish word order",
   "objective": "Use a fronted time phrase and keep the finite verb in second constituent position.",
   "explanation": "In a Danish declarative main clause, the finite verb is typically in second constituent position. In “I dag arbejder jeg hjemme”, “I dag” is the first constituent and “arbejder” is the finite verb in the second. The subject “jeg” follows it. This is one useful main-clause pattern, not a rule for every Danish sentence.",
   "sourceReference": "Notion export: 5 August lesson; source example: “I dag arbejder jeg hjemme.”",
   "skillKey": "danish.main-clause.v2",
+  "sortOrder": 8,
   "exercises": [
     {
       "taskType": "SELECT",

@@ -345,6 +345,30 @@ Backend: `echo_cards` gains `miss_count` and `last_miss`; GraphQL adds `saveEcho
 `grade` (`MISSED`, `CLOSE`, `KNEW`) plus optional `answer` on `reviewEchoCard` (the old
 `knewIt` still works). None of this is tested with learners yet.
 
+## MVP round: a course to learn from (Built as drafts, 2026-10-29)
+
+The owner judged the app still short of an MVP. The verified reason: Echo had **one** Danish
+lesson (and four German), so a new learner ran out of material in minutes whatever the tools.
+The recurring complaints about Duolingo, Busuu, Memrise and Amalie Teaches (no grammar
+explained, unrealistic sentences, paywall or teacher between learner and practice, passive
+video, streak pressure, no sense of what you can now do) shaped how the course is written.
+
+- **Danish starter course:** 10 new short A1 lessons plus the existing word-order lesson, in four
+  stages named by what you can do: *First words* (hello and your name; en/et; "the" on the end),
+  *First sentences* (one verb form; questions; ikke; ordering at a café; time first, verb
+  second), *Getting around* (directions and trains; plans with skal), *Small talk* (how are
+  you, the weather). Each lesson explains **why** the pattern works, uses everyday situations,
+  checks with choice and typed answers (several spellings accepted), and ends with a
+  use-it-yourself task. Text is original Deepwater writing; nothing comes from the sites above.
+- **Teacher review still applies:** the lessons are imported as drafts. A learner sees them only
+  after the teacher presses "I approve & publish" for each one.
+- **Course path on Today:** the whole course on one screen, grouped by stage, with "You're at:
+  First sentences", a Continue button, and New / % deep / Review ready / Settled per lesson.
+  Nothing is locked. Music and podcast filters only appear when audio lessons exist.
+
+Not done yet: pictures as cues, speaking with speech recognition, reminders, and a German
+course of the same size.
+
 ## References
 
 Owner's screenshots of amalieteaches.com, shared in the project thread on 2026-10-28.

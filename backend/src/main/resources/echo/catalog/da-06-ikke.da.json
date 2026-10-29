@@ -1,0 +1,70 @@
+{
+  "id": "da-06-ikke",
+  "languageCode": "da",
+  "title": "Say no: where ikke goes",
+  "level": "A1 · first sentences",
+  "topic": "Negation",
+  "objective": "Place ikke after the verb in a main clause.",
+  "explanation": "“Ikke” (not) comes right after the verb in a normal sentence: “Jeg taler ikke dansk.”, “Hun er ikke hjemme.” If the sentence starts with something else, the verb is still second and ikke usually follows the subject: “I dag arbejder jeg ikke.”",
+  "sourceReference": "Deepwater original starter course (2026-10-29), written for Echo; teacher review required before publishing.",
+  "skillKey": "danish.negation.ikke",
+  "sortOrder": 6,
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "Which says “I don't speak Danish”?",
+      "expectedAnswer": "B",
+      "feedbackCorrect": "Right: ikke comes after the verb.",
+      "feedbackIncorrect": "Put ikke after the verb: “Jeg taler ikke dansk.”",
+      "options": [
+        {
+          "key": "A",
+          "text": "Jeg ikke taler dansk."
+        },
+        {
+          "key": "B",
+          "text": "Jeg taler ikke dansk."
+        },
+        {
+          "key": "C",
+          "text": "Ikke jeg taler dansk."
+        }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Add ikke: “Butikken er åben.” (The shop is not open.)",
+      "expectedAnswer": "butikken er ikke åben.",
+      "feedbackCorrect": "Correct: “Butikken er ikke åben.”",
+      "feedbackIncorrect": "Ikke goes right after the verb “er”.",
+      "acceptedAnswers": [
+        "butikken er ikke åben"
+      ]
+    },
+    {
+      "taskType": "SELECT",
+      "prompt": "“Today I'm not working.”",
+      "expectedAnswer": "A",
+      "feedbackCorrect": "Right: verb second, then subject, then ikke.",
+      "feedbackIncorrect": "Keep the verb second: “I dag arbejder jeg ikke.”",
+      "options": [
+        {
+          "key": "A",
+          "text": "I dag arbejder jeg ikke."
+        },
+        {
+          "key": "B",
+          "text": "I dag jeg arbejder ikke."
+        },
+        {
+          "key": "C",
+          "text": "I dag ikke arbejder jeg."
+        }
+      ]
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "Write three true sentences about yourself with ikke, for example what you don't eat or where you don't live."
+    }
+  ]
+}

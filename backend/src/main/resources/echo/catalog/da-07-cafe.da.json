@@ -1,0 +1,53 @@
+{
+  "id": "da-07-cafe",
+  "languageCode": "da",
+  "title": "Order at a café or bakery",
+  "level": "A1 · first sentences",
+  "topic": "At the café",
+  "objective": "Order politely, ask the price and understand the answer.",
+  "explanation": "The polite all-purpose way to order is “Jeg vil gerne have …” (I would like …): “Jeg vil gerne have en kop kaffe.” To ask the price: “Hvad koster det?” The answer sounds like “Det koster 35 kroner.” End with “Tak” — Danish has no special word for “please”, the politeness is in “gerne” and in thanking.",
+  "sourceReference": "Deepwater original starter course (2026-10-29), written for Echo; teacher review required before publishing.",
+  "skillKey": "danish.functional.ordering",
+  "sortOrder": 7,
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "Which is the polite way to order?",
+      "expectedAnswer": "B",
+      "feedbackCorrect": "Right: “Jeg vil gerne have …” is polite and natural.",
+      "feedbackIncorrect": "Use “Jeg vil gerne have …”.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Giv mig en kaffe."
+        },
+        {
+          "key": "B",
+          "text": "Jeg vil gerne have en kaffe."
+        },
+        {
+          "key": "C",
+          "text": "Kaffe nu."
+        }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete: “Hvad ___ det?” (What does it cost?)",
+      "expectedAnswer": "koster",
+      "feedbackCorrect": "Correct: “Hvad koster det?”",
+      "feedbackIncorrect": "“To cost” is “at koste” → “koster”."
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete: “Jeg vil gerne ___ et rundstykke.”",
+      "expectedAnswer": "have",
+      "feedbackCorrect": "Correct: “Jeg vil gerne have et rundstykke.”",
+      "feedbackIncorrect": "After “vil gerne”, use the infinitive “have”."
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "Write the three lines you would say at a bakery: order two things, ask the price, and say thank you."
+    }
+  ]
+}
