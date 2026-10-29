@@ -1,0 +1,53 @@
+{
+  "id": "da-04-present",
+  "languageCode": "da",
+  "title": "One verb form for everyone",
+  "level": "A1 · first sentences",
+  "topic": "Verbs",
+  "objective": "Use the present tense, which always ends in -r and never changes with the person.",
+  "explanation": "Good news: a Danish present-tense verb is the same for every person. Take the infinitive and add -r: “at spise” → “jeg spiser, du spiser, vi spiser”. “At være” (to be) becomes “er” and “at have” becomes “har”, again for everyone: “jeg er, de er”. You never need a table of endings.",
+  "sourceReference": "Deepwater original starter course (2026-10-29), written for Echo; teacher review required before publishing.",
+  "skillKey": "danish.verb.present",
+  "sortOrder": 4,
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "“We eat” is …",
+      "expectedAnswer": "B",
+      "feedbackCorrect": "Right: “vi spiser”. Same form as “jeg spiser”.",
+      "feedbackIncorrect": "Add -r to “spise”: “vi spiser”, the same as for jeg.",
+      "options": [
+        {
+          "key": "A",
+          "text": "vi spise"
+        },
+        {
+          "key": "B",
+          "text": "vi spiser"
+        },
+        {
+          "key": "C",
+          "text": "vi spiserer"
+        }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete: “Hun ___ i Aarhus.” (bor, at bo = to live)",
+      "expectedAnswer": "bor",
+      "feedbackCorrect": "Correct: “Hun bor i Aarhus.”",
+      "feedbackIncorrect": "“At bo” + r = “bor”, for every person."
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete: “De ___ trætte.” (they are tired)",
+      "expectedAnswer": "er",
+      "feedbackCorrect": "Correct: “De er trætte.”",
+      "feedbackIncorrect": "“At være” is “er” in the present, for everyone."
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "Write three sentences about a normal day, each with a different verb in the -r form, for example “Jeg drikker kaffe.”"
+    }
+  ]
+}

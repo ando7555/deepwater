@@ -1,0 +1,53 @@
+{
+  "id": "da-11-smalltalk",
+  "languageCode": "da",
+  "title": "How are you, and the weather",
+  "level": "A1 · small talk",
+  "topic": "Small talk",
+  "objective": "Answer “Hvordan går det?” and make one comment about the weather.",
+  "explanation": "“Hvordan går det?” (How's it going?) is answered with “Det går godt, tak. Og dig?” The weather is the safest small talk in Denmark: “Det regner” (it's raining), “Det er koldt i dag”, “Sikke et vejr!” (What weather!). Note “det” as a dummy subject, just like English “it”.",
+  "sourceReference": "Deepwater original starter course (2026-10-29), written for Echo; teacher review required before publishing.",
+  "skillKey": "danish.functional.small-talk",
+  "sortOrder": 11,
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "Someone asks “Hvordan går det?” A natural answer is …",
+      "expectedAnswer": "A",
+      "feedbackCorrect": "Right: “Det går godt, tak. Og dig?”",
+      "feedbackIncorrect": "Answer with “Det går godt, tak.”",
+      "options": [
+        {
+          "key": "A",
+          "text": "Det går godt, tak. Og dig?"
+        },
+        {
+          "key": "B",
+          "text": "Jeg hedder godt."
+        },
+        {
+          "key": "C",
+          "text": "Det koster godt."
+        }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete: “Det ___ i dag.” (It's raining today — at regne)",
+      "expectedAnswer": "regner",
+      "feedbackCorrect": "Correct: “Det regner i dag.”",
+      "feedbackIncorrect": "“At regne” → “regner”."
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete: “Det er ___ i dag.” (It's cold today)",
+      "expectedAnswer": "koldt",
+      "feedbackCorrect": "Correct: “Det er koldt i dag.”",
+      "feedbackIncorrect": "Cold is “koldt” after “det er”."
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "Write a four-line chat with a neighbour: greet, ask how it goes, answer, and say something about today's weather."
+    }
+  ]
+}

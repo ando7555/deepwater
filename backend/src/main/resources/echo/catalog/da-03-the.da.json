@@ -1,0 +1,53 @@
+{
+  "id": "da-03-the",
+  "languageCode": "da",
+  "title": "“The” goes on the end: kaffen, huset",
+  "level": "A1 · first words",
+  "topic": "Nouns",
+  "objective": "Make a noun definite by adding -en or -et.",
+  "explanation": "Danish puts “the” at the end of the noun. An en-word adds -en: “en kop” → “koppen”, “en bil” → “bilen”. An et-word adds -et: “et hus” → “huset”, “et glas” → “glasset”. Short words with a short vowel often double the last consonant (glas → glasset, kop → koppen). This is why learning en or et first pays off.",
+  "sourceReference": "Deepwater original starter course (2026-10-29), written for Echo; teacher review required before publishing.",
+  "skillKey": "danish.noun.definite",
+  "sortOrder": 3,
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "“The car” is …",
+      "expectedAnswer": "B",
+      "feedbackCorrect": "Right: “bilen”. En-word + -en.",
+      "feedbackIncorrect": "Bil is an en-word, so “the car” is “bilen”.",
+      "options": [
+        {
+          "key": "A",
+          "text": "en bil"
+        },
+        {
+          "key": "B",
+          "text": "bilen"
+        },
+        {
+          "key": "C",
+          "text": "bilet"
+        }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Write “the house” (et hus).",
+      "expectedAnswer": "huset",
+      "feedbackCorrect": "Correct: “huset”.",
+      "feedbackIncorrect": "Et-words add -et: “huset”."
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Write “the coffee” (en kaffe).",
+      "expectedAnswer": "kaffen",
+      "feedbackCorrect": "Correct: “kaffen”.",
+      "feedbackIncorrect": "Kaffe ends in -e, so just add -n: “kaffen”."
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "Take two of your en/et words from the last lesson and write a short sentence with each in the “the” form, for example “Koppen er varm.”"
+    }
+  ]
+}

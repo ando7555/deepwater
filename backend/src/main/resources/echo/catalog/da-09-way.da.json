@@ -1,0 +1,53 @@
+{
+  "id": "da-09-way",
+  "languageCode": "da",
+  "title": "Ask the way and catch the train",
+  "level": "A1 · getting around",
+  "topic": "Getting around",
+  "objective": "Ask where something is and understand left, right and straight on.",
+  "explanation": "“Hvor er …?” asks where something is: “Hvor er stationen?” Directions use “til venstre” (left), “til højre” (right) and “ligeud” (straight on). For transport: “Hvornår kører toget til Aarhus?” (When does the train to Aarhus leave?) — trains, buses and cars all “kører”.",
+  "sourceReference": "Deepwater original starter course (2026-10-29), written for Echo; teacher review required before publishing.",
+  "skillKey": "danish.functional.directions",
+  "sortOrder": 9,
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "“Turn right” is …",
+      "expectedAnswer": "B",
+      "feedbackCorrect": "Right: “til højre” is right.",
+      "feedbackIncorrect": "Højre = right, venstre = left.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Drej til venstre."
+        },
+        {
+          "key": "B",
+          "text": "Drej til højre."
+        },
+        {
+          "key": "C",
+          "text": "Gå ligeud."
+        }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete: “___ er toilettet?” (Where is the toilet?)",
+      "expectedAnswer": "hvor",
+      "feedbackCorrect": "Correct: “Hvor er toilettet?”",
+      "feedbackIncorrect": "Start with “Hvor”."
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete: “Hvornår ___ bussen?” (When does the bus leave?)",
+      "expectedAnswer": "kører",
+      "feedbackCorrect": "Correct: buses “kører”.",
+      "feedbackIncorrect": "Vehicles use “kører”: “Hvornår kører bussen?”"
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "Write how to get from your front door to the nearest shop in three short Danish steps, using ligeud, til venstre or til højre."
+    }
+  ]
+}

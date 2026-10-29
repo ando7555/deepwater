@@ -31,7 +31,7 @@ class DemoData {
                                 lesson.id(), lesson.languageCode(), lesson.title(), lesson.level(), lesson.topic(),
                                 lesson.objective(), lesson.explanation(), lesson.sourceReference(),
                                 "Starter catalog — teacher review required",
-                                lesson.skillKey(), nextSortOrder(db, lesson.languageCode()), "DRAFT", 1);
+                                lesson.skillKey(), lesson.sortOrder() != null ? lesson.sortOrder() : nextSortOrder(db, lesson.languageCode()), "DRAFT", 1);
                         int position = 0;
                         for (ExerciseSeed exercise : lesson.exercises()) {
                             String exerciseId = lesson.id() + "-" + (++position);
@@ -66,7 +66,7 @@ class DemoData {
 
     record LessonSeed(String id, String languageCode, String title, String level, String topic,
                       String objective, String explanation, String sourceReference, String skillKey,
-                      List<ExerciseSeed> exercises) {}
+                      Integer sortOrder, List<ExerciseSeed> exercises) {}
     record ExerciseSeed(String taskType, String prompt, String expectedAnswer, List<String> acceptedAnswers, String feedbackCorrect,
                         String feedbackIncorrect, List<OptionSeed> options) {}
     record OptionSeed(String key, String text) {}

@@ -1,0 +1,56 @@
+{
+  "id": "da-05-questions",
+  "languageCode": "da",
+  "title": "Ask a question: put the verb first",
+  "level": "A1 · first sentences",
+  "topic": "Questions",
+  "objective": "Make yes/no questions by moving the verb to the front, and use hvad, hvor and hvornår.",
+  "explanation": "To ask a yes/no question, start with the verb: “Du taler engelsk.” → “Taler du engelsk?” With a question word, the question word comes first and the verb second: “Hvor bor du?”, “Hvad laver du?”, “Hvornår kommer toget?”. Danish has no helper verb like English “do”.",
+  "sourceReference": "Deepwater original starter course (2026-10-29), written for Echo; teacher review required before publishing.",
+  "skillKey": "danish.question.verb-first",
+  "sortOrder": 5,
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "Which asks “Do you speak English?”",
+      "expectedAnswer": "B",
+      "feedbackCorrect": "Right. The verb comes first: “Taler du engelsk?”",
+      "feedbackIncorrect": "Start with the verb: “Taler du engelsk?” Danish has no “do”.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Du taler engelsk?"
+        },
+        {
+          "key": "B",
+          "text": "Taler du engelsk?"
+        },
+        {
+          "key": "C",
+          "text": "Gør du taler engelsk?"
+        }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete: “___ bor du?” (Where do you live?)",
+      "expectedAnswer": "hvor",
+      "feedbackCorrect": "Correct: “Hvor bor du?”",
+      "feedbackIncorrect": "“Where” is “hvor”."
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Turn into a question: “Du kommer i morgen.”",
+      "expectedAnswer": "kommer du i morgen?",
+      "feedbackCorrect": "Correct: the verb moves to the front.",
+      "feedbackIncorrect": "Start with the verb “kommer”, then “du”.",
+      "acceptedAnswers": [
+        "kommer du i morgen"
+      ]
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "Write three questions you would ask someone at a party: one yes/no question and two with hvad, hvor or hvornår."
+    }
+  ]
+}

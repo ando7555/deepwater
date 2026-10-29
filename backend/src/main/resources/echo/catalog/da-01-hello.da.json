@@ -1,0 +1,53 @@
+{
+  "id": "da-01-hello",
+  "languageCode": "da",
+  "title": "Say hello and who you are",
+  "level": "A1 · first words",
+  "topic": "Meeting people",
+  "objective": "Greet someone, say your name and where you come from.",
+  "explanation": "Danes greet with “Hej” almost everywhere, from shops to work. To give your name you say “Jeg hedder …” (literally “I am called …”), and to say where you are from, “Jeg kommer fra …”. The verb has the same form for every person: jeg hedder, du hedder, hun hedder. To ask back, put the verb first: “Hvad hedder du?”",
+  "sourceReference": "Deepwater original starter course (2026-10-29), written for Echo; teacher review required before publishing.",
+  "skillKey": "danish.functional.introductions",
+  "sortOrder": 1,
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "You meet a new colleague. Which is the natural way to tell them your name?",
+      "expectedAnswer": "A",
+      "feedbackCorrect": "Right. “Jeg hedder …” is how Danes give their name.",
+      "feedbackIncorrect": "Danes say “Jeg hedder …” (I am called …). Try “Jeg hedder Sara.”",
+      "options": [
+        {
+          "key": "A",
+          "text": "Jeg hedder Sara."
+        },
+        {
+          "key": "B",
+          "text": "Jeg er navn Sara."
+        },
+        {
+          "key": "C",
+          "text": "Mig hedder Sara."
+        }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete: “Hej, jeg ___ Ali.” (I am called Ali)",
+      "expectedAnswer": "hedder",
+      "feedbackCorrect": "Correct: “Hej, jeg hedder Ali.”",
+      "feedbackIncorrect": "The verb for giving your name is “hedder”."
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Complete: “Jeg kommer ___ Spanien.” (I come from Spain)",
+      "expectedAnswer": "fra",
+      "feedbackCorrect": "Correct: “Jeg kommer fra Spanien.”",
+      "feedbackIncorrect": "“From” is “fra”: “Jeg kommer fra …”."
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "Write two sentences about yourself: your name and where you come from. Then ask the other person their name."
+    }
+  ]
+}

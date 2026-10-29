@@ -56,6 +56,30 @@ class EchoCardsTest {
     }
 
     @Test
+    void closeKeepsTheBoxAndAMissRemembersWhatWasTyped() {
+        String token = learner("da");
+        String id = graph(SAVE, Map.of("front", "en kat", "back", "a cat"), token).replaceAll(".*\"id\":\"([^\"]+)\".*", "$1");
+        String grade = "mutation($id:ID!,$grade:CardGrade!,$answer:String){reviewEchoCard(cardId:$id,grade:$grade,answer:$answer){box due missCount lastMiss}}";
+
+        assertThat(graph(grade, Map.of("id", id, "grade", "KNEW"), token)).contains("\"box\":1", "\"missCount\":0");
+        assertThat(graph(grade, Map.of("id", id, "grade", "CLOSE"), token)).contains("\"box\":1", "\"due\":false");
+        assertThat(graph(grade, Map.of("id", id, "grade", "MISSED", "answer", "et kat"), token))
+                .contains("\"box\":0", "\"missCount\":1", "\"lastMiss\":\"et kat\"");
+        assertThat(graph(grade, Map.of("id", id, "grade", "MISSED"), token)).contains("\"missCount\":2", "\"lastMiss\":\"et kat\"");
+    }
+
+    @Test
+    void aPastedListSavesTogetherOrNotAtAll() {
+        String token = learner("da");
+        String many = "mutation($cards:[EchoCardInput!]!){saveEchoCards(cards:$cards){front back box due}}";
+        assertThat(graph(many, Map.of("cards", java.util.List.of(Map.of("front", "hej", "back", "hello"),
+                Map.of("front", "tak", "back", "thank you"))), token)).contains("\"front\":\"hej\"", "\"front\":\"tak\"", "\"box\":0");
+        assertThat(postGraph(many, Map.of("cards", java.util.List.of(Map.of("front", "farvel", "back", "goodbye"),
+                Map.of("front", "  ", "back", "empty"))), token)).contains("Line 2: write the phrase");
+        assertThat(graph("query { echoCards { front } }", Map.of(), token)).doesNotContain("farvel");
+    }
+
+    @Test
     void emptyOrOverlongSidesAreRejected() {
         String token = learner("de");
         assertThat(postGraph(SAVE, Map.of("front", "  ", "back", "Hello"), token)).contains("Write the phrase in 1–300 characters.");

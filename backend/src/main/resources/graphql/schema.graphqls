@@ -16,8 +16,10 @@ type Mutation {
   publishEchoLesson(lessonId: ID!): TeacherLesson!
   unpublishEchoLesson(lessonId: ID!): TeacherLesson!
   saveEchoCard(front: String!, back: String!, lessonId: ID): EchoCard!
-  "knewIt moves the card up one box; a miss moves it down one box, never back to the start."
-  reviewEchoCard(cardId: ID!, knewIt: Boolean!): EchoCard!
+  "Saves a pasted list of 1–100 cards at once; one invalid pair saves nothing."
+  saveEchoCards(cards: [EchoCardInput!]!): [EchoCard!]!
+  "KNEW moves the card up one box; CLOSE keeps its box and brings it back tomorrow; MISSED moves it down one box, never back to the start. knewIt is the older two-way form. answer is the learner's wrong attempt, kept to show what tripped them up."
+  reviewEchoCard(cardId: ID!, knewIt: Boolean, grade: CardGrade, answer: String): EchoCard!
   deleteEchoCard(cardId: ID!): Boolean!
   updateMyProfile(input: PersonProfileInput!): PersonProfile!
 }
@@ -214,6 +216,13 @@ type AudioPracticeResult {
   feedback: String!
 }
 
+enum CardGrade { MISSED CLOSE KNEW }
+
+input EchoCardInput {
+  front: String!
+  back: String!
+}
+
 type EchoCard {
   id: ID!
   front: String!
@@ -223,6 +232,10 @@ type EchoCard {
   box: Int!
   nextReviewAt: String!
   due: Boolean!
+  "How many times this card was missed."
+  missCount: Int!
+  "The learner's most recent wrong answer, if they typed one."
+  lastMiss: String
 }
 
 type PersonProfile {

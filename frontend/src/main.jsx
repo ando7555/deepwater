@@ -4,6 +4,8 @@ import DeepwaterMark3D from './DeepwaterMark3D.jsx';
 import ExerciseCard from './ExerciseCard.jsx';
 import PracticeHub from './PracticeHub.jsx';
 import PhraseCards, { MatchingWarmUp } from './PhraseCards.jsx';
+import { scheduleNote } from './cardTools.js';
+import CoursePath from './CoursePath.jsx';
 import CalmProgress from './CalmProgress.jsx';
 import DailyReview from './DailyReview.jsx';
 import ProfilePage from './ProfilePage.jsx';
@@ -276,7 +278,7 @@ function App() {
 
   useEffect(() => { if (user) loadHome(); }, [user]);
 
-  const CARD_FIELDS = 'id front back lessonId box nextReviewAt due';
+  const CARD_FIELDS = 'id front back lessonId box nextReviewAt due missCount lastMiss';
   async function loadCards() {
     try { setCards((await gql(`query { echoCards { ${CARD_FIELDS} } }`)).echoCards); }
     catch (cardsError) { setError(cardsError.message); }
@@ -295,10 +297,23 @@ function App() {
     finally { setBusy(false); }
   }
 
-  async function reviewCard(card, knewIt) {
+  async function saveCards(pairs) {
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const saved = (await gql(`mutation($cards:[EchoCardInput!]!){ saveEchoCards(cards:$cards) { id } }`, { cards: pairs })).saveEchoCards;
+      await loadCards(); setNotice(`${saved.length} card${saved.length === 1 ? '' : 's'} saved. They’re in today’s review.`);
+      return true;
+    } catch (saveError) { setError(saveError.message); return false; }
+    finally { setBusy(false); }
+  }
+
+  // grade is MISSED, CLOSE or KNEW; answer is the learner's wrong attempt, kept for "Keeps slipping".
+  async function reviewCard(card, grade, answer = null) {
     setBusy(true); setError('');
     try {
-      await gql(`mutation($id:ID!,$knewIt:Boolean!){ reviewEchoCard(cardId:$id, knewIt:$knewIt) { id } }`, { id: card.id, knewIt });
+      const reviewed = (await gql(`mutation($id:ID!,$grade:CardGrade!,$answer:String){ reviewEchoCard(cardId:$id, grade:$grade, answer:$answer) { box } }`,
+        { id: card.id, grade, answer })).reviewEchoCard;
+      setNotice(scheduleNote(grade, reviewed));
       await loadCards();
     } catch (reviewError) { setError(reviewError.message); }
     finally { setBusy(false); }
@@ -471,6 +486,7 @@ function App() {
   const filteredLessons = (home?.lessons || []).filter(item =>
     (audioFilter === 'ALL' || item.audio?.mediaType === audioFilter)
     && (bandFilter === 'ALL' || item.audio?.editorialBand === bandFilter));
+  const hasAudio = (home?.lessons || []).some(item => item.audio);
   const recommendedAudio = filteredLessons.find(item => item.id === home?.recommendedAudioLessonId) || null;
   const lesson = filteredLessons.find(item => item.id === selectedLessonId) || recommendedAudio || filteredLessons[0];
   const percent = lesson ? Math.round(lesson.mastery * 100) : 0;
@@ -552,18 +568,22 @@ function App() {
         canWarmUp={cards.length >= 3} onWarmUp={() => setWarmUp(true)} />}
 
       {tab === 'cards' && <PhraseCards cards={cards} languageCode={home.profile.languageCode} languageName={home.profile.languageCode === 'de' ? 'German' : 'Danish'}
-        busy={busy} onSave={saveCard} onReview={reviewCard} onDelete={deleteCard} />}
+        busy={busy} onSave={saveCard} onSaveMany={saveCards} onReview={reviewCard} onDelete={deleteCard} />}
 
       {tab === 'progress' && <CalmProgress home={home} cards={cards} />}
 
+      {tab === 'today' && <CoursePath lessons={home.lessons} currentId={lesson?.id} onOpen={id => {
+        openLesson(id); requestAnimationFrame(() => document.getElementById('lesson-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      }} />}
+
       {tab === 'today' && <div className="workspace-grid">
-        <section className="lesson panel">
-          <div className="audio-library-filters">
+        <section className="lesson panel" id="lesson-panel">
+          {hasAudio && <div className="audio-library-filters">
             <div><span className="eyebrow">LEARN WITH REAL VOICES</span><h3>Music &amp; podcasts</h3></div>
             <label>Medium<select value={audioFilter} onChange={event => setAudioFilter(event.target.value)}><option value="ALL">All lessons</option><option value="MUSIC">Music</option><option value="PODCAST">Podcasts</option></select></label>
             <label>Suggested level<select value={bandFilter} onChange={event => setBandFilter(event.target.value)}><option value="ALL">All levels</option>{Object.entries(BAND_LABELS).map(([key, value]) => <option value={key} key={key}>{value}</option>)}</select></label>
-          </div>
-          {home.lessons.length > 1 && filteredLessons.length > 0 && <label className="lesson-picker">Choose a lesson<select value={lesson?.id || ''} onChange={event => setSelectedLessonId(event.target.value)}>{filteredLessons.map(item => <option key={item.id} value={item.id}>{item.audio ? `${item.audio.mediaType} · ${BAND_LABELS[item.audio.editorialBand]} · ` : ''}{item.title}</option>)}</select></label>}
+          </div>}
+          {hasAudio && home.lessons.length > 1 && filteredLessons.length > 0 && <label className="lesson-picker">Choose a lesson<select value={lesson?.id || ''} onChange={event => setSelectedLessonId(event.target.value)}>{filteredLessons.map(item => <option key={item.id} value={item.id}>{item.audio ? `${item.audio.mediaType} · ${BAND_LABELS[item.audio.editorialBand]} · ` : ''}{item.title}</option>)}</select></label>}
           {filteredLessons.length === 0 && <div className="audio-empty"><b>{audioFilter === 'ALL' ? 'No approved lessons for this language yet.' : `No approved ${audioFilter.toLowerCase()} lessons in this level yet.`}</b><p>Your teacher is building a reviewed collection. Choose another filter, or return when new material is approved.</p></div>}
           {lesson && <>
             <div className="lesson-topline"><span className="pill">{lesson.level}</span><span className="pill soft">{lesson.topic}</span></div>

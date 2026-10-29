@@ -1,0 +1,67 @@
+{
+  "id": "da-02-en-et",
+  "languageCode": "da",
+  "title": "en or et: learn the word with its article",
+  "level": "A1 · first words",
+  "topic": "Nouns",
+  "objective": "Use en and et with everyday nouns and recognise that most nouns take en.",
+  "explanation": "Every Danish noun is either an en-word or an et-word: “en kop” (a cup), “et glas” (a glass). About three in four nouns take en, but there is no reliable rule for the rest, so learn each noun together with its article, as one unit: not “kop” but “en kop”. Your phrase cards show an en-word or et-word badge to help.",
+  "sourceReference": "Deepwater original starter course (2026-10-29), written for Echo; teacher review required before publishing.",
+  "skillKey": "danish.noun.gender",
+  "sortOrder": 2,
+  "exercises": [
+    {
+      "taskType": "SELECT",
+      "prompt": "Which is correct?",
+      "expectedAnswer": "B",
+      "feedbackCorrect": "Right: “en kop kaffe”. Kop is an en-word.",
+      "feedbackIncorrect": "Kop is an en-word: “en kop kaffe”.",
+      "options": [
+        {
+          "key": "A",
+          "text": "et kop kaffe"
+        },
+        {
+          "key": "B",
+          "text": "en kop kaffe"
+        },
+        {
+          "key": "C",
+          "text": "kop en kaffe"
+        }
+      ]
+    },
+    {
+      "taskType": "SELECT",
+      "prompt": "Which is correct?",
+      "expectedAnswer": "B",
+      "feedbackCorrect": "Right: “et hus”. Hus is an et-word.",
+      "feedbackIncorrect": "Hus is one of the et-words: “et hus”.",
+      "options": [
+        {
+          "key": "A",
+          "text": "en hus"
+        },
+        {
+          "key": "B",
+          "text": "et hus"
+        },
+        {
+          "key": "C",
+          "text": "hus et"
+        }
+      ]
+    },
+    {
+      "taskType": "TEXT",
+      "prompt": "Write the article: “___ æble” (an apple)",
+      "expectedAnswer": "et",
+      "feedbackCorrect": "Correct: “et æble”.",
+      "feedbackIncorrect": "Æble is an et-word: “et æble”."
+    },
+    {
+      "taskType": "TRANSFER",
+      "prompt": "Write three things you can see right now, each with en or et. Look up any article you are not sure of, and save the words as cards."
+    }
+  ]
+}

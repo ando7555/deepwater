@@ -27,7 +27,7 @@ class MvpEndToEndTest {
     void teacherCanDraftPublishAndLearnerCanSelectAndPractiseGerman() {
         String teacher = teacherToken();
         assertThat(graph("query { teacherLessons { id title languageCode reviewStatus exercises{taskType expectedAnswer} } }", Map.of(), teacher))
-                .contains("v2-time-first", "Start with time. Put the verb second.", "\"reviewStatus\":\"DRAFT\"");
+                .contains("v2-time-first", "Start with time. Put the verb second.", "\"reviewStatus\":\"DRAFT\"", "da-01-hello", "da-11-smalltalk");
         var exercise = Map.of("taskType", "SELECT", "prompt", "Choose the correct order.",
                 "expectedAnswer", "A", "feedbackCorrect", "Correct.", "feedbackIncorrect", "Try again.",
                 "options", List.of(Map.of("key", "A", "text", "Heute arbeite ich."),
