@@ -272,6 +272,57 @@ re-read in full, and possibly out of date [6][7][8][9][10]. No Duolingo content 
 To check these against the real app, add `duolingo.com` and `www.duolingo.com` to the allowed
 domains; only threads started after the change can reach it.
 
+## Brain Biscuit Learning (2026-10-29)
+
+The owner also asked for https://brainbiscuitlearning.com/. Its public pages (home, method,
+levels, recorded courses and the PlayWord game page) were read on 2026-10-29 [13]. Signed-in
+areas (dashboard, lessons, the game itself) were not opened. Facts below are what the pages
+say, summarised; nothing was copied.
+
+### What it is (Observed)
+
+An online Danish school (says it has taught since 2010) with three products:
+
+- **Live classes:** weekly, small groups of at most three, narrow age bands; children 4 to 18
+  and adults. The adult plan bundles a weekly class with recorded lessons (USD 69.90 a month).
+- **Recorded courses:** short video lessons of 5 to 10 minutes by one teacher, followed in
+  order but all unlocked from day one; 170+ lessons, 1,000+ sentences, 850+ picture
+  exercises. Beginner and Intermediate are live, Advanced is "coming soon". USD 19.90 a month
+  per course, 29.90 for both. Progress, streaks, badges and a certificate on completion.
+- **PlayWord (Ordjagten):** a word-hunt game (USD 1.99 first month, then 4.99, free with a course).
+
+**Method, as the site states it:** visual first (pictures carry meaning instead of
+translation drills), interactive themed lessons with short, frequently changing activities,
+material adjusted to age, level and interests, speaking, reading and writing from day one,
+and themes that come back over time. The pages give no lesson sequence, no review schedule
+and no feedback method.
+
+**Levels:** five named levels described by what the learner can do: *First words*, *First
+sentences*, *Small talk*, *Confident talker*, *Fluent and polished*. No CEFR mapping is given.
+Live students are placed by a test plus age and time zone.
+
+**PlayWord details:** find Danish words in a letter grid; a picture and English gloss show the
+target (for example a cat, "en kat"); found words go into a personal **word box** with their
+article; ten boards per level, finishing one unlocks the next. Levels follow grammar, not
+topics: Beginner = nouns with en/et (the article is spoken aloud), next level adds verbs shown
+with "at", top level adds adjectives in base form. Native audio throughout; a mascot button
+reveals the word.
+
+### Reuse for Echo (Proposals)
+
+| Brain Biscuit idea | Recommendation for Echo |
+|---|---|
+| Picture as the cue instead of English | **Reuse.** Add an optional image to cards and exercises so a learner can recall Danish from a picture, not only from English. Needs an image source with clear rights. |
+| Article always attached to the noun (en/et), spoken aloud | **Reuse.** Store and show gender with every noun, as also proposed from Amalie Teaches; read the article aloud with the word. Gender is a classic Danish difficulty. |
+| Levels named by what you can do | **Reuse.** Label Echo's progress with can-do names in our own words (for example "first sentences", "small talk") alongside any CEFR tag, so progress means something to a beginner. |
+| Levels that follow grammar (nouns, then verbs, then adjectives) | **Reuse as sequencing input.** Fits the project's prerequisite-aware sequencing idea; test it rather than assume it. |
+| Personal word box filled by playing | **Reuse.** Words found in a game or a reading go straight into My cards with their article. |
+| Short lessons (5 to 10 minutes), all unlocked | **Reuse.** Show an estimated length on every lesson and never lock content behind earlier steps. |
+| Themes that come back | **Already in Echo** through spaced review; keep it explicit in the lesson plan. |
+| Word-hunt grid game | **Later, maybe.** Fun but slow per word; only worth it if it feeds the word box and the review schedule. |
+| Streaks and badges | **Do not copy** streaks (Echo principle). A completion certificate could be fine later. |
+| Live small-group classes | **Not for the MVP.** Echo is self-study first; same call as for Amalie Teaches' booking. |
+
 ## References
 
 Owner's screenshots of amalieteaches.com, shared in the project thread on 2026-10-28.
@@ -289,3 +340,4 @@ Public home page of https://www.amalieteaches.com/ and its interface text catalo
 10. Duolingo blog, ways to practice: https://blog.duolingo.com/ways-to-practice-in-duolingo
 11. Android Authority on the Energy system (2025): https://www.androidauthority.com/quitting-duolingo-energy-system-3599842/
 12. UC+ Dansk, Duolingo overview: https://ucplusdansk.dk/en/duolingo-what-is-it/
+13. Brain Biscuit Learning public pages, read 2026-10-29: https://brainbiscuitlearning.com/ , /method, /levels, /recorded-classes, /ordjagten
