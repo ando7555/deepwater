@@ -9,10 +9,16 @@ Status legend: **Built** = in this PR. **Proposal** = not built, needs an owner 
 
 ## Sources and limits
 
-- amalieteaches.com could not be fetched: the cloud environment's network policy blocks the
-  domain, and a web search did not index it. Everything below about the site comes **only** from
-  two screenshots the owner shared in the project thread on 2026-10-28 (home page and Practice
-  page). No lesson text, vocabulary lists or prices were seen. Nothing was copied from the site.
+- **2026-10-28:** amalieteaches.com was blocked by the cloud network policy, so the first
+  rounds below rest **only** on two screenshots the owner shared (home page and Practice page).
+- **2026-10-29:** after the owner allowed the domain, `www.amalieteaches.com` was fetched
+  (the bare `amalieteaches.com` is still refused by the proxy). Only the public home page is
+  readable without an account. That page ships the site's whole interface text catalogue
+  (171 screen namespaces, about 3,400 labels, for the student, teacher and admin areas), which
+  shows what each screen does. **No lesson text, word lists, audio or prices are public:** they
+  sit behind sign-in, and no account was created. The public travel story for Denmark is an
+  empty placeholder. See [the third round](#third-round-full-site-read-2026-10-29). Nothing was
+  copied into the product; that section summarises structure and method in our own words.
 - Duolingo drawbacks come from published learner research and critiques, listed under
   [References](#references), found by web search on 2026-10-28 and summarised, not re-read in
   full. Treat them as pointers, not settled findings. Some are anecdotal and are marked so.
@@ -123,12 +129,118 @@ only opt-in, coarse Echo signals (owner decisions, 2026-10-17). Nothing below is
 Measure whether learners return for due reviews without streak pressure, for example the
 share of due cards and lessons reviewed within two days. Then pick the next proposal.
 
-To read the full site, add `amalieteaches.com` and `www.amalieteaches.com` to the cloud
-environment's allowed domains and start a new thread.
+The 2026-10-29 read of the site's public page is summarised in the next section.
+
+## Third round: full site read (2026-10-29)
+
+The owner asked for the site's content **and the UI components Echo could reuse**. Everything
+under "Observed" comes from the public page's interface text (labels, hints, empty states);
+it shows what a screen does, not how it looks or how well it works. Screens behind sign-in
+were not opened. "Echo today" was checked against `main` on 2026-10-29. Reuse means reusing
+the idea in Deepwater's own visual style, never the site's look or wording.
+
+### What the platform is (Observed)
+
+A multi-teacher platform, not a single course: each teacher gets a site (subdomain) with
+their own students. Four student areas: **Practice, Lessons, Games, Explore**. Teachers have
+a word bank, vocabulary modules, activity packs, a calendar, student profiles and analytics.
+A platform admin area handles invitations, sites, support and a waitlist. Levels are tagged
+by CEFR (A1 to C2 colour tokens exist).
+
+### Content model (Observed)
+
+| Content | Fields and rules seen |
+|---|---|
+| Word (shared word bank) | Danish, English, word class (noun, verb, expression), gender (en/et or not applicable), Danish example plus its translation, pronunciation tip, recorded audio. A word is shared: editing it updates everywhere and keeps learner progress. |
+| Vocabulary module | Named set of words, e.g. "At the café". Built by pasting pairs or importing CSV (up to 1,000 words, 2 MB) with column mapping and a review step that flags missing translations. Nothing is assigned until the teacher approves and picks students. |
+| Reading activity | A Danish passage plus a glossary; the editor insists every word in the passage has a meaning. The learner taps any word to see it. |
+| Dialogue activity | Turns: the teacher's Danish line, an English prompt for the learner's reply, a model answer. |
+| Sentence activity | A correct Danish sentence, given to learners as shuffled word tiles; optional teaching note. |
+| Quiz | Multiple choice per lesson, one correct option, optional explanation and topic. Can be imported as a JSON file. |
+| Starter pack | Copyable ready-made pack: a morning reading with glossary, a café dialogue, sentence building and 12 words. Copies become the teacher's private drafts. |
+| Lesson material | Teacher-written class page with sections, a quiz and flashcards linked to a module. |
+
+The only Danish visible publicly is placeholder examples (greetings, "a coffee", "the bill",
+"an apple"). There are **no word lists or lessons to gather** without an account.
+
+### Practice catalogue (Observed)
+
+The practice hub groups 16 modes under four skills, each with an estimated length in minutes
+and a "Soon" or "Later" badge for modes not yet live:
+
+- **Read:** match the words; tap to translate (read a short text, tap unknown words);
+  flashcards; real-life Danish (menus, signs, train announcements).
+- **Listen:** listen and choose; hear it, write it; similar sounds (tell near-identical words
+  apart); everyday dialogues.
+- **Speak:** a café dialogue one line at a time; say it in Danish (see English, say Danish);
+  answer out loud (questions about you and your day); conversation partner with feedback.
+- **Write:** build a sentence (word order); spelling with æ, ø, å at hand; spot the mistake;
+  write a message with feedback from the teacher.
+
+### Interaction details worth noting (Observed)
+
+1. **Flashcard session:** direction switch (Danish to English, English to Danish, audio to
+   Danish); answer by flipping, typing or speaking; three self-grades: *Missed it*, *I was
+   close*, *I knew it*. "Close" is flagged for the teacher to look at.
+2. **Danish letters:** buttons that insert æ, ø, å at the cursor, with keys 1, 2, 3.
+3. **Audio:** play button with adjustable playback speed.
+4. **Study before you practise:** a word list view with gender, example, translation and
+   pronunciation before the cards start.
+5. **Filters:** pick a module or word category; "N active filters".
+6. **Clear ends:** "Set complete", "You're caught up", "Nothing due", words to revisit,
+   "Next N words", "Keep practising".
+7. **Schedule honesty:** results say whether they changed the review schedule: first attempts
+   on due words in matching update it; reading, dialogue and sentence activities say
+   "Practice only, your review schedule is unchanged". Speaking practice records completion
+   only, and says the transcript is not saved or scored.
+8. **Leitner boxes:** every word starts as New; correct moves it forward with a longer gap;
+   wrong sends it back to New. A "How boxes work" explainer is in the session.
+9. **Needs another look:** words stuck in New, words wrong twice or more, with the learner's
+   last wrong answer shown and copyable.
+10. **Learner-made cards:** named sets, paste a list (tab or semicolon auto-detected, swap
+    columns, preview with line-level problems), undo on remove, a per-side length limit,
+    "your teacher can see your cards and progress".
+11. **Quiz feedback:** the right answer and why straight after each question; "Retry missed".
+12. **Robust saving:** "Answer saved but overview could not refresh, retry", "Result not
+    saved, retry saving" instead of silent loss.
+13. **Teacher view of a learner:** deck by box, 7-day flashcard accuracy, due now, recent misses
+    with what they wrote, accepted near-misses, dismiss words the learner already knows.
+14. **Live lessons:** booking from teacher availability (morning, afternoon, evening;
+    Google Calendar invites), video call with whiteboard, private teacher notes that autosave,
+    a To do / In progress / Done learning board.
+15. **Games and Explore:** "Roll and talk" (a die gives a speaking question), match pairs, a
+    shared Street View walk through Danish streets, and a travel globe with country stories.
+16. **Streak:** shown in practice and on the teacher's student profile.
+
+### Reuse for Echo (Proposals unless marked)
+
+| Site component | Echo today | Recommendation |
+|---|---|---|
+| Practice hub by skill | Built: Read, Listen, Speak, Write over SELECT, audio, TRANSFER and TEXT tasks | **Reuse.** Add a time estimate per mode and an honest "Soon" badge. Next modes worth building first, because they need no speech grading: *build a sentence* (tiles), *tap to translate* reading with a glossary, *hear it, write it*. |
+| Three-way self-grade with "close" | Cards have two grades; typed answers already accept one small slip as "close" | **Reuse.** Add "I was close": keep the card in its box and bring it back sooner. Keep Echo's rule that a miss steps back one box rather than to New (deliberate difference). |
+| Direction switch on cards | One direction | **Reuse.** Danish to English, English to Danish, and audio to Danish using the existing browser voice. |
+| Danish letter buttons | Typing requires æ, ø, å to be right but gives no help | **Reuse, small.** Insert buttons plus keys; check they do not clash with Echo's 1 and 2 shortcuts. |
+| Playback speed | `speak()` has a fixed rate of 0.9 | **Reuse, small.** Normal and slow. |
+| Word detail (gender, example, pronunciation tip) | Cards hold phrase and meaning only | **Reuse** as optional fields on cards and lesson words; gender (en/et) matters for Danish. |
+| Paste a list into cards | Cards are added one at a time | **Reuse.** Paste pairs with separator detection and a preview of problem lines. Same parser can serve teacher import later. |
+| Needs another look | Save-a-miss-as-card exists; no "stuck" list | **Reuse.** List cards missed twice or more with the learner's last wrong answer. Fits Echo's honest progress view. |
+| "Practice only" vs "schedule updated" messages | Not stated | **Reuse.** Say after every activity whether it changed the review schedule. Cheap and builds trust. |
+| Retry missed at end of a set | Daily review shows a summary | **Reuse.** One-tap "retry missed". |
+| Teacher content tools (word bank, CSV import, draft and publish, preview that saves nothing, starter packs) | Echo has a teacher review flow for lessons | **Later, for the teacher-reviewed AI plan.** The draft, preview, publish pattern is the right shape for AI-drafted exercises a teacher approves. |
+| Teacher view of a learner's misses | Not built | **Later.** Needs a teacher role and learner consent. |
+| Booking, video call, whiteboard, learning board | Not built | **Do not copy for the MVP.** This is a tutoring business; Echo is self-study first. Revisit only if Deepwater adds live teachers. |
+| Streaks, Roll and talk, Street View walk, travel globe | Echo has no streaks; owner rejected a globe | **Do not copy** streaks or the globe. Roll and talk could become a later speaking prompt deck. |
+
+### Content to gather
+
+None could be gathered: the site's lessons and words are behind sign-in, and copying a
+teacher's material would need her permission anyway. If the owner wants Amalie's actual
+material in Echo, the way is to ask her for permission or a partnership, not to scrape it.
 
 ## References
 
 Owner's screenshots of amalieteaches.com, shared in the project thread on 2026-10-28.
+Public home page of https://www.amalieteaches.com/ and its interface text catalogue, fetched 2026-10-29.
 
 1. CALL-EJ article on Duolingo: https://callej.org/index.php/journal/article/download/419/347/1013
 2. Isaacson, Duolingo learner study: https://tfulib.repo.nii.ac.jp/record/794/files/p87-99%20Jonathan%20Isaacson.pdf
