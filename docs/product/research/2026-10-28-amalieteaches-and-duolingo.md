@@ -237,6 +237,41 @@ None could be gathered: the site's lessons and words are behind sign-in, and cop
 teacher's material would need her permission anyway. If the owner wants Amalie's actual
 material in Echo, the way is to ask her for permission or a partnership, not to scrape it.
 
+## Duolingo UI components (2026-10-29)
+
+The owner asked for the same content and reusable-component view of Duolingo, on this PR.
+**duolingo.com is blocked** by the cloud network policy, so the app was not opened. What follows
+comes from web search results only (Duolingo's own blog, a fan wiki and press), summarised, not
+re-read in full, and possibly out of date [6][7][8][9][10]. No Duolingo content was copied.
+
+### Components seen in those sources (Observed, secondhand)
+
+| Component | What it does |
+|---|---|
+| Learning path | One winding path of units and lessons instead of a skill tree; practice sessions sit in the path; old words come back in later lessons instead of skills "breaking" [7][8]. |
+| Exercise types | Tap the pairs (match a grid); tap what you hear (word bank, replay); type what you hear (with a slow "turtle" replay); speak this sentence; arrange words; complete the translation; mark the correct meaning [6][9]. |
+| Practice hub | Speak, Listen, Mistakes, Stories, Radio and Words modes; mistakes practice and all-speaking lessons for paying users [9][10]. |
+| Legendary | A harder re-run of a finished unit for extra XP, with few mistakes allowed [10]. |
+| Hearts, now Energy | Hearts were lost on mistakes; Energy (tested from July 2025) drains on every exercise and refills with gems, ads or streaks of correct answers; unlimited for paying users [11]. |
+| XP, leagues, streaks | Points per lesson, leaderboards against other learners, daily streaks [12]. |
+
+### Reuse for Echo (Proposals)
+
+| Duolingo component | Recommendation for Echo |
+|---|---|
+| Slow replay ("turtle") | **Reuse.** Same as the playback speed idea from Amalie Teaches; one small button on every audio prompt. |
+| Tap what you hear / type what you hear | **Reuse.** Echo already has read-aloud and typed recall; combining them gives a listening dictation mode with no new backend. |
+| Arrange words | **Reuse.** Same as Amalie Teaches' "build a sentence"; build it once for both ideas. |
+| Mistakes practice | **Reuse, free.** Echo's "save a miss as a card" plus the proposed "needs another look" list cover it; keep it free for everyone, not a paid extra. |
+| Old words returning inside new lessons | **Reuse.** Mix due cards into lessons, as Echo's daily review already does. |
+| Single path | **Consider later.** A visible path helps beginners see what is next, but must show patterns mastered, not just nodes passed. |
+| Legendary re-runs | **Do not copy.** Mastery in Echo comes from spaced review, not a one-off hard run. |
+| Hearts or Energy | **Do not copy.** Limiting practice when learners make mistakes or practise a lot works against learning; Echo never caps practice. |
+| Leagues and streaks | **Do not copy.** Already an Echo principle (see the table above). |
+
+To check these against the real app, add `duolingo.com` and `www.duolingo.com` to the allowed
+domains; only threads started after the change can reach it.
+
 ## References
 
 Owner's screenshots of amalieteaches.com, shared in the project thread on 2026-10-28.
@@ -247,3 +282,10 @@ Public home page of https://www.amalieteaches.com/ and its interface text catalo
 3. Technology Assisted Language Education (2024): https://doaj.org/article/cb110689f72d4ec09a48037fba7b99ac
 4. "Does Duolingo Work?": https://jatck.substack.com/p/does-duolingo-work
 5. Podcast analysis (anecdotal): https://www.podengine.ai/articles/we-analyzed-300-podcasts-on-duolingoheres-the-core-debate
+6. Duolingo Wiki, Exercise (fan-run): https://duolingo.fandom.com/wiki/Exercise
+7. Duolingo blog, new home screen design (2022): https://blog.duolingo.com/new-duolingo-home-screen-design
+8. UX Collective, critique of the 2022 path redesign: https://uxdesign.cc/down-the-wrong-path-the-disaster-of-the-latest-duolingo-ui-update-a4cdd1e6ea1c
+9. Duolingo blog, guide to Practice Hub: https://blog.duolingo.com/guide-to-duolingo-practice-hub/
+10. Duolingo blog, ways to practice: https://blog.duolingo.com/ways-to-practice-in-duolingo
+11. Android Authority on the Energy system (2025): https://www.androidauthority.com/quitting-duolingo-energy-system-3599842/
+12. UC+ Dansk, Duolingo overview: https://ucplusdansk.dk/en/duolingo-what-is-it/
