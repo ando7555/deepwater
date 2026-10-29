@@ -20,6 +20,7 @@ and AI fashion remain later, separately gated applications.
 - [Product scope, shared analytical method, and measurable acceptance criteria](docs/product/DEEPWATER_PRODUCT_SCOPE_AND_ACCEPTANCE.md)
 - [Target architecture and Mermaid system/workflow diagrams](docs/architecture/DEEPWATER_TARGET_ARCHITECTURE.md)
 - [Architecture overview](ARCHITECTURE.md)
+- [Echo roadmap from the MVP onward](docs/product/ROADMAP.md) and the [competitor algorithm research](docs/product/research/2026-10-29-competitor-learning-algorithms.md) behind it
 - [Implementation status and known gaps](STATUS.md)
 - [Teacher workflow and coding guide](TEACHER_GUIDE.md)
 
