@@ -4,6 +4,7 @@ import DeepwaterMark3D from './DeepwaterMark3D.jsx';
 import ExerciseCard from './ExerciseCard.jsx';
 import PracticeHub from './PracticeHub.jsx';
 import PhraseCards, { MatchingWarmUp } from './PhraseCards.jsx';
+import { scheduleNote } from './cardTools.js';
 import CalmProgress from './CalmProgress.jsx';
 import DailyReview from './DailyReview.jsx';
 import ProfilePage from './ProfilePage.jsx';
@@ -276,7 +277,7 @@ function App() {
 
   useEffect(() => { if (user) loadHome(); }, [user]);
 
-  const CARD_FIELDS = 'id front back lessonId box nextReviewAt due';
+  const CARD_FIELDS = 'id front back lessonId box nextReviewAt due missCount lastMiss';
   async function loadCards() {
     try { setCards((await gql(`query { echoCards { ${CARD_FIELDS} } }`)).echoCards); }
     catch (cardsError) { setError(cardsError.message); }
@@ -295,10 +296,23 @@ function App() {
     finally { setBusy(false); }
   }
 
-  async function reviewCard(card, knewIt) {
+  async function saveCards(pairs) {
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const saved = (await gql(`mutation($cards:[EchoCardInput!]!){ saveEchoCards(cards:$cards) { id } }`, { cards: pairs })).saveEchoCards;
+      await loadCards(); setNotice(`${saved.length} card${saved.length === 1 ? '' : 's'} saved. They’re in today’s review.`);
+      return true;
+    } catch (saveError) { setError(saveError.message); return false; }
+    finally { setBusy(false); }
+  }
+
+  // grade is MISSED, CLOSE or KNEW; answer is the learner's wrong attempt, kept for "Keeps slipping".
+  async function reviewCard(card, grade, answer = null) {
     setBusy(true); setError('');
     try {
-      await gql(`mutation($id:ID!,$knewIt:Boolean!){ reviewEchoCard(cardId:$id, knewIt:$knewIt) { id } }`, { id: card.id, knewIt });
+      const reviewed = (await gql(`mutation($id:ID!,$grade:CardGrade!,$answer:String){ reviewEchoCard(cardId:$id, grade:$grade, answer:$answer) { box } }`,
+        { id: card.id, grade, answer })).reviewEchoCard;
+      setNotice(scheduleNote(grade, reviewed));
       await loadCards();
     } catch (reviewError) { setError(reviewError.message); }
     finally { setBusy(false); }
@@ -552,7 +566,7 @@ function App() {
         canWarmUp={cards.length >= 3} onWarmUp={() => setWarmUp(true)} />}
 
       {tab === 'cards' && <PhraseCards cards={cards} languageCode={home.profile.languageCode} languageName={home.profile.languageCode === 'de' ? 'German' : 'Danish'}
-        busy={busy} onSave={saveCard} onReview={reviewCard} onDelete={deleteCard} />}
+        busy={busy} onSave={saveCard} onSaveMany={saveCards} onReview={reviewCard} onDelete={deleteCard} />}
 
       {tab === 'progress' && <CalmProgress home={home} cards={cards} />}
 

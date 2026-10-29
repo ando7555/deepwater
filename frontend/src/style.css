@@ -440,3 +440,30 @@ kbd{font:600 10px 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;border-ra
   .form-grid{grid-template-columns:1fr}.review-launch{flex-direction:column;align-items:stretch}
 }
 .card-list .hear-button{justify-self:start}
+
+/* Card review: directions, three grades, letters, tiles, slow replay, "keeps slipping" and pasted lists. */
+.hear-pair{display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.hear-button.slow{padding:6px 10px;color:var(--text-2)}
+.article-badge{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--accent-text);background:var(--accent-soft);vertical-align:middle}
+.mode-picker{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-2)}
+.mode-picker select{width:auto;padding:6px 10px;font-size:13px}
+.letter-buttons{display:inline-flex;gap:6px}
+.letter-buttons button{min-width:38px;padding:6px 10px;font-size:16px;background:var(--deep);color:var(--text-1);box-shadow:inset 0 0 0 1px var(--line-soft)}
+.card-actions{flex-wrap:wrap;justify-content:center}
+.card-actions .suggested{box-shadow:inset 0 0 0 2px var(--accent)}
+.sentence-builder{display:grid;gap:10px;width:100%;max-width:520px}
+.tile-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:44px;align-items:center}
+.tile-row.answer{padding:8px;border-radius:var(--radius-sm);border:1px dashed var(--line-hover)}
+.tile{padding:8px 12px;border-radius:10px;background:var(--surface-glass);color:var(--text-1);box-shadow:inset 0 0 0 1px var(--line-soft);font-size:16px}
+.tile.placed{background:var(--accent-soft);color:var(--accent-text)}
+.slipping{margin-top:20px;padding:20px 22px;display:grid;gap:12px}.slipping h3{margin:0}.slipping p{margin:0;color:var(--text-2)}
+.slipping ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.slipping li{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--line-soft)}
+.slipping li div{display:grid;gap:2px}.slipping li span,.slipping small{font-size:13px;color:var(--text-2)}
+.paste-list,.one-card{display:grid;gap:10px}
+.paste-list textarea{width:100%;font-family:inherit;font-size:15px}
+.paste-list .check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-2)}
+.paste-list .check input{width:auto}
+.paste-summary{margin:0;font-weight:600}
+.paste-problems{margin:0;padding-left:18px;font-size:13px;color:var(--danger, #e57373)}
+@media (max-width:640px){.slipping li{grid-template-columns:1fr auto}.slipping li>div{grid-column:1/-1}.cards-panel-heading{flex-wrap:wrap;gap:8px}}

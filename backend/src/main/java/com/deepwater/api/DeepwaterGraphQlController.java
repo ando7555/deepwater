@@ -14,6 +14,8 @@ import com.deepwater.platform.PersonProfileService.PersonProfileInput;
 import com.deepwater.platform.PlatformService;
 import graphql.GraphQLContext;
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -102,8 +104,17 @@ public class DeepwaterGraphQlController {
     }
 
     @MutationMapping
-    EchoCard reviewEchoCard(@Argument String cardId, @Argument Boolean knewIt, GraphQLContext context) {
-        return cards.review(account(context), cardId, Boolean.TRUE.equals(knewIt));
+    List<EchoCard> saveEchoCards(@Argument List<EchoCardService.CardInput> cards, GraphQLContext context) {
+        return this.cards.saveAll(account(context), cards);
+    }
+
+    @MutationMapping
+    EchoCard reviewEchoCard(@Argument String cardId, @Argument Boolean knewIt, @Argument EchoCardService.Grade grade,
+                            @Argument String answer, GraphQLContext context) {
+        if (grade == null && knewIt == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Say how the review went.");
+        EchoCardService.Grade resolved = grade != null ? grade : Boolean.TRUE.equals(knewIt) ? EchoCardService.Grade.KNEW : EchoCardService.Grade.MISSED;
+        return cards.review(account(context), cardId, resolved, answer);
     }
 
     @MutationMapping

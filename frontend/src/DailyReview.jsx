@@ -3,6 +3,8 @@ import { CardReview } from './PhraseCards.jsx';
 import { memoryStrength } from './memory.js';
 
 const SESSION_SIZE = 10;
+// Cards in a session change direction, so one phrase is met as recognition, recall, listening and word order.
+const REVIEW_ROTATION = ['type', 'flip', 'listen', 'reverse', 'build'];
 
 /**
  * Builds today's session: due cards (weakest memory first) interleaved with graded exercises
@@ -29,13 +31,14 @@ export default function DailyReview({ lessons, cards, languageCode, results, ren
   // The queue is fixed when the session starts, so reviewing a card does not reshuffle it.
   const session = useMemo(() => buildSession(lessons, cards), []); // eslint-disable-line react-hooks/exhaustive-deps
   const [index, setIndex] = useState(0);
-  const [tally, setTally] = useState({ knew: 0, notYet: 0 });
+  const [tally, setTally] = useState({ knew: 0, close: 0, notYet: 0 });
   const item = session[index];
   const done = index >= session.length;
 
-  async function reviewCard(card, knewIt) {
-    await onReviewCard(card, knewIt);
-    setTally(current => knewIt ? { ...current, knew: current.knew + 1 } : { ...current, notYet: current.notYet + 1 });
+  async function reviewCard(card, grade, answer) {
+    await onReviewCard(card, grade, answer);
+    const key = grade === 'KNEW' ? 'knew' : grade === 'CLOSE' ? 'close' : 'notYet';
+    setTally(current => ({ ...current, [key]: current[key] + 1 }));
     setIndex(current => current + 1);
   }
 
@@ -46,14 +49,14 @@ export default function DailyReview({ lessons, cards, languageCode, results, ren
     <div className="progress-track" aria-hidden="true"><span style={{ width: `${Math.round(Math.min(index, session.length) / Math.max(session.length, 1) * 100)}%` }} /></div>
     {session.length === 0 && <p>Nothing is due. Come back later, or add a few cards to build your memory.</p>}
     {!done && item?.kind === 'card' && <CardReview card={item.card} remaining={session.length - index} languageCode={languageCode}
-      onReview={reviewCard} busy={busy} mode={index % 4 === 0 ? 'type' : 'flip'} />}
+      onReview={reviewCard} busy={busy} mode={REVIEW_ROTATION[index % REVIEW_ROTATION.length]} />}
     {!done && item?.kind === 'exercise' && <div>
       <p className="practice-source">{item.lesson.title}{item.lesson.due ? ' · review due' : ''}</p>
       {renderExercise(item.exercise, index + 1, 'REVIEW')}
       <button type="button" className="secondary next-button" disabled={!results[item.exercise.id]} onClick={() => setIndex(index + 1)}>Next</button>
     </div>}
     {done && session.length > 0 && <div className="session-summary" role="status">
-      <p>You worked through {session.length} items. Cards you knew: {tally.knew}. Cards for another look: {tally.notYet}.</p>
+      <p>You worked through {session.length} items. Cards you knew: {tally.knew}. Close: {tally.close}. For another look: {tally.notYet}.</p>
       <p>Everything you missed comes back sooner, a step back rather than to the start.</p>
     </div>}
   </section>;

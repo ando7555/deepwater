@@ -323,6 +323,28 @@ reveals the word.
 | Streaks and badges | **Do not copy** streaks (Echo principle). A completion certificate could be fine later. |
 | Live small-group classes | **Not for the MVP.** Echo is self-study first; same call as for Amalie Teaches' booking. |
 
+## Drawbacks of Amalie Teaches and Brain Biscuit, turned into Echo features (Built, 2026-10-29)
+
+The owner asked to take the drawbacks of both sites, combine them and build. "Drawback" here
+means a weakness visible in what each site publishes (listed above), not a tested finding.
+
+| Drawback seen | Where | Echo's opposite | Status |
+|---|---|---|---|
+| A wrong answer sends a word back to New | Amalie Teaches | A miss steps back one box only, and a new **"I was close"** grade keeps the box and brings the card back tomorrow. | Built |
+| Learners practise what a teacher assigned; content sits behind a teacher or a subscription | Both | Learners make their own cards, one at a time or by **pasting a list** (tab, semicolon, " - " or "="; up to 100 lines, checked line by line before saving). Nothing is locked. | Built |
+| Recorded video lessons are watched, not recalled | Brain Biscuit | Every card can be reviewed in **five directions**: phrase to meaning, meaning to phrase, type from memory, **hear it and write it**, and **build the sentence** from word tiles. The daily review rotates them. | Built |
+| Speaking is recorded as "done" without feedback, and no review schedule is described | Both | After every grade Echo says in plain words what changed ("One step deeper. Next look in 7 days."). | Built |
+| The learner cannot see what keeps going wrong (on Amalie's site the teacher sees the misses) | Amalie Teaches | **Keeps slipping**: cards missed twice or more, with the learner's own last wrong answer, visible to the learner. | Built |
+| Danish letters need a special keyboard | General | **æ, ø, å** buttons (ä, ö, ü, ß for German) next to every typing box. | Built |
+| Audio only at normal speed | General | **Slow** replay next to every Hear button. | Built |
+| Noun gender left to memory (Brain Biscuit teaches en/et only inside a paid game) | Brain Biscuit | Cards starting with en/et (der/die/das) show an **en-word / et-word badge**; the article is read aloud with the noun. | Built |
+| Streaks and badges | Both | Still none in Echo. | Unchanged |
+| Pictures as cues, can-do level names | Brain Biscuit strengths | Not built: images need a source with clear rights, and level names need an owner decision. | Proposal |
+
+Backend: `echo_cards` gains `miss_count` and `last_miss`; GraphQL adds `saveEchoCards` and a
+`grade` (`MISSED`, `CLOSE`, `KNEW`) plus optional `answer` on `reviewEchoCard` (the old
+`knewIt` still works). None of this is tested with learners yet.
+
 ## References
 
 Owner's screenshots of amalieteaches.com, shared in the project thread on 2026-10-28.
