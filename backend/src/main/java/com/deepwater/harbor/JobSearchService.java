@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 /** Scores every recent posting against the person's profile, then applies the filters they chose. */
 @Service
 public class JobSearchService {
+    private static final String NOT_NEEDED = "NOT_NEEDED";
+    private static final String OFFERED = "OFFERED";
+    private static final String SAMPLE = "SAMPLE";
     private final JobCatalogService catalog;
     private final TalentProfileService profiles;
     private final ApplicationService applications;
@@ -49,31 +52,47 @@ public class JobSearchService {
     public record Filters(String q, String country, String remote, String visa, Integer minScore, String source, Integer max) {
         boolean accepts(JobMatch m) {
             JobView job = m.job();
-            if (q != null && !q.isBlank()) {
-                String text = (job.title() + " " + job.company() + " " + String.join(" ", job.tags()) + " " + job.description()).toLowerCase(Locale.ROOT);
-                for (String word : q.toLowerCase(Locale.ROOT).split("\\s+")) if (!word.isBlank() && !text.contains(word)) return false;
-            }
-            if (country != null && !country.isBlank() && !"ANY".equals(country)) {
-                List<String> codes = List.of(country.toUpperCase(Locale.ROOT).split(","));
-                if (job.countryCode() == null || !codes.contains(job.countryCode())) return false;
-            }
-            if ("REMOTE".equals(remote) && !job.remote()) return false;
-            if ("ONSITE".equals(remote) && job.remote()) return false;
-            String permit = m.match().workPermit();
-            switch (visa == null ? "ANY" : visa) {
-                case "SPONSORED" -> { if (!"OFFERED".equals(job.visaSignal())) return false; }
-                case "NO_PERMIT_NEEDED" -> { if (!"NOT_NEEDED".equals(permit)) return false; }
-                case "OPEN_TO_ME" -> { if (!"NOT_NEEDED".equals(permit) && !"OFFERED".equals(job.visaSignal())) return false; }
-                case "NOT_RULED_OUT" -> { if ("NOT_OFFERED".equals(job.visaSignal()) && !"NOT_NEEDED".equals(permit)) return false; }
-                default -> { }
-            }
-            if (minScore != null && m.match().score() < minScore) return false;
-            if ("SAMPLE".equals(source) && !"SAMPLE".equals(job.source())) return false;
-            if ("LIVE".equals(source) && "SAMPLE".equals(job.source())) return false;
+            return keywordMatches(job) && countryMatches(job) && remoteMatches(job) && visaMatches(job, m.match().workPermit())
+                    && (minScore == null || m.match().score() >= minScore) && sourceMatches(job);
+        }
+
+        private boolean keywordMatches(JobView job) {
+            if (q == null || q.isBlank()) return true;
+            String text = (job.title() + " " + job.company() + " " + String.join(" ", job.tags()) + " " + job.description()).toLowerCase(Locale.ROOT);
+            return java.util.Arrays.stream(q.toLowerCase(Locale.ROOT).split("\\s+")).filter(w -> !w.isBlank()).allMatch(text::contains);
+        }
+
+        private boolean countryMatches(JobView job) {
+            if (country == null || country.isBlank() || "ANY".equals(country)) return true;
+            return job.countryCode() != null && List.of(country.toUpperCase(Locale.ROOT).split(",")).contains(job.countryCode());
+        }
+
+        private boolean remoteMatches(JobView job) {
+            if ("REMOTE".equals(remote)) return job.remote();
+            if ("ONSITE".equals(remote)) return !job.remote();
             return true;
         }
 
-        int limit() { return max == null ? 100 : Math.max(1, Math.min(200, max)); }
+        private boolean visaMatches(JobView job, String permit) {
+            boolean noPermitNeeded = NOT_NEEDED.equals(permit);
+            boolean sponsored = OFFERED.equals(job.visaSignal());
+            return switch (visa == null ? "ANY" : visa) {
+                case "SPONSORED" -> sponsored;
+                case "NO_PERMIT_NEEDED" -> noPermitNeeded;
+                case "OPEN_TO_ME" -> noPermitNeeded || sponsored;
+                case "NOT_RULED_OUT" -> noPermitNeeded || !"NOT_OFFERED".equals(job.visaSignal());
+                default -> true;
+            };
+        }
+
+        private boolean sourceMatches(JobView job) {
+            boolean sample = SAMPLE.equals(job.source());
+            if (SAMPLE.equals(source)) return sample;
+            if ("LIVE".equals(source)) return !sample;
+            return true;
+        }
+
+        int limit() { return max == null ? 100 : Math.clamp(max, 1, 200); }
     }
 
     public record JobView(String id, String source, String title, String company, String countryCode, String countryName,

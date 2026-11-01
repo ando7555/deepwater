@@ -61,13 +61,20 @@ public class ArbeitnowJobSource {
                 if (jobs.isEmpty()) break;
                 for (Job job : jobs) { catalog.upsert(job); saved++; }
             }
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            return failed(saved, ex);
         } catch (Exception ex) {
-            log.warn("Arbeitnow refresh failed after {} postings: {}", saved, ex.getMessage());
-            lastRefresh = Instant.now();
-            return new Refresh(true, saved, "The live job source did not answer. " + saved + " postings were updated.", lastRefresh);
+            return failed(saved, ex);
         }
         lastRefresh = Instant.now();
         return new Refresh(true, saved, saved + " live postings updated.", lastRefresh);
+    }
+
+    private Refresh failed(int saved, Exception ex) {
+        log.warn("Arbeitnow refresh failed after {} postings: {}", saved, ex.getMessage());
+        lastRefresh = Instant.now();
+        return new Refresh(true, saved, "The live job source did not answer. " + saved + " postings were updated.", lastRefresh);
     }
 
     /** Maps one page of the API's JSON ({"data":[{slug, company_name, title, description, remote, url, tags, location, created_at}]}). */
@@ -97,7 +104,8 @@ public class ArbeitnowJobSource {
     static String plainText(String html) {
         return html.replaceAll("(?i)<br\\s*/?>|</p>|</li>|</h\\d>", "\n").replaceAll("<[^>]+>", " ")
                 .replace("&nbsp;", " ").replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&#39;", "'")
-                .replaceAll("[ \\t]+", " ").replaceAll(" *\\n *", "\n").replaceAll("\\n{3,}", "\n\n").strip();
+                .replaceAll("[ \\t]+", " ").lines().map(String::strip).collect(java.util.stream.Collectors.joining("\n"))
+                .replaceAll("\\n{3,}", "\n\n").strip();
     }
 
     public record Refresh(boolean enabled, int updated, String message, Instant lastRefreshedAt) {}

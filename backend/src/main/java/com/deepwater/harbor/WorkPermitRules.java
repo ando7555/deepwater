@@ -21,25 +21,27 @@ public final class WorkPermitRules {
     public record CountryGuide(String code, String name, String nonEuRoute, String officialSite, String officialUrl) {}
 
     /** The Nordic countries and Switzerland the owner asked about, with the official immigration site for each. */
-    public static final Map<String, CountryGuide> GUIDES = new LinkedHashMap<>();
+    public static final Map<String, CountryGuide> GUIDES = guides();
 
-    static {
-        GUIDES.put("DK", new CountryGuide("DK", "Denmark",
+    private static Map<String, CountryGuide> guides() {
+        Map<String, CountryGuide> guides = new LinkedHashMap<>();
+        guides.put("DK", new CountryGuide("DK", "Denmark",
                 "Citizens outside the EU/EEA and Switzerland need a residence and work permit before they start work. "
                         + "Common routes are tied to a job offer, such as the Pay Limit scheme and the Positive Lists.",
                 "New to Denmark (SIRI)", "https://www.nyidanmark.dk/en-GB"));
-        GUIDES.put("SE", new CountryGuide("SE", "Sweden",
+        guides.put("SE", new CountryGuide("SE", "Sweden",
                 "Citizens outside the EU/EEA and Switzerland need a work permit, usually applied for before travelling, "
                         + "based on a job offer whose pay and terms meet Swedish requirements.",
                 "Swedish Migration Agency", "https://www.migrationsverket.se/English/Private-individuals/Working-in-Sweden.html"));
-        GUIDES.put("NO", new CountryGuide("NO", "Norway",
+        guides.put("NO", new CountryGuide("NO", "Norway",
                 "Citizens outside the EU/EEA and Switzerland need a residence permit for work, most often as a skilled worker "
                         + "with a job offer.",
                 "Norwegian Directorate of Immigration (UDI)", "https://www.udi.no/en/want-to-apply/work-immigration/"));
-        GUIDES.put("CH", new CountryGuide("CH", "Switzerland",
+        guides.put("CH", new CountryGuide("CH", "Switzerland",
                 "Citizens outside the EU/EFTA can be hired only in limited numbers, mostly for highly qualified roles, and the "
                         + "employer usually has to show no suitable Swiss or EU/EFTA candidate was found. The employer applies.",
                 "State Secretariat for Migration (SEM)", "https://www.sem.admin.ch/sem/en/home/themen/arbeit.html"));
+        return java.util.Collections.unmodifiableMap(guides);
     }
 
     private WorkPermitRules() {}

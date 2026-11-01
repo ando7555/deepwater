@@ -28,7 +28,7 @@ public final class JobMatcher {
         List<String> missing = SkillCatalog.find(job.title() + "\n" + String.join(" ", job.tags())).stream()
                 .filter(skill -> !mine.contains(skill.toLowerCase(Locale.ROOT))).limit(4).toList();
 
-        int skillTarget = Math.min(5, Math.max(1, profile.skills().size()));
+        int skillTarget = Math.clamp(profile.skills().size(), 1, 5);
         int skillPoints = profile.skills().isEmpty() ? 0 : Math.round(60f * Math.min(matched.size(), skillTarget) / skillTarget);
 
         List<String> sharedTitleWords = sharedWords(profile.headline(), job.title());

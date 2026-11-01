@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 /** Keeps one talent profile per Deepwater account. The CV text is private and deleted with the account. */
 @Service
 public class TalentProfileService {
+    private static final String UNKNOWN = "UNKNOWN";
     private static final Set<String> REMOTE = Set.of("ANY", "REMOTE_ONLY", "ONSITE");
     private final JdbcTemplate db;
 
@@ -53,8 +54,8 @@ public class TalentProfileService {
         Integer years = input.yearsExperience();
         if (years != null && (years < 0 || years > 60)) throw bad("Years of experience must be between 0 and 60.");
         List<String> languages = clean(input.languages(), 20, 40);
-        String citizenship = input.citizenship() == null ? "UNKNOWN" : input.citizenship();
-        if (WorkPermitRules.citizenship(citizenship).name().equals("UNKNOWN") && !"UNKNOWN".equals(citizenship))
+        String citizenship = input.citizenship() == null ? UNKNOWN : input.citizenship();
+        if (WorkPermitRules.citizenship(citizenship).name().equals(UNKNOWN) && !UNKNOWN.equals(citizenship))
             throw bad("Choose EU/EEA, Swiss, another citizenship, or prefer not to say.");
         List<String> countries = clean(input.targetCountries(), 30, 2).stream().map(c -> c.toUpperCase(Locale.ROOT)).toList();
         if (countries.stream().anyMatch(c -> !c.matches("[A-Z]{2}"))) throw bad("Use two-letter country codes such as DK or CH.");

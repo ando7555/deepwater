@@ -25,11 +25,11 @@ public final class CvExtractor {
             "Romanian", "Hungarian", "Czech");
     private static final Pattern ROLE_WORDS = Pattern.compile(
             "\\b(engineer|developer|architect|programmer|manager|designer|analyst|consultant|scientist|lead|specialist|"
-                    + "administrator|owner|director|officer|tester|devops|sre|accountant|nurse|teacher|marketer)\\b",
+                    + "administrator|owner|director|officer|tester|devops|sre|accountant|nurse|teacher)\\b",
             Pattern.CASE_INSENSITIVE);
-    private static final Pattern YEARS = Pattern.compile("(\\d{1,2})\\s*\\+?\\s*(?:years|yrs)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern YEARS = Pattern.compile("(\\d{1,2})\\+?\\s?(?:years|yrs)", Pattern.CASE_INSENSITIVE);
     private static final Pattern YEAR_RANGE = Pattern.compile(
-            "((?:19|20)\\d{2})\\s*(?:-|–|—|to)\\s*((?:19|20)\\d{2}|present|now|today|current)", Pattern.CASE_INSENSITIVE);
+            "((?:19|20)\\d{2})\\s?(?:-|–|—|to)\\s?((?:19|20)\\d{2}|present|now|today|current)", Pattern.CASE_INSENSITIVE);
     private static final Pattern SUMMARY_HEADING = Pattern.compile(
             "^(summary|profile|professional summary|about me|about|objective)\\s*:?\\s*$", Pattern.CASE_INSENSITIVE);
     private static final Pattern CONTACT = Pattern.compile("@|https?://|www\\.|\\+?\\d[\\d ()-]{6,}");
@@ -80,19 +80,25 @@ public final class CvExtractor {
     static String summary(String text) {
         String[] lines = text.split("\\R");
         for (int i = 0; i < lines.length; i++) {
-            if (!SUMMARY_HEADING.matcher(lines[i].strip()).matches()) continue;
-            StringBuilder paragraph = new StringBuilder();
-            for (int j = i + 1; j < lines.length; j++) {
-                String line = lines[j].strip();
-                if (line.isEmpty()) { if (!paragraph.isEmpty()) break; else continue; }
-                if (paragraph.length() > 0 && line.length() < 40 && line.equals(line.toUpperCase(Locale.ROOT))) break;
-                paragraph.append(paragraph.isEmpty() ? "" : " ").append(line);
-                if (paragraph.length() >= 400) break;
+            if (SUMMARY_HEADING.matcher(lines[i].strip()).matches()) {
+                String result = paragraphAfter(lines, i + 1);
+                if (!result.isEmpty()) return result.length() > 400 ? result.substring(0, 397) + "…" : result;
             }
-            String result = paragraph.toString().strip();
-            if (!result.isEmpty()) return result.length() > 400 ? result.substring(0, 397) + "…" : result;
         }
         return null;
+    }
+
+    /** Joins the lines of the first paragraph from {@code start}, stopping at a blank line or the next ALL-CAPS heading. */
+    private static String paragraphAfter(String[] lines, int start) {
+        StringBuilder paragraph = new StringBuilder();
+        for (int j = start; j < lines.length && paragraph.length() < 400; j++) {
+            String line = lines[j].strip();
+            boolean heading = line.length() < 40 && line.equals(line.toUpperCase(Locale.ROOT));
+            boolean ends = line.isEmpty() || heading;
+            if (ends && !paragraph.isEmpty()) break;
+            if (!line.isEmpty()) paragraph.append(paragraph.isEmpty() ? "" : " ").append(line);
+        }
+        return paragraph.toString().strip();
     }
 
     /**
@@ -107,7 +113,7 @@ public final class CvExtractor {
             if (value <= 50) stated = Math.max(stated, value);
         }
         if (stated > 0) return stated;
-        int now = Year.now().getValue();
+        int now = Year.now(java.time.ZoneOffset.UTC).getValue();
         int earliest = Integer.MAX_VALUE;
         matcher = YEAR_RANGE.matcher(text);
         while (matcher.find()) {
