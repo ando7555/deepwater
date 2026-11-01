@@ -44,6 +44,7 @@ class HarborRulesTest {
     void yearsComeFromDateRangesWhenTheCvDoesNotStateThem() {
         assertThat(CvExtractor.years("Developer, 2015 - 2018\nLead, 2018 – present")).isEqualTo(Year.now().getValue() - 2015);
         assertThat(CvExtractor.years("No dates here")).isNull();
+        assertThat(CvExtractor.years("Analyst 2012–2014, Lead 2014 to now")).isEqualTo(Year.now().getValue() - 2012);
     }
 
     @Test
@@ -75,7 +76,7 @@ class HarborRulesTest {
         assertThat(WorkPermitRules.need(WorkPermitRules.Citizenship.SWISS, "SE")).isEqualTo(WorkPermitRules.PermitNeed.NOT_NEEDED);
         assertThat(WorkPermitRules.need(eu, "US")).isEqualTo(WorkPermitRules.PermitNeed.CHECK);
         assertThat(WorkPermitRules.need(WorkPermitRules.Citizenship.UNKNOWN, "DK")).isEqualTo(WorkPermitRules.PermitNeed.CHECK);
-        assertThat(WorkPermitRules.GUIDES.keySet()).containsExactly("DK", "SE", "NO", "CH");
+        assertThat(WorkPermitRules.guides().keySet()).containsExactly("DK", "SE", "NO", "CH");
     }
 
     @Test

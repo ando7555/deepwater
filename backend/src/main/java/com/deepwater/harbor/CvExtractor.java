@@ -29,7 +29,7 @@ public final class CvExtractor {
             Pattern.CASE_INSENSITIVE);
     private static final Pattern YEARS = Pattern.compile("(\\d{1,2})\\+?\\s?(?:years|yrs)", Pattern.CASE_INSENSITIVE);
     private static final Pattern YEAR_RANGE = Pattern.compile(
-            "((?:19|20)\\d{2})\\s?(?:-|–|—|to)\\s?((?:19|20)\\d{2}|present|now|today|current)", Pattern.CASE_INSENSITIVE);
+            "((?:19|20)\\d{2}) ?+(?:[-–—]|to) ?+((?:19|20)\\d{2}|present|now|today|current)", Pattern.CASE_INSENSITIVE);
     private static final Pattern SUMMARY_HEADING = Pattern.compile(
             "^(summary|profile|professional summary|about me|about|objective)\\s*:?\\s*$", Pattern.CASE_INSENSITIVE);
     private static final Pattern CONTACT = Pattern.compile("@|https?://|www\\.|\\+?\\d[\\d ()-]{6,}");
@@ -44,7 +44,7 @@ public final class CvExtractor {
             try (var document = Loader.loadPDF(bytes)) {
                 text = new PDFTextStripper().getText(document);
             } catch (IOException ex) {
-                throw new IllegalArgumentException("This PDF could not be read. Try saving it again as PDF, or paste the text.");
+                throw new IllegalArgumentException("This PDF could not be read. Try saving it again as PDF, or paste the text.", ex);
             }
         } else if (name.endsWith(".txt") || name.endsWith(".md") || name.isEmpty()) {
             text = new String(bytes, StandardCharsets.UTF_8);

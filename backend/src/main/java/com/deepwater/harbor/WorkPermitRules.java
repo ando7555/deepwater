@@ -21,9 +21,12 @@ public final class WorkPermitRules {
     public record CountryGuide(String code, String name, String nonEuRoute, String officialSite, String officialUrl) {}
 
     /** The Nordic countries and Switzerland the owner asked about, with the official immigration site for each. */
-    public static final Map<String, CountryGuide> GUIDES = guides();
+    private static final Map<String, CountryGuide> GUIDES = buildGuides();
 
-    private static Map<String, CountryGuide> guides() {
+    /** The guides, keyed by country code, in display order. The map cannot be changed. */
+    public static Map<String, CountryGuide> guides() { return GUIDES; }
+
+    private static Map<String, CountryGuide> buildGuides() {
         Map<String, CountryGuide> guides = new LinkedHashMap<>();
         guides.put("DK", new CountryGuide("DK", "Denmark",
                 "Citizens outside the EU/EEA and Switzerland need a residence and work permit before they start work. "
@@ -54,7 +57,6 @@ public final class WorkPermitRules {
     }
 
     public static Citizenship citizenship(String value) {
-        try { return value == null ? Citizenship.UNKNOWN : Citizenship.valueOf(value); }
-        catch (IllegalArgumentException ex) { return Citizenship.UNKNOWN; }
+        return java.util.Arrays.stream(Citizenship.values()).filter(c -> c.name().equals(value)).findFirst().orElse(Citizenship.UNKNOWN);
     }
 }

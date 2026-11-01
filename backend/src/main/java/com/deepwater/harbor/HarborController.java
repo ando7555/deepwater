@@ -102,7 +102,7 @@ public class HarborController {
         result.put("liveEnabled", arbeitnow.enabled());
         result.put("lastRefreshedAt", arbeitnow.lastRefresh());
         result.put("countries", Countries.NAMES);
-        result.put("permitGuides", List.copyOf(WorkPermitRules.GUIDES.values()));
+        result.put("permitGuides", List.copyOf(WorkPermitRules.guides().values()));
         return result;
     }
 
