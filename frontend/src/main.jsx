@@ -9,6 +9,7 @@ import CoursePath from './CoursePath.jsx';
 import CalmProgress from './CalmProgress.jsx';
 import DailyReview from './DailyReview.jsx';
 import ProfilePage from './ProfilePage.jsx';
+import Harbor from './Harbor.jsx';
 import { API, gql, formatDate } from './api.js';
 import './style.css';
 
@@ -17,6 +18,15 @@ const THEMES = [
   { id: 'amber', label: 'Amber', mark: '/brand/mark-amber.svg' },
   { id: 'light', label: 'Light', mark: '/brand/mark-light.svg' },
 ];
+
+const PRODUCTS = [
+  { id: 'echo', label: 'Echo', hint: 'Languages' },
+  { id: 'harbor', label: 'Harbor', hint: 'Jobs' },
+];
+
+function readProduct() {
+  try { return PRODUCTS.some(option => option.id === localStorage.getItem('deepwater-product')) ? localStorage.getItem('deepwater-product') : 'echo'; } catch { return 'echo'; }
+}
 
 function readTheme() {
   try { return THEMES.some(theme => theme.id === localStorage.getItem('deepwater-theme')) ? localStorage.getItem('deepwater-theme') : 'deep'; } catch { return 'deep'; }
@@ -224,6 +234,8 @@ function App() {
   const [transcriptShown, setTranscriptShown] = useState({});
   const [audioResults, setAudioResults] = useState({});
   const [tab, setTab] = useState('today');
+  const [product, setProduct] = useState(readProduct);
+  useEffect(() => { try { localStorage.setItem('deepwater-product', product); } catch { /* storage unavailable */ } }, [product]);
   const [cards, setCards] = useState([]);
   const [warmUp, setWarmUp] = useState(false);
   const [reviewing, setReviewing] = useState(false);
@@ -499,9 +511,12 @@ function App() {
 
   return <main className="app-shell">
     <header className="site-header">
-      <Brand />
-      <div className="account"><ThemeSwitch /><button type="button" className={`account-chip${tab === 'profile' ? ' active' : ''}`} aria-current={tab === 'profile' ? 'page' : undefined}
-        onClick={() => { setReviewing(false); setWarmUp(false); setTab('profile'); }} aria-label={`Your profile: ${user.name}`}>
+      <Brand product={product === 'harbor' ? 'Harbor' : 'Echo'} />
+      <nav className="product-switch" aria-label="Deepwater products">
+        {PRODUCTS.map(option => <button key={option.id} type="button" aria-pressed={product === option.id} onClick={() => setProduct(option.id)}><b>{option.label}</b><small>{option.hint}</small></button>)}
+      </nav>
+      <div className="account"><ThemeSwitch /><button type="button" className={`account-chip${product === 'echo' && tab === 'profile' ? ' active' : ''}`} aria-current={product === 'echo' && tab === 'profile' ? 'page' : undefined}
+        onClick={() => { setProduct('echo'); setReviewing(false); setWarmUp(false); setTab('profile'); }} aria-label={`Your profile: ${user.name}`}>
         <span className="account-avatar" aria-hidden="true">{(user.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0].toUpperCase()).join('')}</span>
         <span className="account-label">{user.name}</span></button><button className="link" onClick={logout}>Sign out</button></div>
     </header>
@@ -510,6 +525,7 @@ function App() {
     {notice && <p role="status" className="banner notice">{notice}</p>}
     {verifyMessage && <p role="status" className="banner notice">{verifyMessage}</p>}
     {user.emailVerified === 'false' && <p role="status" className="banner notice">Please confirm your email: we sent a link to {user.email}. <button className="link" onClick={resendVerification}>Send a new link</button></p>}
+    {product === 'echo' && <>
     {loading && !home && <p role="status" className="loading">Loading your Echo workspace…</p>}
 
     {home && !home.onboarded && <section className="onboarding panel">
@@ -638,8 +654,10 @@ function App() {
         </div>}
       </section>}
     </>}
-    {(tab === 'profile' || !home?.onboarded) && <DeleteAccount email={user.email} onDeleted={logout} />}
-    <footer>Echo by Deepwater · Go deeper.</footer>
+    </>}
+    {product === 'harbor' && <Harbor />}
+    {product === 'echo' && (tab === 'profile' || !home?.onboarded) && <DeleteAccount email={user.email} onDeleted={logout} />}
+    <footer>{product === 'harbor' ? 'Harbor' : 'Echo'} by Deepwater · Go deeper.</footer>
   </main>;
 }
 
