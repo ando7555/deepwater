@@ -32,8 +32,8 @@ public final class CvExtractor {
     private static final Pattern YEAR_OR_NOW = Pattern.compile("\\b(?:19|20)\\d{2}\\b|\\b(?:present|now|today|current)\\b", Pattern.CASE_INSENSITIVE);
     private static final java.util.Set<String> RANGE_SEPARATORS = java.util.Set.of("-", "–", "—", "to");
     private static final Pattern SUMMARY_HEADING = Pattern.compile(
-            "^(summary|profile|professional summary|about me|about|objective)\\s*:?\\s*$", Pattern.CASE_INSENSITIVE);
-    private static final Pattern CONTACT = Pattern.compile("@|https?://|www\\.|\\+?\\d[\\d ()-]{6,}");
+            "(?:summary|profile|professional summary|about me|about|objective):?", Pattern.CASE_INSENSITIVE);
+    private static final Pattern CONTACT = Pattern.compile("@|https?://|www\\.|\\d[\\d ()-]{6,}+");
 
     private CvExtractor() {}
 
