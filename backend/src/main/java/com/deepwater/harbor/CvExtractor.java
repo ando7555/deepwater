@@ -28,8 +28,9 @@ public final class CvExtractor {
                     + "administrator|owner|director|officer|tester|devops|sre|accountant|nurse|teacher)\\b",
             Pattern.CASE_INSENSITIVE);
     private static final Pattern YEARS = Pattern.compile("(\\d{1,2})\\+?\\s?(?:years|yrs)", Pattern.CASE_INSENSITIVE);
-    private static final Pattern YEAR_RANGE = Pattern.compile(
-            "((?:19|20)\\d{2}) ?+(?:[-–—]|to) ?+((?:19|20)\\d{2}|present|now|today|current)", Pattern.CASE_INSENSITIVE);
+    /** A year or a word meaning "until now"; two of these with only a dash or "to" between them form a date range. */
+    private static final Pattern YEAR_OR_NOW = Pattern.compile("\\b(?:19|20)\\d{2}\\b|\\b(?:present|now|today|current)\\b", Pattern.CASE_INSENSITIVE);
+    private static final java.util.Set<String> RANGE_SEPARATORS = java.util.Set.of("-", "–", "—", "to");
     private static final Pattern SUMMARY_HEADING = Pattern.compile(
             "^(summary|profile|professional summary|about me|about|objective)\\s*:?\\s*$", Pattern.CASE_INSENSITIVE);
     private static final Pattern CONTACT = Pattern.compile("@|https?://|www\\.|\\+?\\d[\\d ()-]{6,}");
@@ -115,10 +116,18 @@ public final class CvExtractor {
         if (stated > 0) return stated;
         int now = Year.now(java.time.ZoneOffset.UTC).getValue();
         int earliest = Integer.MAX_VALUE;
-        matcher = YEAR_RANGE.matcher(text);
+        matcher = YEAR_OR_NOW.matcher(text);
+        String previous = null;
+        int previousEnd = 0;
         while (matcher.find()) {
-            int start = Integer.parseInt(matcher.group(1));
-            if (start >= 1970 && start <= now) earliest = Math.min(earliest, start);
+            boolean range = previous != null && previous.chars().allMatch(Character::isDigit)
+                    && RANGE_SEPARATORS.contains(text.substring(previousEnd, matcher.start()).strip().toLowerCase(Locale.ROOT));
+            if (range) {
+                int start = Integer.parseInt(previous);
+                if (start >= 1970 && start <= now) earliest = Math.min(earliest, start);
+            }
+            previous = matcher.group();
+            previousEnd = matcher.end();
         }
         return earliest == Integer.MAX_VALUE ? null : now - earliest;
     }
