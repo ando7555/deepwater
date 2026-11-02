@@ -18,11 +18,14 @@ Register using that exact email, or sign out and sign back in if the account alr
 ## Add and approve a lesson
 
 1. Sign in with the configured teacher account and finish learner onboarding so Echo opens the workspace.
-2. Choose **Open workspace** under **Teacher workspace**.
-3. Add a normal lesson as JSON using the shape below, or use **Create a music or podcast draft** for an audio lesson. Choose Danish or German. Record the source and permission/provenance; do not paste private messages or material you do not have permission to use.
-4. Save the draft. It is visible in your queue, but learners cannot see it.
-5. Review the language, explanation, expected answers, feedback, and source. Select **I approve & publish** only when you have checked the whole lesson.
-6. Switch your learner-language selector to preview the published language as a learner.
+2. Choose **Open workspace** under **Teacher workspace**, then the **Add a lesson** tab.
+3. Fill in the form: language, title, level band and course stage (lessons with the same stage are grouped on the learner's path), topic, what the learner will be able to do, the explanation, and the source and permission line. The skill key is suggested from the language, topic and title; change it only to group this lesson with an existing skill.
+4. Build the exercises. A new lesson starts with one of each kind: **Choose one** (options with the correct one ticked), **Type the answer** (an expected answer and any other accepted answers, one per line) and **Own example** (the learner's own sentence, saved for reflection and not graded). Add, remove or reorder exercises as you need; a lesson takes one to twenty.
+5. Save. The form lists anything that is missing before it saves. The draft is visible in **Lesson queue**, but learners cannot see it.
+6. In the queue, open **Read the whole lesson before you decide**, check the language, expected answers, feedback and source, then select **I approve & publish** only when you have checked the whole lesson. The queue can be filtered by status and language.
+7. Switch your learner-language selector to preview the published language as a learner.
+
+**Import or copy as JSON** under the form loads a lesson file in the shape below into the form, or shows the form's current content as JSON so you can keep it in the repository (`backend/src/main/resources/echo/catalog/`). Audio lessons have their own tab, **Music or podcast**.
 
 ```json
 {
@@ -106,7 +109,7 @@ page. No song or podcast corpus is bundled with the repository.
 
 ## Revise a published lesson
 
-Create a new draft with the same fields and add `"revisionOf": "<published-lesson-id>"` (an unpublished lesson can be revised too). Copy the id from the teacher queue. The API assigns the next version number and preserves lesson order. Publishing the revision archives its parent so learners see the newly approved version only. The older row remains in the teacher queue for traceability. A draft cannot be edited in place in this slice; create a fresh draft or a revision.
+Select **Revise** on a published or unpublished lesson in the queue. The form opens with that lesson's content; change what you need and save. (In JSON this is the same as adding `"revisionOf": "<lesson-id>"`.) The API assigns the next version number and preserves lesson order. Publishing the revision archives its parent so learners see the newly approved version only. The older row remains in the teacher queue for traceability. A draft cannot be edited in place in this slice: use **Copy as a new lesson** to start from it, publish the copy, and leave the earlier draft unpublished.
 
 ## Unpublish and publish again
 
@@ -116,7 +119,9 @@ Select **Publish again** to bring it back. Audio lessons have their rights check
 
 ## Where the code lives
 
-- `frontend/src/main.jsx` — onboarding, language switch, learner course, and teacher workspace. The JSON form sends structured fields to GraphQL; it does not decide correctness.
+- `frontend/src/teacher/` — the teacher workspace: `lessonDraft.js` (the form's rules, tested by `npm test`), `LessonBuilder.jsx` and `ExerciseEditor.jsx` (the form), `AudioDraftForm.jsx` and `TeacherWorkspace.jsx` (queue and tabs). The form sends structured fields to GraphQL; it does not decide correctness.
+- `frontend/src/ui/` — the reusable components the screens are built from, with a README.
+- `frontend/src/main.jsx` — onboarding, language switch and the learner course.
 - `backend/src/main/resources/graphql/schema.graphqls` — typed API contract, including the learner and teacher operations.
 - `backend/src/main/java/com/deepwater/api/DeepwaterGraphQlController.java` — maps API calls to services and checks teacher identity for authoring actions.
 - `backend/src/main/java/com/deepwater/echo/EchoService.java` — deterministic lesson/audio persistence, rights validation, review-state transitions, learner filtering, answer checking, and review scheduling.
