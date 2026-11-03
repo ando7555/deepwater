@@ -26,6 +26,32 @@ answer the second question for them.
 | Apply | Opens the original posting; Harbor never sends anything to employers. The person tracks status (saved, applied, interview, offer, rejected, withdrawn) and a note. | `ApplicationService` |
 | Privacy | CV text, profile and applications are private, can be deleted (CV separately), and are deleted with the Deepwater account. | `PlatformService.deleteAccount` |
 
+## CV check: styling and formatting (owner ask 2026-11-03)
+
+Every uploaded or pasted CV is checked with fixed rules (no AI) and gets a 0–100 score plus one line per check:
+PASS, WARN (worth improving) or FAIL (likely to hurt the application). The score counts PASS as 1, WARN as ½, FAIL as 0.
+The result is stored with the profile (`harbor_profiles.cv_check`), returned as `cvCheck` on `GET /api/v1/harbor/profile`,
+and deleted together with the CV file.
+
+| Check | Rule |
+|---|---|
+| Text can be read (PDF) | PDFBox extracted text; a scanned image fails earlier with a clear message |
+| Length in pages (PDF) | ≤2 pass, 3 warn, more fail |
+| Amount of content | <150 words fail, <250 warn, >1300 warn |
+| Email / phone / profile link | email missing fails; phone and link missing warn |
+| Standard sections | short heading lines for Experience, Education, Skills; one missing warns, two or more fail |
+| Role headline | a role line near the top |
+| Dated roles | date ranges such as "2019 – present" |
+| Bullet points | at least 4 bullet lines (•, Word's Symbol bullets, dashes…) |
+| Short blocks of text | no run of prose over 70 words |
+| Measurable results | at least 2 numbers such as %, money, "200k customers" |
+| Concise wording | "I/me/my" no more than max(5, words/100) times |
+| Fonts (PDF) | ≤2 families pass, 3 warn, ≥4 fail (subset prefixes and Bold/Italic variants are merged) |
+| Text size (PDF) | smallest size used for ≥200 characters is at least 9.5 pt |
+
+These are common recruiter and applicant-tracking guidelines, not a measured predictor of interviews; the card says so.
+Thresholds are proposals the owner can change.
+
 ## Where job data comes from
 
 * **Sample postings (always on):** 18 postings in `backend/src/main/resources/harbor/sample-jobs.json`, written for the demo.

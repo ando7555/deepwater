@@ -37,7 +37,8 @@ class HarborApiTest {
         var profile = upload(token, "ana-cv.txt", HarborRulesTest.CV.getBytes());
         assertThat(profile.getStatusCode().value()).isEqualTo(200);
         assertThat(profile.getBody()).contains("\"headline\":\"Senior Backend Engineer\"", "\"yearsExperience\":8", "\"hasCv\":true",
-                "\"cvFileName\":\"ana-cv.txt\"", "\"Kafka\"").doesNotContain("cvText", "ana@example.test");
+                "\"cvFileName\":\"ana-cv.txt\"", "\"Kafka\"", "\"cvCheck\":{\"score\":", "\"id\":\"sections\"")
+                .doesNotContain("cvText", "ana@example.test", "\"id\":\"fonts\"");
 
         var edited = send(HttpMethod.PUT, "/api/v1/harbor/profile", token, Map.of(
                 "headline", "Senior Backend Engineer", "skills", List.of("Java", "Spring", "Kafka", "PostgreSQL", "Kubernetes"),
@@ -73,6 +74,7 @@ class HarborApiTest {
     void pdfCvIsRead() throws Exception {
         String token = register();
         var response = upload(token, "cv.pdf", pdf("Data Engineer", "I have 5 years with Python, Spark and Airflow."));
+        assertThat(response.getBody()).contains("\"id\":\"fonts\"", "\"id\":\"pages\"", "\"id\":\"readable\"");
         assertThat(response.getBody()).contains("\"headline\":\"Data Engineer\"", "\"Python\"", "\"Spark\"", "\"Airflow\"", "\"yearsExperience\":5");
         assertThat(upload(token, "cv.docx", new byte[]{1, 2, 3}).getBody()).contains("Upload a PDF or .txt file");
         assertThat(upload(token, "cv.pdf", "not really a pdf".getBytes()).getBody()).contains("This PDF could not be read");
@@ -106,7 +108,7 @@ class HarborApiTest {
         String token = register();
         upload(token, "cv.txt", HarborRulesTest.CV.getBytes());
         var after = send(HttpMethod.DELETE, "/api/v1/harbor/cv", token, null);
-        assertThat(after.getBody()).contains("\"hasCv\":false", "\"cvFileName\":null", "\"headline\":\"Senior Backend Engineer\"");
+        assertThat(after.getBody()).contains("\"hasCv\":false", "\"cvFileName\":null", "\"cvCheck\":null", "\"headline\":\"Senior Backend Engineer\"");
         assertThat(db.queryForObject("select count(*) from harbor_profiles where cv_text is not null and account_id=" +
                 "(select account_id from user_sessions where token=?)", Integer.class, token)).isZero();
     }

@@ -120,6 +120,7 @@ function ProfileView({ profile, sources, onSaved, onDone }) {
         <button disabled={busy}>Read this text</button>
       </form>}
       {profile.hasCv && <p className="harbor-cv-file">Current CV: <b>{profile.cvFileName}</b> · <button type="button" className="link" disabled={busy} onClick={() => run(() => harbor('/cv', { method: 'DELETE' }), 'Your CV file and its text are deleted. Your profile stays.')}>Delete my CV file</button></p>}
+      {profile.cvCheck && <CvCheckCard check={profile.cvCheck} />}
       <div className="method-note"><b>What Harbor reads</b><p>Skills from a list of about 80 common ones, a role from the top of your CV, years from “8 years” or date ranges, and language names. Anything it misses, you add below.</p></div>
     </section>
 
@@ -288,5 +289,28 @@ function ApplicationsView() {
       </div>
       <div className="harbor-actions">{item.job.url && <a href={item.job.url} target="_blank" rel="noreferrer">Open posting ↗</a>}<button type="button" className="link" onClick={() => remove(item)}>Stop tracking</button></div>
     </article>)}
+  </section>;
+}
+
+const CHECK_ICON = { PASS: '✓', WARN: '!', FAIL: '✕' };
+const CHECK_WORD = { PASS: 'Good', WARN: 'Improve', FAIL: 'Fix' };
+
+function CvCheckCard({ check }) {
+  const todo = check.items.filter(i => i.status !== 'PASS').sort((a, b) => (a.status === 'FAIL' ? 0 : 1) - (b.status === 'FAIL' ? 0 : 1));
+  const done = check.items.filter(i => i.status === 'PASS');
+  const verdict = check.score >= 85 ? 'Ready to send' : check.score >= 60 ? 'A few fixes first' : 'Needs work before you apply';
+  const row = item => <li key={item.id} className={`cv-check-item ${item.status.toLowerCase()}`}>
+    <span className="cv-check-icon" aria-label={CHECK_WORD[item.status]}>{CHECK_ICON[item.status]}</span>
+    <div><b>{item.title}</b><p>{item.detail}</p></div>
+  </li>;
+  return <section className="cv-check" aria-label="CV check">
+    <div className="cv-check-head">
+      <div className="harbor-score" style={{ '--score': check.score }} aria-label={`CV check ${check.score} of 100`}><b>{check.score}</b><small>of 100</small></div>
+      <div><p className="eyebrow">CV CHECK · STYLE AND FORMAT</p><h3>{verdict}</h3>
+        <small>{done.length} of {check.items.length} checks pass.{todo.length > 0 ? ' Fix the points below in your CV file, then upload it again.' : ''}</small></div>
+    </div>
+    {todo.length > 0 && <ul className="cv-check-list">{todo.map(row)}</ul>}
+    {done.length > 0 && <details><summary>{done.length} checks pass</summary><ul className="cv-check-list">{done.map(row)}</ul></details>}
+    <small className="cv-check-note">Common recruiter and applicant-tracking guidelines, checked with fixed rules. A guide, not a prediction of interviews.</small>
   </section>;
 }

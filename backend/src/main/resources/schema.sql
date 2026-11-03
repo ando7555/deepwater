@@ -223,3 +223,5 @@ create table if not exists harbor_applications (
   updated_at timestamp with time zone not null default current_timestamp,
   unique(account_id, job_id)
 );
+-- Styling and formatting check of the last uploaded CV, as JSON (CvCheck).
+alter table harbor_profiles add column if not exists cv_check varchar(8000);

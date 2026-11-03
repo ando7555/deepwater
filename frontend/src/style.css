@@ -603,3 +603,14 @@ kbd{font:600 10px 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;border-ra
 :root[data-theme="light"] button.ui-button-quiet:not(.link):not(.swatch){background:transparent;color:var(--accent-deep);box-shadow:inset 0 0 0 1px var(--line-hover)}
 :root[data-theme="light"] button.ui-button-quiet:hover:not(:disabled):not(.link):not(.swatch){background:var(--accent-soft)}
 :root[data-theme="light"] button.ui-button-danger:not(.link):not(.swatch){background:var(--warn-bg);color:#b3392d;box-shadow:inset 0 0 0 1px var(--warn-line)}
+.cv-check{display:grid;gap:12px;padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-glass)}
+.cv-check-head{display:flex;gap:14px;align-items:center}.cv-check-head h3{margin:2px 0 4px;font-size:18px}.cv-check-head small{color:var(--text-3)}
+.cv-check-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.cv-check-item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--line-soft)}
+.cv-check-item p{font-size:13px;color:var(--text-2)}.cv-check-item b{font-size:14px}
+.cv-check-icon{flex:0 0 22px;height:22px;border-radius:50%;display:grid;place-content:center;font-size:12px;font-weight:800}
+.cv-check-item.fail{border-color:var(--warn-line);background:var(--warn-bg)}.cv-check-item.fail .cv-check-icon{background:var(--warn);color:var(--warn-bg)}
+.cv-check-item.warn .cv-check-icon{background:var(--amber);color:#1a0d08}
+.cv-check-item.pass .cv-check-icon{background:var(--good-bg);color:var(--good);border:1px solid var(--good-line)}
+.cv-check details summary{cursor:pointer;color:var(--accent);font-size:14px;margin-bottom:8px}
+.cv-check-note{color:var(--text-3)}
