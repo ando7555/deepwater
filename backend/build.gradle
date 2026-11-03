@@ -11,6 +11,8 @@ dependencies {
     // Added as ports for the next vertical slices; no broker or database is required to run this MVP demo.
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.springframework.boot:spring-boot-starter-graphql'
+    // Reads the text of uploaded PDF CVs for Harbor.
+    implementation 'org.apache.pdfbox:pdfbox:3.0.5'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation 'org.springframework.boot:spring-boot-resttestclient'
     testImplementation 'org.springframework.boot:spring-boot-restclient'

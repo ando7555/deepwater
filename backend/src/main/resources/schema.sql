@@ -180,3 +180,46 @@ create table if not exists person_profiles (
   about varchar(500),
   updated_at timestamp with time zone not null default current_timestamp
 );
+
+-- Harbor: a talent profile built from the person's CV, job postings from public sources (or clearly
+-- marked samples), and the person's own application tracker. Deleted with the account.
+create table if not exists harbor_profiles (
+  account_id varchar(36) primary key references accounts(id),
+  headline varchar(200),
+  summary varchar(2000),
+  skills varchar(2000) not null default '',
+  years_experience integer,
+  languages varchar(500) not null default '',
+  citizenship varchar(16) not null default 'UNKNOWN',
+  target_countries varchar(200) not null default '',
+  remote_preference varchar(16) not null default 'ANY',
+  cv_file_name varchar(255),
+  cv_text varchar(60000),
+  updated_at timestamp with time zone not null default current_timestamp
+);
+create table if not exists harbor_jobs (
+  id varchar(200) primary key,
+  source varchar(32) not null,
+  title varchar(300) not null,
+  company varchar(200) not null,
+  country_code varchar(2),
+  location varchar(200),
+  remote boolean not null default false,
+  visa_signal varchar(16) not null default 'UNKNOWN',
+  description varchar(20000) not null,
+  tags varchar(1000) not null default '',
+  url varchar(1500),
+  posted_at timestamp with time zone,
+  fetched_at timestamp with time zone not null default current_timestamp
+);
+create index if not exists harbor_jobs_country on harbor_jobs(country_code);
+create table if not exists harbor_applications (
+  id varchar(36) primary key,
+  account_id varchar(36) not null references accounts(id),
+  job_id varchar(200) not null references harbor_jobs(id),
+  status varchar(16) not null,
+  note varchar(1000),
+  created_at timestamp with time zone not null default current_timestamp,
+  updated_at timestamp with time zone not null default current_timestamp,
+  unique(account_id, job_id)
+);

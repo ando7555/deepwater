@@ -9,6 +9,9 @@ choice:
 - **Amber** — a separate, consent-first connection and dating application planned
   after the Echo method and platform boundaries are reviewed.
 - **AI fashion** — a future, isolated product idea; scope and name remain open.
+- **Harbor** — upload a CV, get a talent profile, and see jobs ranked by fit with
+  plain visa and work-permit labels; track your applications. MVP with sample
+  postings; see [docs/product/harbor/README.md](docs/product/harbor/README.md).
 
 The supplied logo and visual direction are retained. The current branch builds a
 local Echo MVP slice; it is not a deployable or teacher-approved product. Amber

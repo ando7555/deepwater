@@ -9,6 +9,10 @@ import CoursePath from './CoursePath.jsx';
 import CalmProgress from './CalmProgress.jsx';
 import DailyReview from './DailyReview.jsx';
 import ProfilePage from './ProfilePage.jsx';
+import Harbor from './Harbor.jsx';
+import TeacherWorkspace from './teacher/TeacherWorkspace.jsx';
+import { Notice, Tabs } from './ui/index.jsx';
+import { BAND_LABELS } from './constants.js';
 import { API, gql, formatDate } from './api.js';
 import './style.css';
 
@@ -17,6 +21,15 @@ const THEMES = [
   { id: 'amber', label: 'Amber', mark: '/brand/mark-amber.svg' },
   { id: 'light', label: 'Light', mark: '/brand/mark-light.svg' },
 ];
+
+const PRODUCTS = [
+  { id: 'echo', label: 'Echo', hint: 'Languages' },
+  { id: 'harbor', label: 'Harbor', hint: 'Jobs' },
+];
+
+function readProduct() {
+  try { return PRODUCTS.some(option => option.id === localStorage.getItem('deepwater-product')) ? localStorage.getItem('deepwater-product') : 'echo'; } catch { return 'echo'; }
+}
 
 function readTheme() {
   try { return THEMES.some(theme => theme.id === localStorage.getItem('deepwater-theme')) ? localStorage.getItem('deepwater-theme') : 'deep'; } catch { return 'deep'; }
@@ -147,55 +160,6 @@ const HOME_QUERY = `query EchoHome {
 }`;
 
 const ROUTE_COPY = 'We’ll begin with the experience level you chose and adjust as you practise.';
-const BAND_LABELS = { A0_A1: 'A0–A1 · Beginner', A2: 'A2 · Elementary', B1_B2: 'B1–B2 · Intermediate', C1_C2: 'C1–C2 · Advanced' };
-const NEW_AUDIO_DRAFT = {
-  languageCode: 'da', mediaType: 'MUSIC', title: '', sourceTitle: '', creator: '', sourceUrl: '', playbackUrl: '',
-  editorialBand: 'A0_A1', topicTags: '', skillKey: '', objective: '', explanation: '', sourceReference: '',
-  speechRate: 2, vocabularyDensity: 2, idiomDensity: 2, pronunciationLoad: 2, topicFamiliarity: 3,
-  beforeListeningPrompt: '', gistPrompt: '', focusPrompt: '', transcriptText: '', rightsBasis: 'UNVERIFIED',
-  linkAllowed: false, playbackAllowed: false, transcriptAllowed: false, rightsReference: '', rightsExpiresAt: '',
-};
-
-function AudioDraftForm({ draft, update, busy, onSubmit }) {
-  return <form className="audio-draft-form" onSubmit={onSubmit}>
-    <h3>Create a music or podcast draft</h3>
-    <p>Build a levelled listening lesson. It remains private until your review and approval.</p>
-    <div className="audio-form-grid">
-      <label>Learning language<select value={draft.languageCode} onChange={e => update('languageCode', e.target.value)}><option value="da">Danish</option><option value="de">German</option></select></label>
-      <label>Medium<select value={draft.mediaType} onChange={e => update('mediaType', e.target.value)}><option value="MUSIC">Music</option><option value="PODCAST">Podcast</option></select></label>
-      <label>Editorial level<select value={draft.editorialBand} onChange={e => update('editorialBand', e.target.value)}>{Object.entries(BAND_LABELS).map(([key, value]) => <option value={key} key={key}>{value}</option>)}</select><small>Teacher-curated guide, not a formal CEFR placement.</small></label>
-      <label>Echo lesson title<input required maxLength="240" value={draft.title} onChange={e => update('title', e.target.value)} /></label>
-      <label>Audio title<input required maxLength="240" value={draft.sourceTitle} onChange={e => update('sourceTitle', e.target.value)} /></label>
-      <label>Artist / host / creator<input required maxLength="240" value={draft.creator} onChange={e => update('creator', e.target.value)} /></label>
-      <label>Topic tags<input required maxLength="500" placeholder="daily life, work, relationships" value={draft.topicTags} onChange={e => update('topicTags', e.target.value)} /></label>
-      <label>Source page URL<input type="url" required placeholder="https://…" value={draft.sourceUrl} onChange={e => update('sourceUrl', e.target.value)} /></label>
-      <label>Direct audio URL, only if playback is permitted<input type="url" placeholder="https://…/audio.mp3" value={draft.playbackUrl} onChange={e => update('playbackUrl', e.target.value)} /></label>
-      <label>Skill key<input required maxLength="120" placeholder="danish.audio.gist.beginner" value={draft.skillKey} onChange={e => update('skillKey', e.target.value)} /></label>
-      <label>Learning objective<input required maxLength="500" value={draft.objective} onChange={e => update('objective', e.target.value)} /></label>
-    </div>
-    <label>Teacher explanation<textarea required maxLength="3000" value={draft.explanation} onChange={e => update('explanation', e.target.value)} /></label>
-    <p className="audio-rating-help">Rate the recording and lesson context from 1 (low) to 5 (high). These are separate signals, not one difficulty score.</p>
-    <div className="audio-form-grid audio-ratings">
-      {[['speechRate','Speech rate'],['vocabularyDensity','Vocabulary density'],['idiomDensity','Idiom density'],['pronunciationLoad','Pronunciation / reductions'],['topicFamiliarity','Topic familiarity for beginners']].map(([key, label]) => <label key={key}>{label}<select value={draft[key]} onChange={e => update(key, e.target.value)}>{[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}</select></label>)}
-    </div>
-    <div className="audio-form-grid">
-      <label>Before listening: context or prediction prompt<textarea required maxLength="1000" value={draft.beforeListeningPrompt} onChange={e => update('beforeListeningPrompt', e.target.value)} /></label>
-      <label>Listen for gist<textarea required maxLength="1000" value={draft.gistPrompt} onChange={e => update('gistPrompt', e.target.value)} /></label>
-      <label>Focus prompt for a phrase, sound, or structure<textarea required maxLength="1000" value={draft.focusPrompt} onChange={e => update('focusPrompt', e.target.value)} /></label>
-    </div>
-    <fieldset className="rights-fieldset"><legend>Source permissions · confirm each use separately</legend>
-      <label>Rights basis<select value={draft.rightsBasis} onChange={e => update('rightsBasis', e.target.value)}><option value="UNVERIFIED">Not checked yet · draft only</option><option value="ORIGINAL">Original / teacher-created</option><option value="LICENSED">Licensed for this use</option><option value="PROVIDER_TERMS">Provider terms permit this use</option></select></label>
-      <label className="choice"><input type="checkbox" checked={draft.linkAllowed} onChange={e => update('linkAllowed', e.target.checked)} /><span>The source page may be linked for learners.</span></label>
-      <label className="choice"><input type="checkbox" checked={draft.playbackAllowed} onChange={e => update('playbackAllowed', e.target.checked)} /><span>The direct audio URL may be played in Echo.</span></label>
-      <label className="choice"><input type="checkbox" checked={draft.transcriptAllowed} onChange={e => { update('transcriptAllowed', e.target.checked); if (!e.target.checked) update('transcriptText', ''); }} /><span>Echo may display this transcript or lyric excerpt.</span></label>
-      {draft.transcriptAllowed && <label>Authorized transcript / excerpt<textarea maxLength="5000" value={draft.transcriptText} onChange={e => update('transcriptText', e.target.value)} /><small>Only enter transcript text when your permission covers displaying it to learners.</small></label>}
-      <label>Rights evidence or permission reference<input required maxLength="500" placeholder="License, permission record, or terms reviewed" value={draft.rightsReference} onChange={e => update('rightsReference', e.target.value)} /></label>
-      <label>Rights review / expiry date (optional)<input type="date" value={draft.rightsExpiresAt} onChange={e => update('rightsExpiresAt', e.target.value)} /></label>
-    </fieldset>
-    <button disabled={busy}>{busy ? 'Saving draft…' : 'Save private audio draft'}</button>
-    <small>Unverified, expired, or unauthorized audio cannot be published. Echo does not fetch or copy the source media.</small>
-  </form>;
-}
 
 function App() {
   const [user, setUser] = useState(() => { try { return JSON.parse(sessionStorage.getItem('deepwater-user')); } catch { return null; } });
@@ -212,9 +176,6 @@ function App() {
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [teacherLessons, setTeacherLessons] = useState([]);
-  const [teacherMode, setTeacherMode] = useState(false);
-  const [draftJson, setDraftJson] = useState('');
-  const [audioDraft, setAudioDraft] = useState(NEW_AUDIO_DRAFT);
   const [selectedLessonId, setSelectedLessonId] = useState('');
   const [audioFilter, setAudioFilter] = useState('ALL');
   const [bandFilter, setBandFilter] = useState('ALL');
@@ -224,6 +185,8 @@ function App() {
   const [transcriptShown, setTranscriptShown] = useState({});
   const [audioResults, setAudioResults] = useState({});
   const [tab, setTab] = useState('today');
+  const [product, setProduct] = useState(readProduct);
+  useEffect(() => { try { localStorage.setItem('deepwater-product', product); } catch { /* storage unavailable */ } }, [product]);
   const [cards, setCards] = useState([]);
   const [warmUp, setWarmUp] = useState(false);
   const [reviewing, setReviewing] = useState(false);
@@ -357,54 +320,16 @@ function App() {
     setTeacherLessons(data.teacherLessons);
   }
 
-  function updateAudioDraft(key, value) {
-    setAudioDraft(current => ({ ...current, [key]: value }));
-  }
-
-  async function saveAudioLessonDraft(event) {
-    event.preventDefault(); setError(''); setNotice(''); setBusy(true);
+  /** Saves a lesson draft built by the teacher workspace. Resolves to true when it was saved. */
+  async function saveDraft(input) {
+    setError(''); setNotice(''); setBusy(true);
     try {
-      const bandLabel = BAND_LABELS[audioDraft.editorialBand];
-      const sourceReference = audioDraft.sourceReference.trim() || `${audioDraft.creator} — ${audioDraft.sourceTitle} (${audioDraft.sourceUrl})`;
-      const input = {
-        languageCode: audioDraft.languageCode,
-        title: audioDraft.title,
-        level: bandLabel,
-        topic: audioDraft.topicTags,
-        objective: audioDraft.objective,
-        explanation: audioDraft.explanation,
-        sourceReference,
-        skillKey: audioDraft.skillKey,
-        exercises: [{ taskType: 'TRANSFER', prompt: 'Create an original expression that uses this lesson’s target. Do not copy lines from the recording.' }],
-        audio: {
-          mediaType: audioDraft.mediaType, sourceTitle: audioDraft.sourceTitle, creator: audioDraft.creator,
-          sourceUrl: audioDraft.sourceUrl, ...(audioDraft.playbackUrl ? { playbackUrl: audioDraft.playbackUrl } : {}),
-          editorialBand: audioDraft.editorialBand, topicTags: audioDraft.topicTags,
-          speechRate: Number(audioDraft.speechRate), vocabularyDensity: Number(audioDraft.vocabularyDensity),
-          idiomDensity: Number(audioDraft.idiomDensity), pronunciationLoad: Number(audioDraft.pronunciationLoad),
-          topicFamiliarity: Number(audioDraft.topicFamiliarity), beforeListeningPrompt: audioDraft.beforeListeningPrompt,
-          gistPrompt: audioDraft.gistPrompt, focusPrompt: audioDraft.focusPrompt,
-          ...(audioDraft.transcriptAllowed && audioDraft.transcriptText ? { transcriptText: audioDraft.transcriptText } : {}),
-          rightsBasis: audioDraft.rightsBasis, linkAllowed: audioDraft.linkAllowed,
-          playbackAllowed: audioDraft.playbackAllowed, transcriptAllowed: audioDraft.transcriptAllowed,
-          rightsReference: audioDraft.rightsReference, ...(audioDraft.rightsExpiresAt ? { rightsExpiresAt: audioDraft.rightsExpiresAt } : {}),
-        },
-      };
       const data = await gql(`mutation($input: LessonDraftInput!) { saveEchoLessonDraft(input: $input) { id title reviewStatus } }`, { input });
-      setNotice(`Saved “${data.saveEchoLessonDraft.title}” as a private ${audioDraft.mediaType.toLowerCase()} lesson draft. It stays hidden until you approve it.`);
+      setNotice(`Saved “${data.saveEchoLessonDraft.title}” as a private draft. It stays hidden from learners until you approve it in the lesson queue.`);
       await loadTeacherLessons();
-    } catch (saveError) { setError(saveError.message); }
+      return true;
+    } catch (saveError) { setError(saveError.message); return false; }
     finally { setBusy(false); }
-  }
-
-  async function saveDraft(event) {
-    event.preventDefault(); setError(''); setNotice('');
-    try {
-      const input = JSON.parse(draftJson);
-      const data = await gql(`mutation($input: LessonDraftInput!) { saveEchoLessonDraft(input: $input) { id title languageCode reviewStatus } }`, { input });
-      setNotice(`Saved “${data.saveEchoLessonDraft.title}” as a private teacher draft.`);
-      await loadTeacherLessons();
-    } catch (saveError) { setError(saveError.message); }
   }
 
   async function publishDraft(id) {
@@ -499,17 +424,21 @@ function App() {
 
   return <main className="app-shell">
     <header className="site-header">
-      <Brand />
-      <div className="account"><ThemeSwitch /><button type="button" className={`account-chip${tab === 'profile' ? ' active' : ''}`} aria-current={tab === 'profile' ? 'page' : undefined}
-        onClick={() => { setReviewing(false); setWarmUp(false); setTab('profile'); }} aria-label={`Your profile: ${user.name}`}>
+      <Brand product={product === 'harbor' ? 'Harbor' : 'Echo'} />
+      <nav className="product-switch" aria-label="Deepwater products">
+        {PRODUCTS.map(option => <button key={option.id} type="button" aria-pressed={product === option.id} onClick={() => setProduct(option.id)}><b>{option.label}</b><small>{option.hint}</small></button>)}
+      </nav>
+      <div className="account"><ThemeSwitch /><button type="button" className={`account-chip${product === 'echo' && tab === 'profile' ? ' active' : ''}`} aria-current={product === 'echo' && tab === 'profile' ? 'page' : undefined}
+        onClick={() => { setProduct('echo'); setReviewing(false); setWarmUp(false); setTab('profile'); }} aria-label={`Your profile: ${user.name}`}>
         <span className="account-avatar" aria-hidden="true">{(user.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0].toUpperCase()).join('')}</span>
         <span className="account-label">{user.name}</span></button><button className="link" onClick={logout}>Sign out</button></div>
     </header>
 
-    {error && <p role="alert" className="banner error">{error}</p>}
-    {notice && <p role="status" className="banner notice">{notice}</p>}
-    {verifyMessage && <p role="status" className="banner notice">{verifyMessage}</p>}
-    {user.emailVerified === 'false' && <p role="status" className="banner notice">Please confirm your email: we sent a link to {user.email}. <button className="link" onClick={resendVerification}>Send a new link</button></p>}
+    {error && <Notice tone="error">{error}</Notice>}
+    {notice && <Notice tone="good">{notice}</Notice>}
+    {verifyMessage && <Notice tone="good">{verifyMessage}</Notice>}
+    {user.emailVerified === 'false' && <Notice>Please confirm your email: we sent a link to {user.email}. <button className="link" onClick={resendVerification}>Send a new link</button></Notice>}
+    {product === 'echo' && <>
     {loading && !home && <p role="status" className="loading">Loading your Echo workspace…</p>}
 
     {home && !home.onboarded && <section className="onboarding panel">
@@ -546,11 +475,10 @@ function App() {
         <div className="route-note"><b>{startingRoute} route</b><span>{ROUTE_COPY}</span></div>
       </section>
 
-      <nav className="learn-tabs" aria-label="Echo sections">
-        {[['today', 'Today'], ['practice', 'Practice'], ['cards', 'My cards'], ['progress', 'Progress']].map(([id, label]) =>
-          <button type="button" key={id} className={tab === id ? 'active' : ''} aria-current={tab === id ? 'page' : undefined}
-            onClick={() => setTab(id)}>{label}{id === 'cards' && cards.some(card => card.due) ? ` · ${cards.filter(card => card.due).length}` : ''}</button>)}
-      </nav>
+      <Tabs label="Echo sections" value={tab} onChange={setTab} items={[
+        { id: 'today', label: 'Today' }, { id: 'practice', label: 'Practice' },
+        { id: 'cards', label: 'My cards', badge: cards.filter(card => card.due).length || '' }, { id: 'progress', label: 'Progress' },
+      ]} />
 
       {!reviewing && <div className="review-launch">
         <div><b>{dueCount ? `${dueCount} ${dueCount === 1 ? 'thing is' : 'things are'} ready to review` : 'Your memory is up to date'}</b>
@@ -629,17 +557,13 @@ function App() {
           <div className="method-note"><b>How Echo adapts</b><p>Your chosen experience level sets a guided start. Correct and missed answers update a simple practice estimate and a 1 / 3 / 7 / 14-day review interval. Your free-writing example is saved without automatic grading.</p></div>
         </aside>
       </div>}
-      {user.role === 'TEACHER' && <section className="teacher panel">
-        <div className="teacher-heading"><div><p className="eyebrow">TEACHER WORKSPACE</p><h2>Review and publish Echo lessons</h2><p>Only your configured teacher account can save drafts or approve publication.</p></div><button className="practice-button" onClick={async () => { setTeacherMode(!teacherMode); if (!teacherMode) { try { await loadTeacherLessons(); } catch (e) { setError(e.message); } } }}>{teacherMode ? 'Hide workspace' : 'Open workspace'}</button></div>
-        {teacherMode && <div className="teacher-content">
-          <div><h3>Lesson queue</h3>{teacherLessons.length === 0 ? <p>No teacher drafts yet.</p> : teacherLessons.map(item => <article className="teacher-item" key={item.id}><div className="teacher-review"><b>{item.title} · v{item.version}</b><span>{item.languageCode.toUpperCase()} · {item.level} · {item.reviewStatus}</span><code>{item.id}</code><small><b>Source:</b> {item.sourceReference}</small><p>{item.objective}</p><p>{item.explanation}</p>{item.audio && <div className="teacher-exercise"><b>{item.audio.mediaType} · {item.audio.sourceTitle}</b><small>By {item.audio.creator} · {BAND_LABELS[item.audio.editorialBand]} · {item.audio.topicTags}</small><small>Rights: {item.audio.rightsBasis} · link {item.audio.linkAllowed ? 'allowed' : 'not allowed'} · playback {item.audio.playbackAllowed ? 'allowed' : 'not allowed'} · transcript {item.audio.transcriptAllowed ? 'allowed' : 'not allowed'}</small><small>Rights evidence: {item.audio.rightsReference}{item.audio.rightsExpiresAt ? ` · through ${item.audio.rightsExpiresAt}` : ''}</small><small>Before: {item.audio.beforeListeningPrompt} · Gist: {item.audio.gistPrompt} · Focus: {item.audio.focusPrompt}</small>{item.audio.transcriptText && <details><summary>Review transcript</summary><p>{item.audio.transcriptText}</p></details>}</div>}{item.exercises.map(exercise => <div className="teacher-exercise" key={exercise.position}><b>{exercise.position}. {exercise.taskType}: {exercise.prompt}</b>{exercise.options.map(option => <small key={option.key}>{option.key}. {option.text}{option.key === exercise.expectedAnswer ? ' · expected answer' : ''}</small>)}{exercise.taskType !== 'TRANSFER' && !exercise.options.length && <small>Expected answer: {exercise.expectedAnswer}</small>}{exercise.acceptedAnswers.length > 0 && <small>Also accepted: {exercise.acceptedAnswers.join(' · ')}</small>}<small>Correct feedback: {exercise.feedbackCorrect || '—'}</small><small>Hint: {exercise.feedbackIncorrect || '—'}</small></div>)}</div>{item.reviewStatus === 'DRAFT' && <button onClick={() => publishDraft(item.id)}>I approve & publish</button>}{item.reviewStatus === 'PUBLISHED' && <button onClick={() => unpublishLesson(item)}>Unpublish</button>}{item.reviewStatus === 'UNPUBLISHED' && <button onClick={() => publishDraft(item.id)}>Publish again</button>}</article>)}</div>
-          <AudioDraftForm draft={audioDraft} update={updateAudioDraft} busy={busy} onSubmit={saveAudioLessonDraft} />
-          <form onSubmit={saveDraft}><h3>Add a lesson draft</h3><p>Paste lesson content as JSON. It stays private until you press “I approve &amp; publish”.</p><textarea required value={draftJson} onChange={event => setDraftJson(event.target.value)} placeholder={'{\n  "languageCode": "de",\n  "title": "Verb-second after a time phrase",\n  ...\n}'} /><button>Save as draft</button><small>Shape: languageCode, title, level, topic, objective, explanation, sourceReference, skillKey, exercises[]. See TEACHER_GUIDE.md for a complete example.</small></form>
-        </div>}
-      </section>}
+      {user.role === 'TEACHER' && <TeacherWorkspace lessons={teacherLessons} busy={busy} onSaveDraft={saveDraft} onPublish={publishDraft} onUnpublish={unpublishLesson}
+        onOpen={async () => { try { await loadTeacherLessons(); } catch (loadError) { setError(loadError.message); } }} />}
     </>}
-    {(tab === 'profile' || !home?.onboarded) && <DeleteAccount email={user.email} onDeleted={logout} />}
-    <footer>Echo by Deepwater · Go deeper.</footer>
+    </>}
+    {product === 'harbor' && <Harbor />}
+    {product === 'echo' && (tab === 'profile' || !home?.onboarded) && <DeleteAccount email={user.email} onDeleted={logout} />}
+    <footer>{product === 'harbor' ? 'Harbor' : 'Echo'} by Deepwater · Go deeper.</footer>
   </main>;
 }
 
