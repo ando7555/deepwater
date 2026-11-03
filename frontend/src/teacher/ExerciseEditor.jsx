@@ -1,11 +1,12 @@
 import React from 'react';
 import { Button, Field, FormGrid, Segmented } from '../ui/index.jsx';
 import { TASK_TYPES, emptyOption, withTaskType } from './lessonDraft.js';
+import { pick } from './contentKinds.js';
 
 const KIND_OPTIONS = TASK_TYPES.map(type => ({ id: type.id, label: type.label }));
 
 /** One exercise of the lesson builder: its kind, prompt, answers and feedback. */
-export default function ExerciseEditor({ exercise, index, count, onChange, onMove, onRemove }) {
+export default function ExerciseEditor({ exercise, index, count, language, onChange, onMove, onRemove }) {
   const set = key => event => onChange({ ...exercise, [key]: event.target.value });
   const kind = TASK_TYPES.find(type => type.id === exercise.taskType);
   const setOption = (position, text) => onChange({ ...exercise, options: exercise.options.map((option, i) => i === position ? { ...option, text } : option) });
@@ -27,11 +28,11 @@ export default function ExerciseEditor({ exercise, index, count, onChange, onMov
       </div>
     </div>
     <small>{kind.line}</small>
-    <Field as="textarea" rows="2" label="Prompt" maxLength="1000" value={exercise.prompt} onChange={set('prompt')}
-      placeholder={exercise.taskType === 'TEXT' ? 'Write the article: ___ æble (an apple)' : exercise.taskType === 'SELECT' ? 'Which sentence follows the pattern?' : 'Write three things you can see right now, each with en or et.'} />
+    <Field as="textarea" rows="2" label="Question or task for the learner" maxLength="1000" value={exercise.prompt} onChange={set('prompt')}
+      placeholder={pick(exercise.placeholder, language) || (exercise.taskType === 'TEXT' ? 'Write the article: ___ æble (an apple)' : exercise.taskType === 'SELECT' ? 'Which sentence follows the pattern?' : 'Write three things you can see right now, each with en or et.')} />
 
     {exercise.taskType === 'SELECT' && <div className="option-list" role="group" aria-label={`Options for exercise ${index + 1}`}>
-      <span className="ui-label">Options · tick the correct one</span>
+      <span className="ui-label">Answers to choose from · tick the correct one</span>
       {exercise.options.map((option, position) => <div className="option-row" key={option.key}>
         <input type="radio" name={`correct-${exercise.uid}`} aria-label={`Option ${option.key} is correct`} checked={exercise.expectedAnswer === option.key} onChange={() => onChange({ ...exercise, expectedAnswer: option.key })} />
         <b>{option.key}</b>
@@ -42,13 +43,13 @@ export default function ExerciseEditor({ exercise, index, count, onChange, onMov
     </div>}
 
     {exercise.taskType === 'TEXT' && <FormGrid>
-      <Field label="Expected answer" maxLength="500" value={exercise.expectedAnswer} onChange={set('expectedAnswer')} hint="Capitals, punctuation and extra spaces are ignored when grading." />
-      <Field as="textarea" rows="2" label="Also accepted" optional value={exercise.acceptedAnswers} onChange={set('acceptedAnswers')} hint="One answer per line, up to ten." />
+      <Field label="Correct answer" maxLength="500" value={exercise.expectedAnswer} onChange={set('expectedAnswer')} hint="Capitals, punctuation and extra spaces are ignored when grading." />
+      <Field as="textarea" rows="2" label="Other correct answers" optional value={exercise.acceptedAnswers} onChange={set('acceptedAnswers')} hint="One per line, up to ten." />
     </FormGrid>}
 
     {exercise.taskType !== 'TRANSFER' && <FormGrid>
-      <Field label="Feedback when right" optional maxLength="1000" value={exercise.feedbackCorrect} onChange={set('feedbackCorrect')} hint="Why this answer follows the pattern." />
-      <Field label="Hint when wrong" optional maxLength="1000" value={exercise.feedbackIncorrect} onChange={set('feedbackIncorrect')} hint="A nudge towards the structure, not the answer." />
+      <Field label="Shown when right" optional maxLength="1000" value={exercise.feedbackCorrect} onChange={set('feedbackCorrect')} hint="One line on why it is right." />
+      <Field label="Hint when wrong" optional maxLength="1000" value={exercise.feedbackIncorrect} onChange={set('feedbackIncorrect')} hint="A nudge, not the answer." />
     </FormGrid>}
   </fieldset>;
 }

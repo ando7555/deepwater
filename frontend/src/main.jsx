@@ -325,7 +325,7 @@ function App() {
     setError(''); setNotice(''); setBusy(true);
     try {
       const data = await gql(`mutation($input: LessonDraftInput!) { saveEchoLessonDraft(input: $input) { id title reviewStatus } }`, { input });
-      setNotice(`Saved “${data.saveEchoLessonDraft.title}” as a private draft. It stays hidden from learners until you approve it in the lesson queue.`);
+      setNotice(`Saved “${data.saveEchoLessonDraft.title}” as a private draft. It stays hidden from learners until you approve it under Review & publish.`);
       await loadTeacherLessons();
       return true;
     } catch (saveError) { setError(saveError.message); return false; }
