@@ -119,6 +119,13 @@ class HarborCvCheckTest {
     }
 
     @Test
+    void emailAddressesAreFoundWithoutARegex() {
+        assertThat(CvChecker.hasEmail("Mail: ana.demo@example.dk.")).isTrue();
+        assertThat(CvChecker.hasEmail("ana@example.test | +45 12 34")).isTrue();
+        assertThat(CvChecker.hasEmail("@handle, a@b, x@y., two@@at.dk")).isFalse();
+    }
+
+    @Test
     void wordSymbolBulletsCountAsBullets() {
         String cv = GOOD_CV.replace("•", "\uF0B7");
         assertThat(statuses(CvChecker.check(cv, null))).containsEntry("bullets", "PASS").containsEntry("paragraphs", "PASS");

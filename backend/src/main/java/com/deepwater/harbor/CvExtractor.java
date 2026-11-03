@@ -103,7 +103,10 @@ public final class CvExtractor {
     static String family(String fontName) {
         String name = fontName.contains("+") ? fontName.substring(fontName.indexOf('+') + 1) : fontName;
         int cut = name.length();
-        for (char c : new char[]{'-', ','}) if (name.indexOf(c) > 0) cut = Math.min(cut, name.indexOf(c));
+        for (char c : new char[]{'-', ','}) {
+            int at = name.indexOf(c);
+            if (at >= 1) cut = Math.min(cut, at); // a separator in first place would leave no name, so it is not a cut
+        }
         name = name.substring(0, cut);
         for (String suffix : new String[]{"MT", "PS", "Bold", "Italic", "Regular"})
             if (name.endsWith(suffix) && name.length() > suffix.length()) name = name.substring(0, name.length() - suffix.length());

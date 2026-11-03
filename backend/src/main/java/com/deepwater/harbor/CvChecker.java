@@ -18,14 +18,18 @@ public final class CvChecker {
     static final String WARN = "WARN";
     static final String FAIL = "FAIL";
 
-    private static final Pattern EMAIL = Pattern.compile("[\\w.+-]++@[\\w-]++(?:\\.[\\w-]++)++");
     private static final Pattern PHONE = Pattern.compile("\\+?\\d[\\d ()-]{7,}+");
     private static final Pattern PROFILE_LINK = Pattern.compile("linkedin\\.com/|github\\.com/|https?://|www\\.", Pattern.CASE_INSENSITIVE);
     /** Common bullet characters, including the private-use glyph Word writes for Symbol-font bullets. */
     private static final Pattern BULLET = Pattern.compile("^[•▪●◦‣∙○■□➢➤►✓\uF0B7\uF0A7*–-]\\s?\\S");
-    private static final Pattern RESULT = Pattern.compile(
-            "\\d+\\s?%|[€$£]\\s?\\d|\\b\\d+(?:[.,]\\d+)?\\s?[kmx]\\b|\\b\\d+\\+?\\s(?:users|customers|clients|people|engineers|developers|"
-                    + "services|teams|countries|projects|requests|transactions|ms|hours|days)\\b", Pattern.CASE_INSENSITIVE);
+    /** Simple patterns for numbers that show impact: percentages, money, "3x"/"200k", and counts of people or things. */
+    private static final List<Pattern> RESULTS = List.of(
+            Pattern.compile("\\d\\s?%"),
+            Pattern.compile("[€$£]\\s?\\d"),
+            Pattern.compile("\\b\\d++(?:[.,]\\d++)?\\s?[kmx]\\b", Pattern.CASE_INSENSITIVE));
+    private static final Pattern COUNTED = Pattern.compile("\\b\\d++\\+?\\s([a-z]++)", Pattern.CASE_INSENSITIVE);
+    private static final java.util.Set<String> COUNTED_THINGS = java.util.Set.of("users", "customers", "clients", "people",
+            "engineers", "developers", "services", "teams", "countries", "projects", "requests", "transactions", "ms", "hours", "days");
     private static final Pattern FIRST_PERSON = Pattern.compile("\\b(?:I|me|my)\\b");
 
     private static final String[][] SECTIONS = {
@@ -46,7 +50,7 @@ public final class CvChecker {
             items.add(pages(layout.pages()));
         }
         items.add(length(words));
-        items.add(EMAIL.matcher(text).find()
+        items.add(hasEmail(text)
                 ? item("email", PASS, "Email address", "Found an email address.")
                 : item("email", FAIL, "Email address", "Add an email address at the top so recruiters can reach you."));
         items.add(PHONE.matcher(text).find()
@@ -143,7 +147,8 @@ public final class CvChecker {
     }
 
     private static CvCheck.Item results(String text) {
-        long count = RESULT.matcher(text).results().count();
+        long count = RESULTS.stream().mapToLong(p -> p.matcher(text).results().count()).sum()
+                + COUNTED.matcher(text).results().filter(m -> COUNTED_THINGS.contains(m.group(1).toLowerCase(Locale.ROOT))).count();
         if (count >= 2) return item("results", PASS, "Measurable results", count + " numbers show the size of your impact.");
         return item("results", WARN, "Measurable results",
                 "Add numbers to your achievements, for example \"cut response time by 40%\" or \"served 2 million users\".");
@@ -192,6 +197,17 @@ public final class CvChecker {
             default -> 0.0;
         }).sum();
         return (int) Math.round(100 * points / items.size());
+    }
+
+    /** An email address: a word with text before one "@" and a dot inside the part after it. Checked without a regex. */
+    static boolean hasEmail(String text) {
+        for (String token : text.split("[\\s|,;<>()\\[\\]]+")) {
+            String word = token.endsWith(".") ? token.substring(0, token.length() - 1) : token;
+            int at = word.indexOf('@');
+            int dot = word.lastIndexOf('.');
+            if (at >= 1 && at == word.lastIndexOf('@') && dot > at + 1 && dot < word.length() - 1) return true;
+        }
+        return false;
     }
 
     private static CvCheck.Item item(String id, String status, String title, String detail) {
