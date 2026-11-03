@@ -18,14 +18,15 @@ Register using that exact email, or sign out and sign back in if the account alr
 ## Add and approve a lesson
 
 1. Sign in with the configured teacher account and finish learner onboarding so Echo opens the workspace.
-2. Choose **Open workspace** under **Teacher workspace**, then the **Add a lesson** tab.
-3. Fill in the form: language, title, level band and course stage (lessons with the same stage are grouped on the learner's path), topic, what the learner will be able to do, the explanation, and the source and permission line. The skill key is suggested from the language, topic and title; change it only to group this lesson with an existing skill.
-4. Build the exercises. A new lesson starts with one of each kind: **Choose one** (options with the correct one ticked), **Type the answer** (an expected answer and any other accepted answers, one per line) and **Own example** (the learner's own sentence, saved for reflection and not graded). Add, remove or reorder exercises as you need; a lesson takes one to twenty.
-5. Save. The form lists anything that is missing before it saves. The draft is visible in **Lesson queue**, but learners cannot see it.
-6. In the queue, open **Read the whole lesson before you decide**, check the language, expected answers, feedback and source, then select **I approve & publish** only when you have checked the whole lesson. The queue can be filtered by status and language.
-7. Switch your learner-language selector to preview the published language as a learner.
+2. Choose **Open workspace** under **Teacher workspace**. The workspace has two places: **Add content** and **Review & publish**.
+3. Under **Add content**, pick what you want to add: **Grammar**, **Writing**, **Vocabulary & phrases**, **Song lyrics**, **Conversation & negotiation**, or **Music or podcast** (the longer listening form with its rights check). Each kind opens a short form already laid out for it, with example prompts in grey for Danish or German.
+4. Fill in five things: the language and topic, the title, what the learner will be able to do, the explanation as you would give it in class, and the source and permission line. The exercises are already laid out for the kind (for example, a choice, a typed answer and the learner's own writing); write your question in each box over the grey example, add or remove boxes as you need (one to twenty). **Choose one** needs its answers with the correct one ticked; **Type the answer** needs the correct answer and any other correct answers, one per line; **Own example** is the learner's own writing, saved for you to read and not graded.
+5. **More options** at the bottom holds what you rarely change: the level band and course stage (lessons with the same stage are grouped on the learner's path), the skill key (suggested from the language, kind and topic; change it only to group this lesson with an existing skill), and the lesson as JSON.
+6. Save. The form lists anything that is missing before it saves. The draft lands under **Review & publish**, where learners cannot see it.
+7. Under **Review & publish**, open **Read the whole lesson before you decide**, check the language, expected answers, feedback and source, then select **I approve & publish** only when you have checked the whole lesson. The queue can be filtered by status and language, and each lesson shows its kind.
+8. Switch your learner-language selector to preview the published language as a learner.
 
-**Import or copy as JSON** under the form loads a lesson file in the shape below into the form, or shows the form's current content as JSON so you can keep it in the repository (`backend/src/main/resources/echo/catalog/`). Audio lessons have their own tab, **Music or podcast**.
+The lesson's kind is kept in the second part of the skill key (`danish.grammar.negation`), so older lessons without one simply show no kind. **Lesson as JSON** under More options loads a lesson file in the shape below into the form, or shows the form's current content as JSON so you can keep it in the repository (`backend/src/main/resources/echo/catalog/`).
 
 ```json
 {

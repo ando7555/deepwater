@@ -4,10 +4,12 @@
  * GraphQL LessonDraftInput that the backend validates again on save.
  */
 
+import { kindOfLesson } from './contentKinds.js';
+
 export const TASK_TYPES = [
   { id: 'SELECT', label: 'Choose one', line: 'The learner picks the right option. Graded automatically.' },
   { id: 'TEXT', label: 'Type the answer', line: 'The learner types a word or phrase. Graded against the answers you accept.' },
-  { id: 'TRANSFER', label: 'Own example', line: 'The learner writes a new sentence of their own. Saved for reflection, not graded.' },
+  { id: 'TRANSFER', label: 'Own example', line: 'The learner writes freely. Saved for you to read, not graded.' },
 ];
 
 export const BANDS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
@@ -28,10 +30,10 @@ export function emptyOption(index) {
   return { key: OPTION_KEYS[index] ?? String(index + 1), text: '' };
 }
 
-/** One exercise in the form. acceptedAnswers is kept as text, one answer per line. */
-export function emptyExercise(taskType = 'SELECT') {
+/** One exercise in the form. acceptedAnswers is kept as text, one answer per line; placeholder ({da, de} or text) is only shown, never saved. */
+export function emptyExercise(taskType = 'SELECT', placeholder = '') {
   return {
-    uid: uid(), taskType, prompt: '',
+    uid: uid(), taskType, prompt: '', placeholder,
     expectedAnswer: taskType === 'SELECT' ? 'A' : '',
     acceptedAnswers: '', feedbackCorrect: '', feedbackIncorrect: '',
     options: taskType === 'SELECT' ? [emptyOption(0), emptyOption(1)] : [],
@@ -39,18 +41,26 @@ export function emptyExercise(taskType = 'SELECT') {
 }
 
 /** A new lesson starts with one exercise of each kind, in the order a lesson usually runs. */
-export function emptyLesson(languageCode = 'da') {
+export function emptyLesson(languageCode = 'da', kind = '') {
   return {
-    revisionOf: '', languageCode, title: '', band: 'A1', stage: '', topic: '', objective: '',
+    revisionOf: '', languageCode, kind, title: '', band: 'A1', stage: '', topic: '', objective: '',
     explanation: '', sourceReference: '', skillKey: '',
     exercises: [emptyExercise('SELECT'), emptyExercise('TEXT'), emptyExercise('TRANSFER')],
   };
 }
 
+/** A lesson started from a content kind: its topic filled in and its exercises laid out with example prompts. */
+export function lessonForKind(kind, languageCode = 'da') {
+  const lesson = emptyLesson(languageCode, kind.id);
+  lesson.topic = kind.topic || '';
+  if (kind.exercises?.length) lesson.exercises = kind.exercises.map(exercise => emptyExercise(exercise.taskType, exercise.placeholder));
+  return lesson;
+}
+
 /** Switches an exercise's kind, keeping the prompt and feedback but resetting the answer fields. */
 export function withTaskType(exercise, taskType) {
   if (exercise.taskType === taskType) return exercise;
-  const fresh = emptyExercise(taskType);
+  const fresh = emptyExercise(taskType, exercise.placeholder);
   return { ...fresh, uid: exercise.uid, prompt: exercise.prompt, feedbackCorrect: exercise.feedbackCorrect, feedbackIncorrect: exercise.feedbackIncorrect };
 }
 
@@ -74,10 +84,11 @@ export function slug(text) {
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
-/** A skill key from the language, topic and title, e.g. "danish.nouns.en-or-et". */
+/** A skill key from the language, kind, topic and title, e.g. "danish.grammar.negation.ikke-after-the-verb". */
 export function suggestSkillKey(form) {
   const language = form.languageCode === 'de' ? 'german' : 'danish';
-  const parts = [language, slug(form.topic), slug(form.title).split('-').slice(0, 4).join('-')].filter(Boolean);
+  const topic = slug(form.topic);
+  const parts = [language, form.kind, topic === form.kind ? '' : topic, slug(form.title).split('-').slice(0, 4).join('-')].filter(Boolean);
   return parts.join('.').slice(0, LIMITS.skillKey);
 }
 
@@ -158,14 +169,14 @@ export function toDraftInput(form) {
 export function fromLesson(lesson, { revisionOf = '' } = {}) {
   const { band, stage } = splitLevel(lesson.level);
   return {
-    revisionOf, languageCode: lesson.languageCode === 'de' ? 'de' : 'da',
+    revisionOf, languageCode: lesson.languageCode === 'de' ? 'de' : 'da', kind: kindOfLesson(lesson),
     title: lesson.title || '', band, stage, topic: lesson.topic || '', objective: lesson.objective || '',
     explanation: lesson.explanation || '', sourceReference: lesson.sourceReference || '', skillKey: lesson.skillKey || '',
     exercises: (lesson.exercises || []).map(exercise => {
       const taskType = TASK_TYPES.some(type => type.id === exercise.taskType) ? exercise.taskType : 'TEXT';
       const options = taskType === 'SELECT' ? (exercise.options || []).map((option, index) => ({ key: option.key || OPTION_KEYS[index], text: option.text || '' })) : [];
       return {
-        uid: uid(), taskType, prompt: exercise.prompt || '',
+        uid: uid(), taskType, prompt: exercise.prompt || '', placeholder: '',
         expectedAnswer: taskType === 'TRANSFER' ? '' : (exercise.expectedAnswer || (taskType === 'SELECT' ? options[0]?.key || 'A' : '')),
         acceptedAnswers: (exercise.acceptedAnswers || []).join('\n'),
         feedbackCorrect: exercise.feedbackCorrect || '', feedbackIncorrect: exercise.feedbackIncorrect || '',

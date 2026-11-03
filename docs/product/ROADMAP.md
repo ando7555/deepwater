@@ -71,6 +71,8 @@ UTC (open question for the owner).
 
 ## Phase 2: Content approved and a first learner pilot
 
+Done on this branch (2026-11-03): the teacher workspace is two places, "Add content" and "Review & publish". Adding content starts from a kind (grammar, writing, vocabulary and phrases, song lyrics, conversation and negotiation, music or podcast) that lays out a short form with example prompts in Danish or German; level, stage, skill key and JSON import sit under "More options". The kind is stored in the skill key, so the lesson shape and the backend are unchanged.
+
 **Problem.** The Danish A1 course exists only as teacher drafts, and no design choice has been
 tested with a real learner.
 
