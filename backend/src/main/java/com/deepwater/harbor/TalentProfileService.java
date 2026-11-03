@@ -18,7 +18,12 @@ public class TalentProfileService {
     private static final Set<String> REMOTE = Set.of("ANY", "REMOTE_ONLY", "ONSITE");
     private final JdbcTemplate db;
 
-    public TalentProfileService(JdbcTemplate db) { this.db = db; }
+    private final tools.jackson.databind.ObjectMapper json;
+
+    public TalentProfileService(JdbcTemplate db, tools.jackson.databind.ObjectMapper json) {
+        this.db = db;
+        this.json = json;
+    }
 
     public TalentProfile profile(String accountId) {
         return db.query("select * from harbor_profiles where account_id=?", (rs, row) -> {
@@ -26,7 +31,7 @@ public class TalentProfileService {
             return new TalentProfile(rs.getString("headline"), rs.getString("summary"), split(rs.getString("skills")),
                     (Integer) rs.getObject("years_experience"), split(rs.getString("languages")), rs.getString("citizenship"),
                     split(rs.getString("target_countries")), rs.getString("remote_preference"), rs.getString("cv_file_name"),
-                    rs.getString("cv_text") != null, updated == null ? null : updated.toInstant());
+                    rs.getString("cv_text") != null, updated == null ? null : updated.toInstant(), readCheck(rs.getString("cv_check")));
         }, accountId).stream().findFirst().orElse(TalentProfile.empty());
     }
 
@@ -35,12 +40,15 @@ public class TalentProfileService {
      * Choices the person made that a CV cannot tell (citizenship, target countries, remote) are kept.
      */
     @Transactional
-    public TalentProfile importCv(String accountId, String fileName, String text) {
+    public TalentProfile importCv(String accountId, String fileName, CvExtractor.CvDocument document) {
+        String text = document.text();
         var draft = CvExtractor.extract(text);
         var current = profile(accountId);
         var next = new TalentProfile(draft.headline(), draft.summary(), draft.skills(), draft.yearsExperience(), draft.languages(),
                 current.citizenship(), current.targetCountries(), current.remotePreference(), fileName, true, null);
         save(accountId, next, text);
+        db.update("update harbor_profiles set cv_check=? where account_id=?",
+                json.writeValueAsString(CvChecker.check(text, document.layout())), accountId);
         return profile(accountId);
     }
 
@@ -70,7 +78,7 @@ public class TalentProfileService {
     /** Forgets the CV file and its text but keeps the profile the person corrected. */
     @Transactional
     public TalentProfile deleteCv(String accountId) {
-        db.update("update harbor_profiles set cv_file_name=null, cv_text=null, updated_at=current_timestamp where account_id=?", accountId);
+        db.update("update harbor_profiles set cv_file_name=null, cv_text=null, cv_check=null, updated_at=current_timestamp where account_id=?", accountId);
         return profile(accountId);
     }
 
@@ -90,6 +98,10 @@ public class TalentProfileService {
         Object[] result = Arrays.copyOf(values, values.length + 1);
         result[values.length] = value;
         return result;
+    }
+
+    private CvCheck readCheck(String value) {
+        return value == null ? null : json.readValue(value, CvCheck.class);
     }
 
     private static List<String> split(String value) {

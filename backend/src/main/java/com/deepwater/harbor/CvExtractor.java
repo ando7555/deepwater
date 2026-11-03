@@ -39,11 +39,22 @@ public final class CvExtractor {
 
     /** Reads the text of a PDF, plain-text or Markdown CV. Word files are not supported yet. */
     public static String readText(String fileName, byte[] bytes) {
+        return read(fileName, bytes).text();
+    }
+
+    /**
+     * Reads a CV and, for a PDF, also its layout: page count, font families and font sizes,
+     * which the formatting check uses. Pasted or plain-text CVs have no layout.
+     */
+    public static CvDocument read(String fileName, byte[] bytes) {
         String name = fileName == null ? "" : fileName.toLowerCase(Locale.ROOT);
         String text;
+        CvLayout layout = null;
         if (name.endsWith(".pdf") || startsWithPdfMarker(bytes)) {
             try (var document = Loader.loadPDF(bytes)) {
-                text = new PDFTextStripper().getText(document);
+                var stripper = new LayoutStripper();
+                text = stripper.getText(document);
+                layout = new CvLayout(document.getNumberOfPages(), List.copyOf(stripper.fonts), stripper.smallestBodySize());
             } catch (IOException ex) {
                 throw new IllegalArgumentException("This PDF could not be read. Try saving it again as PDF, or paste the text.", ex);
             }
@@ -55,7 +66,51 @@ public final class CvExtractor {
         text = text.replace("\u0000", "").strip();
         if (text.isEmpty())
             throw new IllegalArgumentException("No text was found in this file. A scanned image CV needs to be pasted as text.");
-        return text.length() > MAX_TEXT ? text.substring(0, MAX_TEXT) : text;
+        return new CvDocument(text.length() > MAX_TEXT ? text.substring(0, MAX_TEXT) : text, layout);
+    }
+
+    /** The CV's text and, for PDFs, its layout. */
+    public record CvDocument(String text, CvLayout layout) {}
+
+    /** Layout facts read from a PDF: pages, font families used, and the smallest size used for a run of body text. */
+    public record CvLayout(int pages, List<String> fontFamilies, Float smallestBodySize) {}
+
+    /** Collects font families and sizes while PDFBox extracts the text. */
+    private static final class LayoutStripper extends PDFTextStripper {
+        private final java.util.Set<String> fonts = new java.util.TreeSet<>();
+        private final java.util.Map<Float, Integer> charsBySize = new java.util.HashMap<>();
+
+        @Override
+        protected void writeString(String text, List<org.apache.pdfbox.text.TextPosition> positions) throws IOException {
+            for (var position : positions) {
+                var font = position.getFont();
+                if (font != null && font.getName() != null) fonts.add(family(font.getName()));
+                // The rendered height includes the page transform; getFontSizeInPt misses it in PDFs from browsers.
+                float size = Math.round(position.getYScale() * 2) / 2f;
+                charsBySize.merge(size, 1, Integer::sum);
+            }
+            super.writeString(text, positions);
+        }
+
+        /** The smallest size used for at least 200 characters, so a tiny footer does not count as body text. */
+        Float smallestBodySize() {
+            return charsBySize.entrySet().stream().filter(e -> e.getValue() >= 200 && e.getKey() > 0)
+                    .map(java.util.Map.Entry::getKey).min(Float::compare).orElse(null);
+        }
+    }
+
+    /** "ABCDEF+Calibri-Bold" and "Calibri,Italic" both become "Calibri". */
+    static String family(String fontName) {
+        String name = fontName.contains("+") ? fontName.substring(fontName.indexOf('+') + 1) : fontName;
+        int cut = name.length();
+        for (char c : new char[]{'-', ','}) {
+            int at = name.indexOf(c);
+            if (at >= 1) cut = Math.min(cut, at); // a separator in first place would leave no name, so it is not a cut
+        }
+        name = name.substring(0, cut);
+        for (String suffix : new String[]{"MT", "PS", "Bold", "Italic", "Regular"})
+            if (name.endsWith(suffix) && name.length() > suffix.length()) name = name.substring(0, name.length() - suffix.length());
+        return name;
     }
 
     private static boolean startsWithPdfMarker(byte[] bytes) {

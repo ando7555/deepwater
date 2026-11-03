@@ -129,8 +129,8 @@ public class HarborController {
         applications.remove(platform.requireAccount(auth), jobId);
     }
 
-    private static String read(String name, byte[] bytes) {
-        try { return CvExtractor.readText(name, bytes); }
+    private static CvExtractor.CvDocument read(String name, byte[] bytes) {
+        try { return CvExtractor.read(name, bytes); }
         catch (IllegalArgumentException ex) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage()); }
     }
 
