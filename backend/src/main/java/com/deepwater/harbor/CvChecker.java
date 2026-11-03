@@ -74,16 +74,35 @@ public final class CvChecker {
     }
 
     private static CvCheck.Item pages(int pages) {
-        if (pages <= 2) return item("pages", PASS, "Length in pages", pages + (pages == 1 ? " page." : " pages."));
-        if (pages == 3) return item("pages", WARN, "Length in pages", "3 pages. Most recruiters expect 1–2; cut older roles to one line each.");
-        return item("pages", FAIL, "Length in pages", pages + " pages. Shorten to 2 pages: keep the last 10 years in detail.");
+        String status;
+        String detail;
+        if (pages <= 2) {
+            status = PASS;
+            detail = pages + (pages == 1 ? " page." : " pages.");
+        } else if (pages == 3) {
+            status = WARN;
+            detail = "3 pages. Most recruiters expect 1–2; cut older roles to one line each.";
+        } else {
+            status = FAIL;
+            detail = pages + " pages. Shorten to 2 pages: keep the last 10 years in detail.";
+        }
+        return item("pages", status, "Length in pages", detail);
     }
 
     private static CvCheck.Item length(int words) {
-        if (words < 150) return item("words", FAIL, "Amount of content", words + " words. Too little to judge your experience; describe each role.");
-        if (words < 250) return item("words", WARN, "Amount of content", words + " words. Add what you achieved in each role.");
-        if (words > 1300) return item("words", WARN, "Amount of content", words + " words. Long CVs get skimmed; aim for 400–900.");
-        return item("words", PASS, "Amount of content", words + " words.");
+        String status = PASS;
+        String advice = "";
+        if (words < 150) {
+            status = FAIL;
+            advice = " Too little to judge your experience; describe each role.";
+        } else if (words < 250) {
+            status = WARN;
+            advice = " Add what you achieved in each role.";
+        } else if (words > 1300) {
+            status = WARN;
+            advice = " Long CVs get skimmed; aim for 400–900.";
+        }
+        return item("words", status, "Amount of content", words + " words." + advice);
     }
 
     private static CvCheck.Item sections(String[] lines) {
@@ -140,15 +159,28 @@ public final class CvChecker {
     private static CvCheck.Item fonts(List<String> families) {
         int count = families.size();
         String names = String.join(", ", families.subList(0, Math.min(5, count)));
-        if (count <= 2) return item("fonts", PASS, "Fonts", count + (count == 1 ? " font family" : " font families") + (count > 0 ? ": " + names + "." : "."));
-        if (count == 3) return item("fonts", WARN, "Fonts", "3 font families (" + names + "). Use one or two for a calmer look.");
-        return item("fonts", FAIL, "Fonts", count + " font families (" + names + "). Use one or two fonts throughout.");
+        String status;
+        String detail;
+        if (count <= 2) {
+            status = PASS;
+            String listed = count > 0 ? ": " + names + "." : ".";
+            detail = count + (count == 1 ? " font family" : " font families") + listed;
+        } else if (count == 3) {
+            status = WARN;
+            detail = "3 font families (" + names + "). Use one or two for a calmer look.";
+        } else {
+            status = FAIL;
+            detail = count + " font families (" + names + "). Use one or two fonts throughout.";
+        }
+        return item("fonts", status, "Fonts", detail);
     }
 
     private static CvCheck.Item fontSize(float size) {
         String shown = java.math.BigDecimal.valueOf(size).stripTrailingZeros().toPlainString() + " pt";
-        if (size >= 9.5f) return item("fontsize", PASS, "Text size", "Body text is at least " + shown + ".");
-        return item("fontsize", WARN, "Text size", "Some body text is " + shown + ". Use 10–12 pt so it reads well on screen and paper.");
+        boolean readable = size >= 9.5f;
+        return item("fontsize", readable ? PASS : WARN, "Text size", readable
+                ? "Body text is at least " + shown + "."
+                : "Some body text is " + shown + ". Use 10–12 pt so it reads well on screen and paper.");
     }
 
     /** PASS counts fully, WARN half, FAIL nothing. */

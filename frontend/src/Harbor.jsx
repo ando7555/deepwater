@@ -295,10 +295,16 @@ function ApplicationsView() {
 const CHECK_ICON = { PASS: '✓', WARN: '!', FAIL: '✕' };
 const CHECK_WORD = { PASS: 'Good', WARN: 'Improve', FAIL: 'Fix' };
 
+function cvVerdict(score) {
+  if (score >= 85) return 'Ready to send';
+  if (score >= 60) return 'A few fixes first';
+  return 'Needs work before you apply';
+}
+
 function CvCheckCard({ check }) {
-  const todo = check.items.filter(i => i.status !== 'PASS').sort((a, b) => (a.status === 'FAIL' ? 0 : 1) - (b.status === 'FAIL' ? 0 : 1));
+  const todo = [...check.items.filter(i => i.status === 'FAIL'), ...check.items.filter(i => i.status === 'WARN')];
   const done = check.items.filter(i => i.status === 'PASS');
-  const verdict = check.score >= 85 ? 'Ready to send' : check.score >= 60 ? 'A few fixes first' : 'Needs work before you apply';
+  const verdict = cvVerdict(check.score);
   const row = item => <li key={item.id} className={`cv-check-item ${item.status.toLowerCase()}`}>
     <span className="cv-check-icon" aria-label={CHECK_WORD[item.status]}>{CHECK_ICON[item.status]}</span>
     <div><b>{item.title}</b><p>{item.detail}</p></div>
