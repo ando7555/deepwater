@@ -51,7 +51,7 @@ public class PersonProfileService {
     public String normalizePhone(String phone) {
         if (phone == null || phone.isBlank()) return null;
         String compact = phone.strip().replaceAll("[\\s().-]", "");
-        if (!compact.matches("\\+?[0-9]{6,15}"))
+        if (!compact.matches("\\+?\\d{6,15}"))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Enter a phone number with 6–15 digits, for example +45 12 34 56 78.");
         return compact;
     }

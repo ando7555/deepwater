@@ -27,7 +27,7 @@ class EchoCardsTest {
         String token = learner("da");
         String saved = graph(SAVE, Map.of("front", "Jeg kan godt lide kaffe", "back", "I like coffee"), token);
         assertThat(saved).contains("\"box\":0", "\"due\":true");
-        String id = saved.replaceAll(".*\"id\":\"([^\"]+)\".*", "$1");
+        String id = idOf(saved);
 
         assertThat(graph(REVIEW, Map.of("id", id, "knew", true), token)).contains("\"box\":1", "\"due\":false");
         assertThat(graph(REVIEW, Map.of("id", id, "knew", true), token)).contains("\"box\":2");
@@ -42,7 +42,7 @@ class EchoCardsTest {
         String owner = learner("da");
         String other = learner("da");
         String saved = graph(SAVE, Map.of("front", "Hej", "back", "Hi"), owner);
-        String id = saved.replaceAll(".*\"id\":\"([^\"]+)\".*", "$1");
+        String id = idOf(saved);
 
         assertThat(graph("query { echoCards { id } }", Map.of(), other)).contains("\"echoCards\":[]");
         assertThat(postGraph(REVIEW, Map.of("id", id, "knew", true), other)).contains("Card not found.");
@@ -58,7 +58,7 @@ class EchoCardsTest {
     @Test
     void closeKeepsTheBoxAndAMissRemembersWhatWasTyped() {
         String token = learner("da");
-        String id = graph(SAVE, Map.of("front", "en kat", "back", "a cat"), token).replaceAll(".*\"id\":\"([^\"]+)\".*", "$1");
+        String id = idOf(graph(SAVE, Map.of("front", "en kat", "back", "a cat"), token));
         String grade = "mutation($id:ID!,$grade:CardGrade!,$answer:String){reviewEchoCard(cardId:$id,grade:$grade,answer:$answer){box due missCount lastMiss}}";
 
         assertThat(graph(grade, Map.of("id", id, "grade", "KNEW"), token)).contains("\"box\":1", "\"missCount\":0");
@@ -107,5 +107,11 @@ class EchoCardsTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(token);
         return http.postForObject("/graphql", new HttpEntity<>(Map.of("query", query, "variables", variables), headers), String.class);
+    }
+
+    /** The first "id" value in a GraphQL JSON response. */
+    private static String idOf(String json) {
+        int start = json.indexOf("\"id\":\"") + 6;
+        return json.substring(start, json.indexOf('"', start));
     }
 }
