@@ -18,13 +18,13 @@ public final class CvChecker {
     static final String WARN = "WARN";
     static final String FAIL = "FAIL";
 
-    private static final Pattern EMAIL = Pattern.compile("[\\w.+-]+@[\\w-]+(?:\\.[\\w-]+)+");
+    private static final Pattern EMAIL = Pattern.compile("[\\w.+-]++@[\\w-]++(?:\\.[\\w-]++)++");
     private static final Pattern PHONE = Pattern.compile("\\+?\\d[\\d ()-]{7,}+");
     private static final Pattern PROFILE_LINK = Pattern.compile("linkedin\\.com/|github\\.com/|https?://|www\\.", Pattern.CASE_INSENSITIVE);
     /** Common bullet characters, including the private-use glyph Word writes for Symbol-font bullets. */
     private static final Pattern BULLET = Pattern.compile("^[•▪●◦‣∙○■□➢➤►✓\uF0B7\uF0A7*–-]\\s?\\S");
     private static final Pattern RESULT = Pattern.compile(
-            "\\d+\\s?%|[€$£]\\s?\\d|\\b\\d+(?:[.,]\\d+)?\\s?(?:k|m|x)\\b|\\b\\d+\\+?\\s(?:users|customers|clients|people|engineers|developers|"
+            "\\d+\\s?%|[€$£]\\s?\\d|\\b\\d+(?:[.,]\\d+)?\\s?[kmx]\\b|\\b\\d+\\+?\\s(?:users|customers|clients|people|engineers|developers|"
                     + "services|teams|countries|projects|requests|transactions|ms|hours|days)\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern FIRST_PERSON = Pattern.compile("\\b(?:I|me|my)\\b");
 
@@ -146,7 +146,7 @@ public final class CvChecker {
     }
 
     private static CvCheck.Item fontSize(float size) {
-        String shown = (size == Math.floor(size) ? String.valueOf((int) size) : String.valueOf(size)) + " pt";
+        String shown = java.math.BigDecimal.valueOf(size).stripTrailingZeros().toPlainString() + " pt";
         if (size >= 9.5f) return item("fontsize", PASS, "Text size", "Body text is at least " + shown + ".");
         return item("fontsize", WARN, "Text size", "Some body text is " + shown + ". Use 10–12 pt so it reads well on screen and paper.");
     }
