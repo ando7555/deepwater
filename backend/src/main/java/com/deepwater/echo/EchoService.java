@@ -21,6 +21,15 @@ import org.springframework.web.server.ResponseStatusException;
 public class EchoService {
     private static final String INSERT_AUDIT_EVENT = "insert into audit_events(id,event_type,aggregate_id) values(?,?,?)";
     private static final int[] REVIEW_INTERVALS = {1, 3, 7, 14};
+    private static final String TRANSFER = "TRANSFER";
+    private static final String PHRASE = "PHRASE";
+    private static final String STRUCTURE = "STRUCTURE";
+    private static final String BAND_BEGINNER = "A0_A1";
+    private static final String BAND_INTERMEDIATE = "B1_B2";
+    private static final String LEVEL_COMFORTABLE = "comfortable";
+    private static final String SKILL_KEY = "skill_key";
+    private static final String TASK_TYPE = "task_type";
+    private static final String RIGHTS_EXPIRES_AT = "rights_expires_at";
 
     private final JdbcTemplate db;
 
@@ -47,13 +56,18 @@ public class EchoService {
         int audioAttempts = db.queryForObject("select count(*) from echo_audio_attempts where account_id=?", Integer.class, learnerId);
         LearnerProfile profile = profiles.isEmpty() ? null : profiles.getFirst();
         AudioRecommendation recommendation = chooseAudioRecommendation(lessons, profile);
-        String nextAction = profile == null ? "Choose a language and set your learning goal."
-                : lessons.stream().anyMatch(LessonCard::due) ? "A review is due. Revisit the pattern before adding a new one."
-                : lessons.isEmpty() ? "No " + languageName(languageCode) + " lessons are published yet. Your teacher can add and approve the first lesson."
-                : attempts == 0 ? "Start the first " + languageName(languageCode) + " pattern lesson."
-                : "Try the transfer prompt, then return when your review is due.";
+        String nextAction = nextAction(profile, lessons, attempts, languageCode);
         return new EchoHome(profile != null, profile, nextAction, lessons, attempts, correct, audioAttempts,
                 recommendation.lessonId(), recommendation.reason());
+    }
+
+    private String nextAction(LearnerProfile profile, List<LessonCard> lessons, int attempts, String languageCode) {
+        if (profile == null) return "Choose a language and set your learning goal.";
+        if (lessons.stream().anyMatch(LessonCard::due)) return "A review is due. Revisit the pattern before adding a new one.";
+        if (lessons.isEmpty())
+            return "No " + languageName(languageCode) + " lessons are published yet. Your teacher can add and approve the first lesson.";
+        if (attempts == 0) return "Start the first " + languageName(languageCode) + " pattern lesson.";
+        return "Try the transfer prompt, then return when your review is due.";
     }
 
     private AudioRecommendation chooseAudioRecommendation(List<LessonCard> lessons, LearnerProfile profile) {
@@ -62,24 +76,23 @@ public class EchoService {
         if (audioLessons.isEmpty()) return new AudioRecommendation(null, "Your teacher has not published rights-cleared audio for this language yet.");
         String targetBand = switch (profile.selfReportedLevel()) {
             case "some" -> "A2";
-            case "comfortable" -> "B1_B2";
-            default -> "A0_A1";
+            case LEVEL_COMFORTABLE -> BAND_INTERMEDIATE;
+            default -> BAND_BEGINNER;
         };
         java.util.Set<String> goalTerms = java.util.Arrays.stream(profile.goal().toLowerCase(Locale.ROOT).split("[^\\p{L}\\p{N}]+"))
                 .filter(term -> term.length() > 2).collect(java.util.stream.Collectors.toSet());
         LessonCard selected = null;
         int bestScore = Integer.MIN_VALUE;
-        int bestTopicMatches = 0;
         for (LessonCard lesson : audioLessons) {
             String searchable = (lesson.title() + " " + lesson.topic() + " " + lesson.audio().topicTags()).toLowerCase(Locale.ROOT);
             int topicMatches = (int) goalTerms.stream().filter(searchable::contains).count();
             int score = (targetBand.equals(lesson.audio().editorialBand()) ? 100 : 0) + topicMatches;
-            if (score > bestScore) { selected = lesson; bestScore = score; bestTopicMatches = topicMatches; }
+            if (score > bestScore) { selected = lesson; bestScore = score; }
         }
         String bandName = switch (selected.audio().editorialBand()) {
-            case "A0_A1" -> "A0–A1 beginner";
+            case BAND_BEGINNER -> "A0–A1 beginner";
             case "A2" -> "A2 elementary";
-            case "B1_B2" -> "B1–B2 intermediate";
+            case BAND_INTERMEDIATE -> "B1–B2 intermediate";
             default -> "C1–C2 advanced";
         };
         String reason = (targetBand.equals(selected.audio().editorialBand())
@@ -92,7 +105,6 @@ public class EchoService {
 
     private LessonCard lesson(String accountId, java.sql.ResultSet rs) throws java.sql.SQLException {
         String lessonId = rs.getString("id");
-        String skill = rs.getString("skill_key");
         BigDecimal mastery = rs.getBigDecimal("mastery");
         java.sql.Timestamp dueTimestamp = rs.getTimestamp("next_review_at");
         Instant dueAt = dueTimestamp == null ? null : dueTimestamp.toInstant();
@@ -106,7 +118,7 @@ public class EchoService {
                     List<ExerciseOption> options = db.query("select option_key,option_text from echo_exercise_options where exercise_id=? order by sort_order",
                             (optionRs, optionRow) -> new ExerciseOption(optionRs.getString(1), optionRs.getString(2)), exerciseRs.getString("id"));
                     return new Exercise(exerciseRs.getString("id"), exerciseRs.getInt("position"),
-                            exerciseRs.getString("task_type"), exerciseRs.getString("prompt"), options, lastCorrect);
+                            exerciseRs.getString(TASK_TYPE), exerciseRs.getString("prompt"), options, lastCorrect);
                 }, accountId, lessonId);
         boolean due = dueAt != null && !dueAt.isAfter(Instant.now());
         return new LessonCard(lessonId, rs.getString("title"), rs.getString("level"), rs.getString("topic"),
@@ -121,12 +133,12 @@ public class EchoService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choose Danish or German.");
         if (goal == null || goal.isBlank() || goal.length() > 300)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Describe your language learning goal in 1–300 characters.");
-        if (selfReportedLevel == null || !List.of("new", "some", "comfortable").contains(selfReportedLevel))
+        if (selfReportedLevel == null || !List.of("new", "some", LEVEL_COMFORTABLE).contains(selfReportedLevel))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choose new, some experience, or comfortable.");
         int score = 0; // Legacy database column retained for existing profiles; no quiz score is shown.
         String route = switch (selfReportedLevel) {
             case "some" -> "STANDARD";
-            case "comfortable" -> "CHALLENGE";
+            case LEVEL_COMFORTABLE -> "CHALLENGE";
             default -> "GUIDED";
         };
         int exists = db.queryForObject("select count(*) from echo_learner_profiles where account_id=?", Integer.class, accountId);
@@ -165,13 +177,13 @@ public class EchoService {
                     String exerciseId = exerciseRs.getString("id");
                     List<ExerciseOption> options = db.query("select option_key,option_text from echo_exercise_options where exercise_id=? order by sort_order",
                             (optionRs, optionRow) -> new ExerciseOption(optionRs.getString(1), optionRs.getString(2)), exerciseId);
-                    return new TeacherExercise(exerciseRs.getInt("position"), exerciseRs.getString("task_type"),
+                    return new TeacherExercise(exerciseRs.getInt("position"), exerciseRs.getString(TASK_TYPE),
                             exerciseRs.getString("prompt"), exerciseRs.getString("expected_answer"), acceptedAnswers(exerciseId),
                             exerciseRs.getString("feedback_correct"), exerciseRs.getString("feedback_incorrect"), options);
                 }, lessonId);
         return new TeacherLesson(lessonId, rs.getString("language_code"), rs.getString("title"),
                 rs.getString("level"), rs.getString("topic"), rs.getString("objective"), rs.getString("explanation"),
-                rs.getString("source_reference"), rs.getString("skill_key"), rs.getString("review_status"),
+                rs.getString("source_reference"), rs.getString(SKILL_KEY), rs.getString("review_status"),
                 rs.getInt("version"), rs.getString("revision_of"), exercises, audioLesson(lessonId, true));
     }
 
@@ -189,13 +201,13 @@ public class EchoService {
                         rs.getString("gist_prompt"), rs.getString("focus_prompt"),
                         rs.getBoolean("transcript_allowed"), rs.getString("transcript_text"),
                         rs.getString("rights_basis"), rs.getBoolean("link_allowed"), rs.getBoolean("playback_allowed"),
-                        rs.getString("rights_reference"), rs.getDate("rights_expires_at") == null ? null : rs.getDate("rights_expires_at").toLocalDate().toString()),
+                        rs.getString("rights_reference"), rs.getDate(RIGHTS_EXPIRES_AT) == null ? null : rs.getDate(RIGHTS_EXPIRES_AT).toLocalDate().toString()),
                 lessonId);
         if (items.isEmpty()) return null;
         AudioLessonContent item = items.getFirst();
         if (teacherView) return item;
         return new AudioLessonContent(item.mediaType(), item.sourceTitle(), item.creator(), item.sourceUrl(),
-                item.playbackAllowed() ? item.playbackUrl() : null, item.editorialBand(), item.topicTags(),
+                Boolean.TRUE.equals(item.playbackAllowed()) ? item.playbackUrl() : null, item.editorialBand(), item.topicTags(),
                 item.speechRate(), item.vocabularyDensity(), item.idiomDensity(), item.pronunciationLoad(),
                 item.topicFamiliarity(), item.beforeListeningPrompt(), item.gistPrompt(), item.focusPrompt(),
                 item.transcriptAllowed(), item.transcriptAllowed() ? item.transcriptText() : null,
@@ -206,18 +218,9 @@ public class EchoService {
     public TeacherLesson saveDraft(String teacherId, LessonDraft draft) {
         validateDraft(draft);
         String id = UUID.randomUUID().toString();
-        int version = 1;
-        int sortOrder;
-        if (draft.revisionOf() != null && !draft.revisionOf().isBlank()) {
-            var parent = db.query("select version,sort_order from echo_lessons where id=? and review_status in ('PUBLISHED','UNPUBLISHED') and language_code=?",
-                    (rs, row) -> new LessonOrder(rs.getInt("version"), rs.getInt("sort_order")), draft.revisionOf(), draft.languageCode())
-                    .stream().findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The lesson being revised was not found."));
-            version = parent.version() + 1;
-            sortOrder = parent.sortOrder();
-        } else {
-            Integer maxOrder = db.queryForObject("select coalesce(max(sort_order),0) from echo_lessons where language_code=?", Integer.class, draft.languageCode());
-            sortOrder = draft.sortOrder() == null ? maxOrder + 1 : draft.sortOrder();
-        }
+        LessonOrder order = draftOrder(draft);
+        int version = order.version();
+        int sortOrder = order.sortOrder();
         if (sortOrder < 1) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lesson order must be a positive number.");
         try {
             db.update("insert into echo_lessons(id,language_code,title,level,topic,objective,explanation,source_reference,content_status,skill_key,sort_order,review_status,version,revision_of,created_by) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -226,27 +229,40 @@ public class EchoService {
                 sortOrder, "DRAFT", version, draft.revisionOf(), teacherId);
         if (draft.audio() != null) saveAudioDraft(id, draft.audio());
         int position = 0;
-        for (ExerciseDraft exercise : draft.exercises()) {
-            String exerciseId = id + "-" + (++position);
-            String expectedAnswer = "TRANSFER".equals(exercise.taskType()) ? null : exercise.expectedAnswer();
-            db.update("insert into echo_exercises(id,lesson_id,position,task_type,prompt,expected_answer,feedback_correct,feedback_incorrect) values(?,?,?,?,?,?,?,?)",
-                    exerciseId, id, position, exercise.taskType(), exercise.prompt().strip(), expectedAnswer,
-                    safe(exercise.feedbackCorrect()), safe(exercise.feedbackIncorrect()));
-            saveAcceptedAnswers(db, exerciseId, exercise.acceptedAnswers());
-            if (exercise.options() != null) {
-                int optionPosition = 0;
-                for (ExerciseOption option : exercise.options()) {
-                    if (option.key() == null || option.key().isBlank() || option.key().length() > 16 || option.text() == null || option.text().isBlank() || option.text().length() > 500)
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exercise options need a short key and text.");
-                    db.update("insert into echo_exercise_options(exercise_id,option_key,option_text,sort_order) values(?,?,?,?)",
-                            exerciseId, option.key(), option.text().strip(), ++optionPosition);
-                }
-            }
-        }
-        } catch (org.springframework.dao.DuplicateKeyException ex) {
+        for (ExerciseDraft exercise : draft.exercises()) saveExerciseDraft(id, ++position, exercise);
+        } catch (org.springframework.dao.DuplicateKeyException _) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "This lesson draft conflicts with existing content.");
         }
         return teacherLessons(teacherId).stream().filter(lesson -> lesson.id().equals(id)).findFirst().orElseThrow();
+    }
+
+    /** A revision keeps its parent's place and takes the next version; a new lesson goes where asked or last. */
+    private LessonOrder draftOrder(LessonDraft draft) {
+        if (draft.revisionOf() != null && !draft.revisionOf().isBlank()) {
+            var parent = db.query("select version,sort_order from echo_lessons where id=? and review_status in ('PUBLISHED','UNPUBLISHED') and language_code=?",
+                    (rs, row) -> new LessonOrder(rs.getInt("version"), rs.getInt("sort_order")), draft.revisionOf(), draft.languageCode())
+                    .stream().findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The lesson being revised was not found."));
+            return new LessonOrder(parent.version() + 1, parent.sortOrder());
+        }
+        Integer maxOrder = db.queryForObject("select coalesce(max(sort_order),0) from echo_lessons where language_code=?", Integer.class, draft.languageCode());
+        return new LessonOrder(1, draft.sortOrder() == null ? maxOrder + 1 : draft.sortOrder());
+    }
+
+    private void saveExerciseDraft(String lessonId, int position, ExerciseDraft exercise) {
+        String exerciseId = lessonId + "-" + position;
+        String expectedAnswer = TRANSFER.equals(exercise.taskType()) ? null : exercise.expectedAnswer();
+        db.update("insert into echo_exercises(id,lesson_id,position,task_type,prompt,expected_answer,feedback_correct,feedback_incorrect) values(?,?,?,?,?,?,?,?)",
+                exerciseId, lessonId, position, exercise.taskType(), exercise.prompt().strip(), expectedAnswer,
+                safe(exercise.feedbackCorrect()), safe(exercise.feedbackIncorrect()));
+        saveAcceptedAnswers(db, exerciseId, exercise.acceptedAnswers());
+        if (exercise.options() == null) return;
+        int optionPosition = 0;
+        for (ExerciseOption option : exercise.options()) {
+            if (option.key() == null || option.key().isBlank() || option.key().length() > 16 || option.text() == null || option.text().isBlank() || option.text().length() > 500)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exercise options need a short key and text.");
+            db.update("insert into echo_exercise_options(exercise_id,option_key,option_text,sort_order) values(?,?,?,?)",
+                    exerciseId, option.key(), option.text().strip(), ++optionPosition);
+        }
     }
 
     @Transactional
@@ -299,31 +315,32 @@ public class EchoService {
                 || blank(draft.explanation(), 3000) || blank(draft.sourceReference(), 500)
                 || blank(draft.skillKey(), 120) || draft.exercises() == null || draft.exercises().isEmpty() || draft.exercises().size() > 20)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Complete lesson details, source reference, and 1–20 exercises.");
-        for (ExerciseDraft exercise : draft.exercises()) {
-            if (exercise == null || exercise.taskType() == null || !List.of("SELECT", "TEXT", "TRANSFER").contains(exercise.taskType()) || blank(exercise.prompt(), 1000))
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Each exercise needs a supported type and prompt.");
-            if (exercise.taskType().equals("TRANSFER") && exercise.expectedAnswer() != null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transfer exercises must not define an automated expected answer.");
-            if (!"TRANSFER".equals(exercise.taskType()) && blank(exercise.expectedAnswer(), 500))
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Graded exercises need an expected answer.");
-            if (exercise.acceptedAnswers() != null && (!"TEXT".equals(exercise.taskType()) || exercise.acceptedAnswers().size() > 10
-                    || exercise.acceptedAnswers().stream().anyMatch(answer -> blank(answer, 500))))
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only typed exercises take extra accepted answers: up to 10, each at most 500 characters.");
-            if ("SELECT".equals(exercise.taskType())) {
-                if (exercise.options() == null || exercise.options().size() < 2 || exercise.options().size() > 10
-                        || exercise.options().stream().anyMatch(option -> option == null || blank(option.key(), 16) || blank(option.text(), 500))
-                        || exercise.options().stream().noneMatch(option -> option.key().equals(exercise.expectedAnswer())))
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choice exercises need 2–10 valid options including the expected-answer key.");
-            }
-        }
+        for (ExerciseDraft exercise : draft.exercises()) validateExerciseDraft(exercise);
         if (draft.audio() != null) validateAudioDraft(draft.audio());
+    }
+
+    private void validateExerciseDraft(ExerciseDraft exercise) {
+        if (exercise == null || exercise.taskType() == null || !List.of("SELECT", "TEXT", TRANSFER).contains(exercise.taskType()) || blank(exercise.prompt(), 1000))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Each exercise needs a supported type and prompt.");
+        boolean transfer = TRANSFER.equals(exercise.taskType());
+        if (transfer && exercise.expectedAnswer() != null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transfer exercises must not define an automated expected answer.");
+        if (!transfer && blank(exercise.expectedAnswer(), 500))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Graded exercises need an expected answer.");
+        if (exercise.acceptedAnswers() != null && (!"TEXT".equals(exercise.taskType()) || exercise.acceptedAnswers().size() > 10
+                || exercise.acceptedAnswers().stream().anyMatch(answer -> blank(answer, 500))))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only typed exercises take extra accepted answers: up to 10, each at most 500 characters.");
+        if ("SELECT".equals(exercise.taskType()) && (exercise.options() == null || exercise.options().size() < 2 || exercise.options().size() > 10
+                || exercise.options().stream().anyMatch(option -> option == null || blank(option.key(), 16) || blank(option.text(), 500))
+                || exercise.options().stream().noneMatch(option -> option.key().equals(exercise.expectedAnswer()))))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choice exercises need 2–10 valid options including the expected-answer key.");
     }
 
     private void validateAudioDraft(AudioLessonDraft audio) {
         if (audio == null || !List.of("MUSIC", "PODCAST").contains(audio.mediaType())
                 || blank(audio.sourceTitle(), 240) || blank(audio.creator(), 240)
                 || !validHttpsUrl(audio.sourceUrl()) || blank(audio.editorialBand(), 16)
-                || !List.of("A0_A1", "A2", "B1_B2", "C1_C2").contains(audio.editorialBand())
+                || !List.of(BAND_BEGINNER, "A2", BAND_INTERMEDIATE, "C1_C2").contains(audio.editorialBand())
                 || blank(audio.topicTags(), 500) || !demand(audio.speechRate()) || !demand(audio.vocabularyDensity())
                 || !demand(audio.idiomDensity()) || !demand(audio.pronunciationLoad()) || !demand(audio.topicFamiliarity())
                 || blank(audio.beforeListeningPrompt(), 1000) || blank(audio.gistPrompt(), 1000)
@@ -340,7 +357,7 @@ public class EchoService {
         }
         if (audio.rightsExpiresAt() != null && !audio.rightsExpiresAt().isBlank()) {
             try { LocalDate.parse(audio.rightsExpiresAt()); }
-            catch (java.time.format.DateTimeParseException ex) {
+            catch (java.time.format.DateTimeParseException _) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rights expiry must use YYYY-MM-DD.");
             }
         }
@@ -353,7 +370,7 @@ public class EchoService {
         try {
             URI uri = URI.create(value.strip());
             return "https".equalsIgnoreCase(uri.getScheme()) && uri.getHost() != null && uri.getUserInfo() == null;
-        } catch (IllegalArgumentException ex) { return false; }
+        } catch (IllegalArgumentException _) { return false; }
     }
 
     private void saveAudioDraft(String lessonId, AudioLessonDraft audio) {
@@ -367,7 +384,7 @@ public class EchoService {
                 audio.editorialBand(), audio.topicTags().strip(), audio.speechRate(),
                 audio.vocabularyDensity(), audio.idiomDensity(), audio.pronunciationLoad(), audio.topicFamiliarity(),
                 audio.beforeListeningPrompt().strip(), audio.gistPrompt().strip(), audio.focusPrompt().strip(),
-                audio.transcriptAllowed() ? safe(audio.transcriptText()) : null, audio.rightsBasis(), audio.linkAllowed(),
+                Boolean.TRUE.equals(audio.transcriptAllowed()) ? safe(audio.transcriptText()) : null, audio.rightsBasis(), audio.linkAllowed(),
                 audio.playbackAllowed(), audio.transcriptAllowed(), audio.rightsReference().strip(),
                 audio.rightsExpiresAt() == null || audio.rightsExpiresAt().isBlank() ? null : java.sql.Date.valueOf(audio.rightsExpiresAt()));
     }
@@ -377,7 +394,7 @@ public class EchoService {
                         "transcript_allowed,rights_reference,rights_expires_at from echo_audio_lessons where lesson_id=?",
                 (rs, row) -> new Object[]{rs.getString("rights_basis"), rs.getBoolean("link_allowed"),
                         rs.getString("playback_url"), rs.getBoolean("playback_allowed"), rs.getString("transcript_text"),
-                        rs.getBoolean("transcript_allowed"), rs.getString("rights_reference"), rs.getDate("rights_expires_at")}, lessonId);
+                        rs.getBoolean("transcript_allowed"), rs.getString("rights_reference"), rs.getDate(RIGHTS_EXPIRES_AT)}, lessonId);
         if (rows.isEmpty()) return;
         Object[] rights = rows.getFirst();
         java.sql.Date expiresAt = (java.sql.Date) rights[7];
@@ -386,7 +403,7 @@ public class EchoService {
                 || (Boolean.TRUE.equals(rights[3]) && blank((String) rights[2], 1500))
                 || (Boolean.FALSE.equals(rights[3]) && rights[2] != null)
                 || (Boolean.FALSE.equals(rights[5]) && rights[4] != null)
-                || (expiresAt != null && expiresAt.toLocalDate().isBefore(LocalDate.now()))) {
+                || (expiresAt != null && expiresAt.toLocalDate().isBefore(LocalDate.now(java.time.ZoneId.systemDefault())))) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Audio lesson cannot publish: verify source-link rights, remove unauthorized media/transcript, and check rights expiry.");
         }
@@ -400,11 +417,11 @@ public class EchoService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Enter an answer of at most 2000 characters.");
         var rows = db.query("select e.task_type,e.expected_answer,l.skill_key,e.feedback_correct,e.feedback_incorrect " +
                         "from echo_exercises e join echo_lessons l on l.id=e.lesson_id where e.id=? and l.review_status='PUBLISHED'",
-                (rs, row) -> new ExerciseRule(rs.getString("task_type"), rs.getString("expected_answer"),
-                        rs.getString("skill_key"), rs.getString("feedback_correct"), rs.getString("feedback_incorrect")), exerciseId);
+                (rs, row) -> new ExerciseRule(rs.getString(TASK_TYPE), rs.getString("expected_answer"),
+                        rs.getString(SKILL_KEY), rs.getString("feedback_correct"), rs.getString("feedback_incorrect")), exerciseId);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Learning exercise not found.");
         ExerciseRule rule = rows.getFirst();
-        boolean transfer = "TRANSFER".equals(rule.taskType());
+        boolean transfer = TRANSFER.equals(rule.taskType());
         if (transfer && transferSelfCheck == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Complete the self-check for your transfer answer.");
         boolean graded = !transfer;
@@ -414,41 +431,44 @@ public class EchoService {
             if ("TEXT".equals(rule.taskType())) accepted.addAll(acceptedAnswers(exerciseId));
         }
         boolean correct = graded && accepted.stream().anyMatch(expected -> normalize(answer).equals(normalize(expected)));
-        String feedback = transfer
-                ? "Saved as your own transfer example. Echo does not automatically score free writing; compare your sentence with the pattern and your self-check."
-                : correct ? rule.feedbackCorrect() : rule.feedbackIncorrect();
         String hint = graded && !correct && "TEXT".equals(rule.taskType()) ? AnswerHints.nearMiss(answer, accepted) : null;
         String storedAnswer = answer.strip();
         db.update("insert into echo_attempts(id,account_id,exercise_id,answer,is_correct,is_transfer) values(?,?,?,?,?,?)",
                 UUID.randomUUID().toString(), accountId, exerciseId, storedAnswer, graded ? correct : null, transfer);
 
-        Double mastery = null;
-        Instant nextReview = null;
-        if (graded) {
-            SkillState previous = db.query("select mastery,correct_streak from echo_skill_states where account_id=? and skill_key=?",
-                    (rs, row) -> new SkillState(rs.getDouble("mastery"), rs.getInt("correct_streak")), accountId, rule.skillKey())
-                    .stream().findFirst().orElse(new SkillState(0.0, 0));
-            double newMastery = Math.max(0.0, Math.min(1.0, previous.mastery() + (correct ? 0.2 : -0.2)));
-            int streak = correct ? previous.correctStreak() + 1 : 0;
-            int interval = correct ? REVIEW_INTERVALS[Math.min(streak - 1, REVIEW_INTERVALS.length - 1)] : 1;
-            nextReview = Instant.now().plus(interval, ChronoUnit.DAYS);
-            mastery = BigDecimal.valueOf(newMastery).setScale(4, RoundingMode.HALF_UP).doubleValue();
-            int stateExists = db.queryForObject("select count(*) from echo_skill_states where account_id=? and skill_key=?",
-                    Integer.class, accountId, rule.skillKey());
-            if (stateExists == 0) {
-                db.update("insert into echo_skill_states(account_id,skill_key,mastery,correct_streak,interval_days,next_review_at,attempts) values(?,?,?,?,?,?,1)",
-                        accountId, rule.skillKey(), mastery, streak, interval, java.sql.Timestamp.from(nextReview));
-            } else {
-                db.update("update echo_skill_states set mastery=?,correct_streak=?,interval_days=?,next_review_at=?,attempts=attempts+1,updated_at=current_timestamp where account_id=? and skill_key=?",
-                        mastery, streak, interval, java.sql.Timestamp.from(nextReview), accountId, rule.skillKey());
-            }
-        } else {
-            mastery = currentMastery(accountId, rule.skillKey());
-            nextReview = currentReview(accountId, rule.skillKey());
-        }
+        SkillUpdate skill = graded ? updateSkillState(accountId, rule.skillKey(), correct)
+                : new SkillUpdate(currentMastery(accountId, rule.skillKey()), currentReview(accountId, rule.skillKey()));
         audit("ECHO_PRACTICE_SUBMITTED", accountId);
-        return new PracticeResult(exerciseId, storedAnswer, graded, graded ? correct : null, feedback, hint,
-                mastery, nextReview == null ? null : nextReview.toString(), transfer);
+        return new PracticeResult(exerciseId, storedAnswer, graded, graded ? correct : null, practiceFeedback(rule, transfer, correct), hint,
+                skill.mastery(), skill.nextReview() == null ? null : skill.nextReview().toString(), transfer);
+    }
+
+    private static String practiceFeedback(ExerciseRule rule, boolean transfer, boolean correct) {
+        if (transfer)
+            return "Saved as your own transfer example. Echo does not automatically score free writing; compare your sentence with the pattern and your self-check.";
+        return correct ? rule.feedbackCorrect() : rule.feedbackIncorrect();
+    }
+
+    /** Moves mastery by a fixed step and schedules the next review from the run of correct answers. */
+    private SkillUpdate updateSkillState(String accountId, String skillKey, boolean correct) {
+        SkillState previous = db.query("select mastery,correct_streak from echo_skill_states where account_id=? and skill_key=?",
+                (rs, row) -> new SkillState(rs.getDouble("mastery"), rs.getInt("correct_streak")), accountId, skillKey)
+                .stream().findFirst().orElse(new SkillState(0.0, 0));
+        double newMastery = Math.clamp(previous.mastery() + (correct ? 0.2 : -0.2), 0.0, 1.0);
+        int streak = correct ? previous.correctStreak() + 1 : 0;
+        int interval = correct ? REVIEW_INTERVALS[Math.min(streak - 1, REVIEW_INTERVALS.length - 1)] : 1;
+        Instant nextReview = Instant.now().plus(interval, ChronoUnit.DAYS);
+        double mastery = BigDecimal.valueOf(newMastery).setScale(4, RoundingMode.HALF_UP).doubleValue();
+        int stateExists = db.queryForObject("select count(*) from echo_skill_states where account_id=? and skill_key=?",
+                Integer.class, accountId, skillKey);
+        if (stateExists == 0) {
+            db.update("insert into echo_skill_states(account_id,skill_key,mastery,correct_streak,interval_days,next_review_at,attempts) values(?,?,?,?,?,?,1)",
+                    accountId, skillKey, mastery, streak, interval, java.sql.Timestamp.from(nextReview));
+        } else {
+            db.update("update echo_skill_states set mastery=?,correct_streak=?,interval_days=?,next_review_at=?,attempts=attempts+1,updated_at=current_timestamp where account_id=? and skill_key=?",
+                    mastery, streak, interval, java.sql.Timestamp.from(nextReview), accountId, skillKey);
+        }
+        return new SkillUpdate(mastery, nextReview);
     }
 
     @Transactional
@@ -456,7 +476,7 @@ public class EchoService {
                                              String answer, boolean transcriptUsed, int confidence) {
         if (answer == null || answer.isBlank() || answer.length() > 2000)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Enter a short reflection of at most 2000 characters.");
-        if (!List.of("GIST", "PHRASE", "STRUCTURE", "SOUND", "TRANSFER").contains(taskType))
+        if (!List.of("GIST", PHRASE, STRUCTURE, "SOUND", TRANSFER).contains(taskType))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choose a supported audio learning step.");
         if (confidence < 1 || confidence > 5)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Confidence must be between 1 and 5.");
@@ -479,9 +499,9 @@ public class EchoService {
 
     private String nextAudioTask(String taskType) {
         return switch (taskType) {
-            case "GIST" -> "PHRASE";
-            case "PHRASE" -> "STRUCTURE";
-            case "STRUCTURE" -> "TRANSFER";
+            case "GIST" -> PHRASE;
+            case PHRASE -> STRUCTURE;
+            case STRUCTURE -> TRANSFER;
             default -> "DONE";
         };
     }
@@ -558,4 +578,5 @@ public class EchoService {
     private record ExerciseRule(String taskType, String expectedAnswer, String skillKey,
                                 String feedbackCorrect, String feedbackIncorrect) {}
     private record SkillState(double mastery, int correctStreak) {}
+    private record SkillUpdate(double mastery, Instant nextReview) {}
 }

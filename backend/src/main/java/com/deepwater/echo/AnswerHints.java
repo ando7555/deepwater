@@ -47,7 +47,9 @@ final class AnswerHints {
 
     private static boolean editDistanceAtMostOne(String a, String b) {
         if (Math.abs(a.length() - b.length()) > 1) return false;
-        int i = 0, j = 0, edits = 0;
+        int i = 0;
+        int j = 0;
+        int edits = 0;
         while (i < a.length() && j < b.length()) {
             if (a.charAt(i) == b.charAt(j)) { i++; j++; continue; }
             if (++edits > 1) return false;

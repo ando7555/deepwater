@@ -23,29 +23,7 @@ class DemoData {
             for (Resource resource : catalogs) {
                 transactions.executeWithoutResult(status -> {
                     try {
-                        LessonSeed lesson = json.readValue(resource.getInputStream().readAllBytes(), LessonSeed.class);
-                        Integer exists = db.queryForObject("select count(*) from echo_lessons where id=?", Integer.class, lesson.id());
-                        if (exists != null && exists > 0) return;
-                        db.update("insert into echo_lessons(id,language_code,title,level,topic,objective,explanation," +
-                                  "source_reference,content_status,skill_key,sort_order,review_status,version) values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                                lesson.id(), lesson.languageCode(), lesson.title(), lesson.level(), lesson.topic(),
-                                lesson.objective(), lesson.explanation(), lesson.sourceReference(),
-                                "Starter catalog — teacher review required",
-                                lesson.skillKey(), lesson.sortOrder() != null ? lesson.sortOrder() : nextSortOrder(db, lesson.languageCode()), "DRAFT", 1);
-                        int position = 0;
-                        for (ExerciseSeed exercise : lesson.exercises()) {
-                            String exerciseId = lesson.id() + "-" + (++position);
-                            db.update("insert into echo_exercises(id,lesson_id,position,task_type,prompt,expected_answer," +
-                                      "feedback_correct,feedback_incorrect) values(?,?,?,?,?,?,?,?)",
-                                    exerciseId, lesson.id(), position, exercise.taskType(), exercise.prompt(),
-                                    exercise.expectedAnswer(), text(exercise.feedbackCorrect()), text(exercise.feedbackIncorrect()));
-                            com.deepwater.echo.EchoService.saveAcceptedAnswers(db, exerciseId, exercise.acceptedAnswers());
-                            int optionPosition = 0;
-                            for (OptionSeed option : exercise.options() == null ? List.<OptionSeed>of() : exercise.options()) {
-                                db.update("insert into echo_exercise_options(exercise_id,option_key,option_text,sort_order) values(?,?,?,?)",
-                                        exerciseId, option.key(), option.text(), ++optionPosition);
-                            }
-                        }
+                        importLesson(db, json.readValue(resource.getInputStream().readAllBytes(), LessonSeed.class));
                     } catch (Exception ex) {
                         status.setRollbackOnly();
                         throw new IllegalStateException("Could not import catalog lesson: " + resource.getFilename(), ex);
@@ -53,6 +31,34 @@ class DemoData {
                 });
             }
         };
+    }
+
+    /** Inserts one catalog lesson as a draft, unless a lesson with its id already exists. */
+    private static void importLesson(JdbcTemplate db, LessonSeed lesson) {
+        Integer exists = db.queryForObject("select count(*) from echo_lessons where id=?", Integer.class, lesson.id());
+        if (exists != null && exists > 0) return;
+        db.update("insert into echo_lessons(id,language_code,title,level,topic,objective,explanation," +
+                  "source_reference,content_status,skill_key,sort_order,review_status,version) values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                lesson.id(), lesson.languageCode(), lesson.title(), lesson.level(), lesson.topic(),
+                lesson.objective(), lesson.explanation(), lesson.sourceReference(),
+                "Starter catalog — teacher review required",
+                lesson.skillKey(), lesson.sortOrder() != null ? lesson.sortOrder() : nextSortOrder(db, lesson.languageCode()), "DRAFT", 1);
+        int position = 0;
+        for (ExerciseSeed exercise : lesson.exercises()) importExercise(db, lesson.id(), ++position, exercise);
+    }
+
+    private static void importExercise(JdbcTemplate db, String lessonId, int position, ExerciseSeed exercise) {
+        String exerciseId = lessonId + "-" + position;
+        db.update("insert into echo_exercises(id,lesson_id,position,task_type,prompt,expected_answer," +
+                  "feedback_correct,feedback_incorrect) values(?,?,?,?,?,?,?,?)",
+                exerciseId, lessonId, position, exercise.taskType(), exercise.prompt(),
+                exercise.expectedAnswer(), text(exercise.feedbackCorrect()), text(exercise.feedbackIncorrect()));
+        com.deepwater.echo.EchoService.saveAcceptedAnswers(db, exerciseId, exercise.acceptedAnswers());
+        int optionPosition = 0;
+        for (OptionSeed option : exercise.options() == null ? List.<OptionSeed>of() : exercise.options()) {
+            db.update("insert into echo_exercise_options(exercise_id,option_key,option_text,sort_order) values(?,?,?,?)",
+                    exerciseId, option.key(), option.text(), ++optionPosition);
+        }
     }
 
     private static int nextSortOrder(JdbcTemplate db, String languageCode) {

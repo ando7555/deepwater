@@ -13,6 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class PlatformService {
+    private static final String SELECT_EMAIL = "select email from accounts where id=?";
+    private static final String EMAIL = "email";
     private final JdbcTemplate db;
     private final BCryptPasswordEncoder passwords = new BCryptPasswordEncoder();
     @Value("${deepwater.teacher.email:}") private String teacherEmail;
@@ -27,7 +29,7 @@ public class PlatformService {
     @Transactional
     public Map<String, String> register(String name, String email, String password) {
         if (name == null || name.isBlank() || name.length() > 160 || email == null
-                || !email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$") || email.length() > 320
+                || !email.matches("[^\\s@]++@(?:[^\\s@.]++\\.)++[^\\s@.]++") || email.length() > 320
                 || password == null || password.length() < 12 || password.length() > 72) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Enter a name, valid email, and password of 12 to 72 characters.");
@@ -36,7 +38,7 @@ public class PlatformService {
         try {
             db.update("insert into accounts(id,name,email,password_hash) values(?,?,?,?)",
                     id, name.strip(), email.strip().toLowerCase(), passwords.encode(password));
-        } catch (org.springframework.dao.DuplicateKeyException ex) {
+        } catch (org.springframework.dao.DuplicateKeyException _) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already registered.");
         }
         return session(id, name.strip(), email.strip().toLowerCase());
@@ -49,7 +51,7 @@ public class PlatformService {
         if (throttle.isBlocked(normalizedEmail))
             throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Too many sign-in attempts. Wait 15 minutes and try again.");
         var found = db.query("select id,name,email,password_hash from accounts where email=?",
-                (rs, row) -> new String[]{rs.getString("id"), rs.getString("name"), rs.getString("email"), rs.getString("password_hash")},
+                (rs, row) -> new String[]{rs.getString("id"), rs.getString("name"), rs.getString(EMAIL), rs.getString("password_hash")},
                 normalizedEmail);
         if (found.isEmpty() || !passwords.matches(password, found.getFirst()[3])) {
             throttle.recordFailure(normalizedEmail);
@@ -100,7 +102,7 @@ public class PlatformService {
                 String.class, code, java.sql.Timestamp.from(Instant.now()));
         if (accounts.isEmpty() || db.update("delete from oauth_login_codes where code=?", code) != 1) throw unauthorized();
         var account = db.queryForMap("select id,name,email from accounts where id=?", accounts.getFirst());
-        return session((String) account.get("id"), (String) account.get("name"), (String) account.get("email"));
+        return session((String) account.get("id"), (String) account.get("name"), (String) account.get(EMAIL));
     }
 
     /**
@@ -110,7 +112,7 @@ public class PlatformService {
     @Transactional
     public void deleteAccount(String authorization, String confirmEmail) {
         String accountId = requireAccount(authorization);
-        String email = db.queryForObject("select email from accounts where id=?", String.class, accountId);
+        String email = db.queryForObject(SELECT_EMAIL, String.class, accountId);
         if (confirmEmail == null || !email.equalsIgnoreCase(confirmEmail.strip()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Type your account email to confirm deletion.");
         if ("TEACHER".equals(role(accountId)))
@@ -137,7 +139,7 @@ public class PlatformService {
     /** Only the deployment-configured teacher account receives authoring access. */
     public String requireTeacher(String authorization) {
         String accountId = requireAccount(authorization);
-        String email = db.queryForObject("select email from accounts where id=?", String.class, accountId);
+        String email = db.queryForObject(SELECT_EMAIL, String.class, accountId);
         if (teacherEmail == null || teacherEmail.isBlank() || !email.equalsIgnoreCase(teacherEmail.strip()))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Teacher access is not enabled for this account.");
         return accountId;
@@ -145,7 +147,7 @@ public class PlatformService {
 
     public String role(String accountId) {
         if (accountId == null || teacherEmail == null || teacherEmail.isBlank()) return "LEARNER";
-        String email = db.queryForObject("select email from accounts where id=?", String.class, accountId);
+        String email = db.queryForObject(SELECT_EMAIL, String.class, accountId);
         return email.equalsIgnoreCase(teacherEmail.strip()) ? "TEACHER" : "LEARNER";
     }
 
@@ -163,7 +165,7 @@ public class PlatformService {
         db.update("insert into user_sessions(token,account_id,expires_at) values(?,?,?)", token, id,
                 java.sql.Timestamp.from(Instant.now().plusSeconds(60L * 60 * 24 * 7)));
         Boolean verified = db.queryForObject("select email_verified from accounts where id=?", Boolean.class, id);
-        return Map.of("token", token, "name", name, "email", email, "accountId", id, "role", role(id),
+        return Map.of("token", token, "name", name, EMAIL, email, "accountId", id, "role", role(id),
                 "emailVerified", String.valueOf(Boolean.TRUE.equals(verified)));
     }
 

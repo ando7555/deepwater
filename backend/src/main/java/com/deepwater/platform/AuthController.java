@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
     static final String STATE_COOKIE = "dw_oauth_state";
-    private static final String STATE_COOKIE_PATH = "/api/v1/auth/google";
+    private static final String LOGIN_ERROR = "login_error";
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     private final PlatformService platform;
@@ -40,6 +40,8 @@ public class AuthController {
     private final EmailVerificationService verification;
     private final PersonProfileService profiles;
     @Value("${deepwater.frontend.base-url:http://localhost:5173}") private String frontendBaseUrl;
+    /** The state cookie is only sent to the Google sign-in endpoints. */
+    @Value("${deepwater.auth.state-cookie-path:/api/v1/auth/google}") private String stateCookiePath;
 
     public AuthController(PlatformService platform, GoogleAuthService google, EmailVerificationService verification,
                           PersonProfileService profiles) {
@@ -98,20 +100,20 @@ public class AuthController {
             HttpServletResponse response) throws IOException {
         response.addHeader("Set-Cookie", stateCookie("", 0).toString());
         if (error != null || code == null || !stateMatches(state, request)) {
-            frontendRedirect(response, "login_error", error != null ? "cancelled" : "failed");
+            frontendRedirect(response, LOGIN_ERROR, error != null ? "cancelled" : "failed");
             return;
         }
         try {
             var user = google.fetchGoogleUser(code);
             if (!user.emailVerified() || user.sub() == null || user.email() == null) {
-                frontendRedirect(response, "login_error", "unverified");
+                frontendRedirect(response, LOGIN_ERROR, "unverified");
                 return;
             }
             String accountId = platform.loginOrRegisterWithGoogle(user.sub(), user.email(), user.name());
             frontendRedirect(response, "login_code", platform.issueLoginCode(accountId));
         } catch (Exception ex) {
             log.warn("Google sign-in failed: {}", ex.getMessage());
-            frontendRedirect(response, "login_error", "failed");
+            frontendRedirect(response, LOGIN_ERROR, "failed");
         }
     }
 
@@ -138,12 +140,12 @@ public class AuthController {
     private ResponseCookie stateCookie(String value, long maxAgeSeconds) {
         // Lax is enough: Google returns to the callback with a top-level GET navigation.
         return ResponseCookie.from(STATE_COOKIE, value).httpOnly(true).secure(google.usesHttps())
-                .sameSite("Lax").path(STATE_COOKIE_PATH).maxAge(maxAgeSeconds).build();
+                .sameSite("Lax").path(stateCookiePath).maxAge(maxAgeSeconds).build();
     }
 
     private void frontendRedirect(HttpServletResponse response, String param, String value) throws IOException {
         // The frontend is served from its root; other paths are not routed by the production web server.
-        response.sendRedirect(frontendBaseUrl.replaceAll("/+$", "") + "/?" + param + "="
+        response.sendRedirect(UrlText.withoutTrailingSlashes(frontendBaseUrl) + "/?" + param + "="
                 + java.net.URLEncoder.encode(value, StandardCharsets.UTF_8));
     }
 

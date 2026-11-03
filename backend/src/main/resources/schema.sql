@@ -146,7 +146,7 @@ create table if not exists oauth_login_codes (
 
 -- Email verification: Google-verified accounts count as verified.
 alter table accounts add column if not exists email_verified boolean not null default false;
-update accounts set email_verified=true where google_sub is not null and email_verified=false;
+update accounts set email_verified=true where google_sub is not null and not email_verified;
 create table if not exists email_verification_tokens (
   token_hash varchar(64) primary key, account_id varchar(36) not null references accounts(id),
   expires_at timestamp with time zone not null,

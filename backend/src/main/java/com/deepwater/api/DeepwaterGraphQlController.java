@@ -23,6 +23,7 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class DeepwaterGraphQlController {
+    private static final String AUTHORIZATION = "authorization";
     private final EchoService echo;
     private final EchoCardService cards;
     private final PlatformService platform;
@@ -45,7 +46,7 @@ public class DeepwaterGraphQlController {
 
     @QueryMapping
     EchoHome echoHome(GraphQLContext context) {
-        return echo.home(platform.accountIfAuthenticated(context.get("authorization")));
+        return echo.home(platform.accountIfAuthenticated(token(context)));
     }
 
     @MutationMapping
@@ -75,22 +76,22 @@ public class DeepwaterGraphQlController {
 
     @QueryMapping
     List<TeacherLesson> teacherLessons(GraphQLContext context) {
-        return echo.teacherLessons(platform.requireTeacher(context.get("authorization")));
+        return echo.teacherLessons(platform.requireTeacher(token(context)));
     }
 
     @MutationMapping
     TeacherLesson saveEchoLessonDraft(@Argument LessonDraft input, GraphQLContext context) {
-        return echo.saveDraft(platform.requireTeacher(context.get("authorization")), input);
+        return echo.saveDraft(platform.requireTeacher(token(context)), input);
     }
 
     @MutationMapping
     TeacherLesson publishEchoLesson(@Argument String lessonId, GraphQLContext context) {
-        return echo.publish(platform.requireTeacher(context.get("authorization")), lessonId);
+        return echo.publish(platform.requireTeacher(token(context)), lessonId);
     }
 
     @MutationMapping
     TeacherLesson unpublishEchoLesson(@Argument String lessonId, GraphQLContext context) {
-        return echo.unpublish(platform.requireTeacher(context.get("authorization")), lessonId);
+        return echo.unpublish(platform.requireTeacher(token(context)), lessonId);
     }
 
     @QueryMapping
@@ -113,7 +114,8 @@ public class DeepwaterGraphQlController {
                             @Argument String answer, GraphQLContext context) {
         if (grade == null && knewIt == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Say how the review went.");
-        EchoCardService.Grade resolved = grade != null ? grade : Boolean.TRUE.equals(knewIt) ? EchoCardService.Grade.KNEW : EchoCardService.Grade.MISSED;
+        EchoCardService.Grade resolved = grade;
+        if (resolved == null) resolved = Boolean.TRUE.equals(knewIt) ? EchoCardService.Grade.KNEW : EchoCardService.Grade.MISSED;
         return cards.review(account(context), cardId, resolved, answer);
     }
 
@@ -123,6 +125,10 @@ public class DeepwaterGraphQlController {
     }
 
     private String account(GraphQLContext context) {
-        return platform.requireAccount(context.get("authorization"));
+        return platform.requireAccount(token(context));
+    }
+
+    private static String token(GraphQLContext context) {
+        return context.get(AUTHORIZATION);
     }
 }

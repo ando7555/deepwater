@@ -45,7 +45,7 @@ public class EmailVerificationService {
         db.update("insert into email_verification_tokens(token_hash,account_id,expires_at) values(?,?,?)",
                 hash(token), accountId, Timestamp.from(Instant.now().plusSeconds(TOKEN_HOURS * 3600)));
         mailer.sendVerification((String) account.get("email"), (String) account.get("name"),
-                frontendBaseUrl.replaceAll("/+$", "") + "/?verify_email=" + token);
+                UrlText.withoutTrailingSlashes(frontendBaseUrl) + "/?verify_email=" + token);
     }
 
     /** Sends a new link to a signed-in, unverified account, at most once a minute. */
