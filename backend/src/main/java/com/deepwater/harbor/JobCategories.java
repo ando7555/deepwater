@@ -13,6 +13,10 @@ import java.util.regex.Pattern;
  */
 public final class JobCategories {
     public static final String OTHER = "OTHER";
+    public static final String NEED_REQUIRED = "REQUIRED";
+    public static final String NEED_PLUS = "PLUS";
+    public static final String NEED_ENGLISH_OK = "ENGLISH_OK";
+    public static final String NEED_NOT_STATED = "NOT_STATED";
 
     /** Job families, in the order they are checked: the first that matches wins. */
     private static final List<Family> FAMILIES = List.of(
@@ -60,8 +64,8 @@ public final class JobCategories {
      */
     public static LanguageNeed languageNeed(String description) {
         String text = lower(description);
-        LanguageNeed best = new LanguageNeed("NOT_STATED", null);
-        if (ENGLISH_ONLY.matcher(text).find()) best = new LanguageNeed("ENGLISH_OK", null);
+        LanguageNeed best = new LanguageNeed(NEED_NOT_STATED, null);
+        if (ENGLISH_ONLY.matcher(text).find()) best = new LanguageNeed(NEED_ENGLISH_OK, null);
         for (String clause : text.split("[.;!?\\n]")) {
             var language = LOCAL_LANGUAGE.matcher(clause);
             if (!language.find()) continue;
@@ -74,9 +78,9 @@ public final class JobCategories {
 
     private static LanguageNeed clauseNeed(String clause, String language) {
         boolean plus = A_PLUS.matcher(clause).find();
-        if (NOT_NEEDED.matcher(clause).find()) return new LanguageNeed(plus ? "PLUS" : "ENGLISH_OK", plus ? language : null);
-        if (plus) return new LanguageNeed("PLUS", language);
-        if (REQUIRED.matcher(clause).find()) return new LanguageNeed("REQUIRED", language);
+        if (NOT_NEEDED.matcher(clause).find()) return new LanguageNeed(plus ? NEED_PLUS : NEED_ENGLISH_OK, plus ? language : null);
+        if (plus) return new LanguageNeed(NEED_PLUS, language);
+        if (REQUIRED.matcher(clause).find()) return new LanguageNeed(NEED_REQUIRED, language);
         return null;
     }
 
@@ -87,9 +91,9 @@ public final class JobCategories {
     public record LanguageNeed(String need, String language) {
         int rank() {
             return switch (need) {
-                case "REQUIRED" -> 3;
-                case "PLUS" -> 2;
-                case "ENGLISH_OK" -> 1;
+                case NEED_REQUIRED -> 3;
+                case NEED_PLUS -> 2;
+                case NEED_ENGLISH_OK -> 1;
                 default -> 0;
             };
         }

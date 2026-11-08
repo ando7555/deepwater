@@ -72,7 +72,7 @@ public class JobSearchService {
         }
 
         private boolean languageMatches(JobView job) {
-            return !"NO_LOCAL_REQUIRED".equals(language) || !"REQUIRED".equals(job.languageNeed());
+            return !"NO_LOCAL_REQUIRED".equals(language) || !JobCategories.NEED_REQUIRED.equals(job.languageNeed());
         }
 
         private boolean keywordMatches(JobView job) {
