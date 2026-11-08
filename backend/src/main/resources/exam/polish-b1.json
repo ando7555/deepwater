@@ -62,7 +62,7 @@
       "name": "Pisanie",
       "english": "Writing",
       "kind": "WRITING",
-      "instructions": "Napisz teksty po polsku. The word ranges are Deepwater's practice targets.",
+      "instructions": "Napisz teksty po polsku. The word ranges are practice targets for this mock exam.",
       "items": [
         {"id": "w1", "prompt": "Napisz e-mail do koleżanki albo kolegi i zaproś ją lub go na swoje urodziny. Napisz, kiedy i gdzie będzie przyjęcie, co planujesz i jak można do ciebie dojechać.",
          "minWords": 60, "maxWords": 100, "topicWords": ["urodzin", "zaprasz", "przyjęci", "imprez"]},
