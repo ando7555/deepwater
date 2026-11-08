@@ -88,8 +88,10 @@ public class HarborController {
                                        @RequestParam(required = false) String q, @RequestParam(required = false) String country,
                                        @RequestParam(required = false) String remote, @RequestParam(required = false) String visa,
                                        @RequestParam(required = false) Integer minScore, @RequestParam(required = false) String source,
-                                       @RequestParam(required = false) Integer max) {
-        return search.search(platform.requireAccount(auth), new JobSearchService.Filters(q, country, remote, visa, minScore, source, max));
+                                       @RequestParam(required = false) Integer max, @RequestParam(required = false) String category,
+                                       @RequestParam(required = false) String language) {
+        return search.search(platform.requireAccount(auth),
+                new JobSearchService.Filters(q, country, remote, visa, minScore, source, max, category, language));
     }
 
     /** Where the postings come from, and the work-permit guide for the Nordic countries and Switzerland. */
