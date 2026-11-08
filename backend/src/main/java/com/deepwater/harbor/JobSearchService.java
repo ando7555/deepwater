@@ -36,24 +36,43 @@ public class JobSearchService {
                 .toList();
         Map<String, Long> countries = all.stream().filter(m -> m.job().countryCode() != null)
                 .collect(Collectors.groupingBy(m -> m.job().countryCode(), java.util.TreeMap::new, Collectors.counting()));
-        return new SearchResult(shown, all.size(), countries, profile.skills().isEmpty());
+        Map<String, Long> categories = all.stream()
+                .collect(Collectors.groupingBy(m -> m.job().category(), java.util.TreeMap::new, Collectors.counting()));
+        return new SearchResult(shown, all.size(), countries, categories, JobCategories.orderedLabels(), profile.skills().isEmpty());
     }
 
     static JobView view(Job job) {
+        JobCategories.LanguageNeed language = JobCategories.languageNeed(job.description());
         return new JobView(job.id(), job.source(), job.title(), job.company(), job.countryCode(), Countries.name(job.countryCode()),
-                job.location(), job.remote(), job.visaSignal(), job.description(), job.tags(), job.url(), job.postedAt());
+                job.location(), job.remote(), job.visaSignal(), job.description(), job.tags(), job.url(), job.postedAt(),
+                JobCategories.category(job), language.need(), language.language());
     }
 
     /**
      * visa: ANY; SPONSORED (the posting says it sponsors); NO_PERMIT_NEEDED (the person can work there without one);
      * OPEN_TO_ME (no permit needed, or the posting offers sponsorship); NOT_RULED_OUT (hides postings that refuse sponsorship).
-     * remote: ANY, REMOTE or ONSITE. source: ALL, SAMPLE or LIVE.
+     * remote: ANY, REMOTE or ONSITE. source: ALL, SAMPLE or LIVE. category: ANY or a code from {@link JobCategories}.
+     * language: ANY, or NO_LOCAL_REQUIRED to hide postings that require the local language.
      */
-    public record Filters(String q, String country, String remote, String visa, Integer minScore, String source, Integer max) {
+    public record Filters(String q, String country, String remote, String visa, Integer minScore, String source, Integer max,
+                          String category, String language) {
+        public Filters(String q, String country, String remote, String visa, Integer minScore, String source, Integer max) {
+            this(q, country, remote, visa, minScore, source, max, null, null);
+        }
+
         boolean accepts(JobMatch m) {
             JobView job = m.job();
             return keywordMatches(job) && countryMatches(job) && remoteMatches(job) && visaMatches(job, m.match().workPermit())
-                    && (minScore == null || m.match().score() >= minScore) && sourceMatches(job);
+                    && (minScore == null || m.match().score() >= minScore) && sourceMatches(job) && categoryMatches(job)
+                    && languageMatches(job);
+        }
+
+        private boolean categoryMatches(JobView job) {
+            return category == null || category.isBlank() || "ANY".equals(category) || category.equals(job.category());
+        }
+
+        private boolean languageMatches(JobView job) {
+            return !"NO_LOCAL_REQUIRED".equals(language) || !JobCategories.NEED_REQUIRED.equals(job.languageNeed());
         }
 
         private boolean keywordMatches(JobView job) {
@@ -97,9 +116,10 @@ public class JobSearchService {
 
     public record JobView(String id, String source, String title, String company, String countryCode, String countryName,
                           String location, boolean remote, String visaSignal, String description, List<String> tags, String url,
-                          Instant postedAt) {}
+                          Instant postedAt, String category, String languageNeed, String localLanguage) {}
 
     public record JobMatch(JobView job, JobMatcher.Match match, String applicationStatus) {}
 
-    public record SearchResult(List<JobMatch> jobs, int totalJobs, Map<String, Long> jobsByCountry, boolean profileIsEmpty) {}
+    public record SearchResult(List<JobMatch> jobs, int totalJobs, Map<String, Long> jobsByCountry, Map<String, Long> jobsByCategory,
+                               Map<String, String> categoryLabels, boolean profileIsEmpty) {}
 }

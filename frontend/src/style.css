@@ -627,3 +627,77 @@ kbd{font:600 10px 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;border-ra
 .cv-check-item.pass .cv-check-icon{background:var(--good-bg);color:var(--good);border:1px solid var(--good-line)}
 .cv-check details summary{cursor:pointer;color:var(--accent);font-size:14px;margin-bottom:8px}
 .cv-check-note{color:var(--text-3)}
+
+/* Brand switch (Deepwater or Nibble) and the welcome page product cards */
+.header-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.auth-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand-switch{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--line-soft);border-radius:999px;background:var(--surface-glass)}
+.brand-switch button{padding:5px 12px;border-radius:999px;background:transparent;color:var(--text-3);box-shadow:none;font:700 11px 'Space Grotesk',sans-serif;letter-spacing:.08em;text-transform:uppercase}
+.brand-switch button:hover:not(:disabled){transform:none;box-shadow:none}
+.brand-switch button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-text)}
+:root[data-theme="light"] .brand-switch button:not(.link):not(.swatch){background:transparent;color:var(--text-3)}
+:root[data-theme="light"] .brand-switch button[aria-pressed="true"]:not(.link):not(.swatch){background:var(--accent-soft);color:var(--accent-deep)}
+.pitch-mascot{display:block;width:180px;height:180px;margin-bottom:6px}
+.welcome-products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 28px}
+.welcome-product{display:grid;gap:6px;justify-items:start;align-content:start;text-align:left;padding:16px;border:1px solid var(--line-soft);border-radius:var(--radius);background:var(--surface-glass);color:var(--text-2);font:inherit;box-shadow:none;cursor:pointer}
+.welcome-product:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px);box-shadow:none;filter:none}
+.welcome-product b{font:700 17px 'Space Grotesk',sans-serif;color:var(--text)}
+.welcome-product p{margin:0;font-size:14px;line-height:1.5}
+.welcome-product.soon{cursor:default;border-style:dashed;opacity:.85}
+:root[data-theme="light"] button.welcome-product:not(.link):not(.swatch){background:var(--deep);color:var(--text-2)}
+.welcome-why{margin-top:6px}
+@media(max-width:560px){.welcome-products{grid-template-columns:1fr}}
+
+/* Polish B1 practice exam */
+.exam-shell{display:grid;gap:16px;margin-top:22px}
+.exam-panel{padding:26px;display:grid;gap:18px;min-width:0}
+.exam-hero{display:flex;gap:24px;align-items:center}
+.exam-hero h2{margin:6px 0 8px}
+.exam-hero img{flex:0 0 auto}
+.exam-parts{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.exam-parts li{display:grid;gap:3px;padding:12px;border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:var(--deep)}
+.exam-parts span{font-size:13px;color:var(--text-2)}.exam-parts small{color:var(--text-3)}
+.exam-hint{font-size:14px;color:var(--text-3);margin:0}
+.exam-history ul{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}
+.exam-history li{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.exam-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.exam-progress{font-size:13px;color:var(--text-3);padding-top:6px}
+.exam-passage{padding:16px 18px;border-left:3px solid var(--accent);background:var(--surface-2);border-radius:0 12px 12px 0}
+.exam-passage p{margin:6px 0 0;color:var(--text)}
+.exam-items{margin:0;padding-left:22px;display:grid;gap:16px}
+.exam-item{padding-left:4px}
+.exam-choice{border:0;padding:0;margin:0;display:grid;gap:8px;min-width:0}
+.exam-choice legend{font-weight:600;color:var(--text);margin-bottom:8px}
+.exam-audio{margin-bottom:4px}
+.exam-open{display:grid;gap:8px}
+.exam-task{margin:0;color:var(--text);font-weight:600}
+.exam-open textarea{resize:vertical;min-height:110px}
+.exam-count{color:var(--text-3)}
+.exam-nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.exam-verdict{display:flex;gap:20px;align-items:flex-start;padding:18px;border-radius:var(--radius);border:1px solid var(--warn-line);background:var(--warn-bg)}
+.exam-verdict.ready{border-color:var(--good-line);background:var(--good-bg)}
+.exam-verdict h2{margin:4px 0 6px}.exam-verdict p{margin:0 0 6px}.exam-verdict small{color:var(--text-3)}
+.exam-bars{display:grid;gap:10px}
+.exam-bar{display:grid;grid-template-columns:minmax(150px,1fr) 3fr 52px;gap:12px;align-items:center}
+.exam-bar small{color:var(--text-3)}
+.exam-bar-track{position:relative;height:12px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.exam-bar-track i{position:absolute;inset:0 auto 0 0;width:var(--pct);background:var(--warn);border-radius:999px}
+.exam-bar.pass .exam-bar-track i{background:var(--good)}
+.exam-bar-track::after{content:'';position:absolute;top:-2px;bottom:-2px;left:var(--pass);width:2px;background:var(--text)}
+.exam-feedback{border:1px solid var(--line-soft);border-radius:var(--radius-sm);padding:12px 14px;background:var(--deep)}
+.exam-feedback summary{cursor:pointer;font-weight:600;color:var(--text)}
+.exam-closed{margin:8px 0 0;font-size:14px}.exam-closed.right b{color:var(--good)}.exam-closed.wrong b{color:var(--warn)}
+.exam-open-feedback{margin-top:12px;padding-top:10px;border-top:1px solid var(--line-soft)}
+.exam-open-feedback p{margin:4px 0}
+.exam-good li::marker{color:var(--good)}.exam-fixes li::marker{color:var(--warn)}
+.exam-fixes s{color:var(--warn)}.exam-fixes small{color:var(--text-3)}
+@media(max-width:800px){.exam-parts{grid-template-columns:repeat(2,minmax(0,1fr))}.exam-hero,.exam-verdict{flex-direction:column}.exam-bar{grid-template-columns:1fr 52px}.exam-bar>span{grid-column:1/-1}}
+@media(max-width:560px){.exam-panel{padding:18px}}
+
+/* Harbor job families and language tags */
+.harbor-categories{display:flex;flex-wrap:wrap;gap:8px}
+.harbor-categories button{padding:7px 13px;border-radius:999px;background:var(--surface-glass);color:var(--text-2);box-shadow:inset 0 0 0 1px var(--line-soft);font-size:13px;font-weight:600}
+.harbor-categories button:hover:not(:disabled){transform:none;box-shadow:inset 0 0 0 1px var(--accent);filter:none}
+.harbor-categories button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 0 0 0 1px var(--accent)}
+:root[data-theme="light"] .harbor-categories button:not(.link):not(.swatch){background:var(--deep);color:var(--text-2)}
+:root[data-theme="light"] .harbor-categories button[aria-pressed="true"]:not(.link):not(.swatch){background:var(--accent-soft);color:var(--accent-deep)}

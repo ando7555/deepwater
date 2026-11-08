@@ -28,6 +28,11 @@ const VISA_FILTERS = [
 const VISA_BADGE = {
   OFFERED: ['good', 'Visa sponsorship offered'], NOT_OFFERED: ['warn', 'Says no visa sponsorship'], UNKNOWN: ['muted', 'Visa not mentioned'],
 };
+const LANGUAGE_BADGE = {
+  REQUIRED: ['warn', language => `${language || 'Local language'} required`],
+  PLUS: ['accent', language => `${language || 'Local language'} is a plus`],
+  ENGLISH_OK: ['good', () => 'English is enough'],
+};
 const PERMIT_BADGE = {
   NOT_NEEDED: ['good', 'No work permit needed'], NEEDED: ['warn', 'You need a work permit'], CHECK: ['muted', 'Check permit rules'],
 };
@@ -152,7 +157,7 @@ function ProfileView({ profile, sources, onSaved, onDone }) {
 }
 
 function JobsView({ profile, sources, onSources, goToProfile }) {
-  const [filters, setFilters] = useState({ q: '', country: 'ANY', visa: profile.citizenship === 'OTHER' ? 'OPEN_TO_ME' : 'ANY', remote: 'ANY', minScore: '', source: 'ALL' });
+  const [filters, setFilters] = useState({ q: '', country: 'ANY', visa: profile.citizenship === 'OTHER' ? 'OPEN_TO_ME' : 'ANY', remote: 'ANY', minScore: '', source: 'ALL', category: 'ANY', language: 'ANY' });
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [refreshNote, setRefreshNote] = useState('');
@@ -203,7 +208,13 @@ function JobsView({ profile, sources, onSources, goToProfile }) {
       <label>Remote<select value={filters.remote} onChange={e => set('remote', e.target.value)}><option value="ANY">On-site or remote</option><option value="REMOTE">Remote only</option><option value="ONSITE">On-site only</option></select></label>
       <label>Match<select value={filters.minScore} onChange={e => set('minScore', e.target.value)}><option value="">Any match</option><option value="40">40% or better</option><option value="60">60% or better</option><option value="80">80% or better</option></select></label>
       <label>Source<select value={filters.source} onChange={e => set('source', e.target.value)}><option value="ALL">All sources</option><option value="SAMPLE">Sample postings</option><option value="LIVE">Live postings</option></select></label>
+      <label>Local language<select value={filters.language} onChange={e => set('language', e.target.value)}><option value="ANY">Any</option><option value="NO_LOCAL_REQUIRED">Hide jobs that require it</option></select></label>
     </form>
+    {result?.categoryLabels && <div className="harbor-categories" role="group" aria-label="Job family">
+      <button type="button" aria-pressed={filters.category === 'ANY'} onClick={() => set('category', 'ANY')}>All jobs ({result.totalJobs})</button>
+      {Object.entries(result.categoryLabels).filter(([code]) => result.jobsByCategory?.[code]).map(([code, label]) =>
+        <button type="button" key={code} aria-pressed={filters.category === code} onClick={() => set('category', code)}>{label} ({result.jobsByCategory[code]})</button>)}
+    </div>}
     {profile.citizenship === 'UNKNOWN' && <p className="harbor-hint">Tell Harbor your citizenship group in your <button className="link" onClick={goToProfile}>talent profile</button> to see whether you need a work permit for each job.</p>}
     {error && <p role="alert" className="banner error">{error}</p>}
 
@@ -241,11 +252,13 @@ function JobCard({ item, onTrack }) {
           {sample ? <Badge kind="sample">Sample posting</Badge> : <Badge kind="muted">Arbeitnow</Badge>}
           <Badge kind={visaKind}>{visaLabel}</Badge>
           <Badge kind={permitKind}>{permitLabel}</Badge>
+          {LANGUAGE_BADGE[job.languageNeed] && <Badge kind={LANGUAGE_BADGE[job.languageNeed][0]}>{LANGUAGE_BADGE[job.languageNeed][1](job.localLanguage)}</Badge>}
           {applicationStatus && <Badge kind="accent">{STATUS_LABELS[applicationStatus]}</Badge>}
         </div>
       </div>
     </div>
     <ul className="harbor-reasons">{match.reasons.map(reason => <li key={reason}>{reason}</li>)}</ul>
+    {job.languageNeed !== 'ENGLISH_OK' && ['Danish', 'German'].includes(job.localLanguage) && <p className="harbor-hint">{job.localLanguage} {job.languageNeed === 'REQUIRED' ? 'is required here' : 'helps here'}: practise it in Echo, a few minutes a day.</p>}
     <details><summary>Read the posting</summary><p className="harbor-description">{job.description}</p>{job.tags.length > 0 && <small>Tags: {job.tags.join(', ')}</small>}</details>
     <div className="harbor-actions">
       {job.url && <a className="harbor-apply" href={job.url} target="_blank" rel="noreferrer" onClick={() => { if (!applicationStatus) onTrack(job, 'SAVED'); }}>Apply on the original posting ↗</a>}

@@ -1,0 +1,86 @@
+{
+  "id": "polish-b1",
+  "title": "Polish B1 practice exam",
+  "notice": "Practice items written for Deepwater in the shape of the five parts of the Polish state certificate exam at B1 (egzamin certyfikatowy z języka polskiego jako obcego). They are not official exam tasks, and the result is an estimate, not an official grade. The official exam and its rules: certyfikatpolski.pl.",
+  "parts": [
+    {
+      "id": "listening",
+      "name": "Rozumienie ze słuchu",
+      "english": "Listening",
+      "kind": "CHOICE",
+      "instructions": "Posłuchaj nagrania i wybierz poprawną odpowiedź. Each recording can be played twice.",
+      "items": [
+        {"id": "l1", "audio": "Dzień dobry, tu przychodnia Zdrowie. Dzwonię, żeby przypomnieć, że wizyta u lekarza jest jutro o godzinie dziesiątej trzydzieści, a nie o dziewiątej, jak było wcześniej.",
+         "prompt": "O której jest wizyta u lekarza?", "options": ["O dziewiątej", "O dziesiątej trzydzieści", "O jedenastej"], "answer": 1},
+        {"id": "l2", "audio": "Uwaga, pasażerowie. Pociąg do Krakowa odjedzie z peronu trzeciego z opóźnieniem około dwudziestu minut. Przepraszamy za utrudnienia.",
+         "prompt": "Co wiemy o pociągu do Krakowa?", "options": ["Odjedzie z peronu drugiego", "Jest odwołany", "Odjedzie później, niż planowano"], "answer": 2},
+        {"id": "l3", "audio": "Cześć Marta, to ja, Tomek. W sobotę nie mogę przyjść na twoje urodziny, bo muszę pracować. Może spotkamy się w niedzielę po południu na kawę?",
+         "prompt": "Dlaczego Tomek nie przyjdzie w sobotę?", "options": ["Jest chory", "Musi pracować", "Wyjeżdża z miasta"], "answer": 1},
+        {"id": "l4", "audio": "Szukamy osoby do pracy w magazynie w Kopenhadze. Wymagamy prawa jazdy i podstawowej znajomości angielskiego. Oferujemy umowę na rok i pomoc w znalezieniu mieszkania.",
+         "prompt": "Czego wymaga pracodawca?", "options": ["Prawa jazdy i podstaw angielskiego", "Dobrej znajomości duńskiego", "Własnego mieszkania w Kopenhadze"], "answer": 0},
+        {"id": "l5", "audio": "Jutro na północy kraju będzie pochmurno i chłodno, a wieczorem może padać deszcz. Na południu czeka nas słoneczny i ciepły dzień.",
+         "prompt": "Jaka będzie jutro pogoda na południu?", "options": ["Deszczowa", "Słoneczna i ciepła", "Pochmurna i chłodna"], "answer": 1}
+      ]
+    },
+    {
+      "id": "grammar",
+      "name": "Poprawność gramatyczna",
+      "english": "Grammar",
+      "kind": "CHOICE",
+      "instructions": "Wybierz poprawną formę.",
+      "items": [
+        {"id": "g1", "prompt": "Wczoraj (ja, kobieta) ___ do kina z siostrą.", "options": ["idę", "poszłam", "pójdę"], "answer": 1},
+        {"id": "g2", "prompt": "Przepraszam, dzisiaj nie mam ___ na kawę.", "options": ["czas", "czasu", "czasem"], "answer": 1},
+        {"id": "g3", "prompt": "Często rozmawiam z ___ o pracy.", "options": ["kolega", "kolegą", "kolegi"], "answer": 1},
+        {"id": "g4", "prompt": "Jeśli jutro będzie ładna pogoda, ___ na spacer.", "options": ["pójdziemy", "poszliśmy", "chodziliśmy"], "answer": 0},
+        {"id": "g5", "prompt": "To jest książka, ___ kupiłem wczoraj.", "options": ["który", "którą", "której"], "answer": 1},
+        {"id": "g6", "prompt": "Mieszkam w ___ od trzech lat.", "options": ["Danii", "Dania", "Danię"], "answer": 0},
+        {"id": "g7", "prompt": "Gdybym miał więcej pieniędzy, ___ nowy samochód.", "options": ["kupię", "kupiłbym", "kupuję"], "answer": 1},
+        {"id": "g8", "prompt": "Moja siostra jest dwa lata ___ ode mnie.", "options": ["starsza", "najstarsza", "stara"], "answer": 0}
+      ]
+    },
+    {
+      "id": "reading",
+      "name": "Rozumienie tekstów pisanych",
+      "english": "Reading",
+      "kind": "CHOICE",
+      "instructions": "Przeczytaj teksty i wybierz poprawną odpowiedź.",
+      "passages": [
+        {"id": "p1", "title": "Ogłoszenie", "text": "Biblioteka Miejska zaprasza na bezpłatne kursy języka polskiego dla obcokrajowców. Zajęcia odbywają się we wtorki i czwartki od 18:00 do 19:30. Kurs trwa trzy miesiące. Na pierwszych zajęciach uczestnicy piszą krótki test, żeby nauczyciel mógł podzielić ich na grupy. Liczba miejsc jest ograniczona, dlatego trzeba zapisać się do końca września przez stronę internetową biblioteki albo osobiście w czytelni."},
+        {"id": "p2", "title": "E-mail od Kasi", "text": "Cześć Ania! Od miesiąca mieszkam w Aarhus. Pracuję w firmie informatycznej, w której wszyscy mówią po angielsku, ale po pracy uczę się duńskiego, bo chcę lepiej rozumieć sąsiadów. Mieszkanie jest małe, ale blisko morza, więc codziennie rano biegam po plaży. Najbardziej brakuje mi polskiego chleba! Przyjedziesz do mnie w maju? Ściskam, Kasia"}
+      ],
+      "items": [
+        {"id": "r1", "passage": "p1", "prompt": "Ile kosztuje kurs?", "options": ["Nic, jest bezpłatny", "Sto złotych", "Cena zależy od grupy"], "answer": 0},
+        {"id": "r2", "passage": "p1", "prompt": "Kiedy odbywają się zajęcia?", "options": ["W poniedziałki i środy", "We wtorki i czwartki", "Codziennie"], "answer": 1},
+        {"id": "r3", "passage": "p1", "prompt": "Po co jest test na pierwszych zajęciach?", "options": ["Żeby dostać certyfikat", "Żeby podzielić uczestników na grupy", "Żeby zapłacić mniej za kurs"], "answer": 1},
+        {"id": "r4", "passage": "p2", "prompt": "Dlaczego Kasia uczy się duńskiego?", "options": ["Bo w pracy wszyscy mówią po duńsku", "Bo chce lepiej rozumieć sąsiadów", "Bo musi zdać egzamin"], "answer": 1},
+        {"id": "r5", "passage": "p2", "prompt": "Co Kasia robi codziennie rano?", "options": ["Biega po plaży", "Piecze chleb", "Pisze e-maile do Ani"], "answer": 0}
+      ]
+    },
+    {
+      "id": "writing",
+      "name": "Pisanie",
+      "english": "Writing",
+      "kind": "WRITING",
+      "instructions": "Napisz teksty po polsku. The word ranges are practice targets for this mock exam.",
+      "items": [
+        {"id": "w1", "prompt": "Napisz e-mail do koleżanki albo kolegi i zaproś ją lub go na swoje urodziny. Napisz, kiedy i gdzie będzie przyjęcie, co planujesz i jak można do ciebie dojechać.",
+         "minWords": 60, "maxWords": 100, "topicWords": ["urodzin", "zaprasz", "przyjęci", "imprez"]},
+        {"id": "w2", "prompt": "Od roku mieszkasz za granicą i szukasz pracy. Napisz krótki list motywacyjny do firmy, która szuka pracownika. Napisz, kim jesteś i jakie masz doświadczenie, dlaczego chcesz pracować w tej firmie, jakie języki znasz i kiedy możesz zacząć.",
+         "minWords": 120, "maxWords": 180, "topicWords": ["prac", "doświadczen", "firm", "język"]}
+      ]
+    },
+    {
+      "id": "speaking",
+      "name": "Mówienie",
+      "english": "Speaking",
+      "kind": "SPEAKING",
+      "instructions": "Odpowiedz na głos (your browser writes down what you say) albo wpisz odpowiedź. Only the words are checked, not your pronunciation.",
+      "items": [
+        {"id": "s1", "prompt": "Przedstaw się. Opowiedz o sobie, o swojej rodzinie i o tym, czym się zajmujesz.", "minWords": 40, "maxWords": 120, "topicWords": ["jestem", "mam", "nazywam", "pracuj", "rodzin"]},
+        {"id": "s2", "prompt": "Opisz swój typowy dzień w pracy albo na studiach.", "minWords": 40, "maxWords": 120, "topicWords": ["rano", "potem", "wieczor", "prac", "studi"]},
+        {"id": "s3", "prompt": "Wyraź opinię: czy lepiej mieszkać w dużym mieście, czy na wsi? Podaj dwa argumenty.", "minWords": 40, "maxWords": 120, "topicWords": ["miast", "wsi", "uważam", "myślę", "moim zdaniem"]}
+      ]
+    }
+  ]
+}
