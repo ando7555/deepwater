@@ -47,8 +47,9 @@ public final class AmberRules {
         boolean sameArea = !key(me.area()).isEmpty() && key(me.area()).equals(key(them.area()));
         List<String> shared = sharedInterests(me.interests(), them.interests());
         boolean sameLearning = me.learning() != null && me.learning().equals(them.learning());
-        List<String> reasons = intents.isEmpty() ? List.of() : reasons(intents, sameArea ? me.area().strip() : null, shared,
-                sameLearning ? them.learning() : null);
+        String area = sameArea ? me.area().strip() : null;
+        String learning = sameLearning ? them.learning() : null;
+        List<String> reasons = intents.isEmpty() ? List.of() : reasons(intents, area, shared, learning);
         return new Match(intents, sameArea, List.copyOf(shared), sameLearning, List.copyOf(reasons));
     }
 
