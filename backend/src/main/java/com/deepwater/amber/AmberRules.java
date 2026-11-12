@@ -3,6 +3,7 @@ package com.deepwater.amber;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -43,25 +44,34 @@ public final class AmberRules {
         Set<Intent> intents = EnumSet.noneOf(Intent.class);
         intents.addAll(me.intents());
         intents.retainAll(them.intents());
-        boolean sameArea = key(me.area()).equals(key(them.area())) && !key(me.area()).isEmpty();
-        Set<String> theirs = new java.util.HashSet<>();
-        for (String interest : them.interests()) theirs.add(key(interest));
-        List<String> shared = new ArrayList<>();
-        Set<String> seen = new java.util.HashSet<>();
-        for (String interest : me.interests())
-            if (theirs.contains(key(interest)) && seen.add(key(interest))) shared.add(interest);
+        boolean sameArea = !key(me.area()).isEmpty() && key(me.area()).equals(key(them.area()));
+        List<String> shared = sharedInterests(me.interests(), them.interests());
         boolean sameLearning = me.learning() != null && me.learning().equals(them.learning());
-
-        List<String> reasons = new ArrayList<>();
-        if (!intents.isEmpty()) {
-            reasons.add("You are both looking for " + String.join(" and ", intents.stream().map(i -> i.words).toList()));
-            if (sameArea) reasons.add("You both chose " + me.area().strip());
-            if (!shared.isEmpty())
-                reasons.add(shared.size() == 1 ? "1 shared interest: " + shared.getFirst().toLowerCase(Locale.ROOT)
-                        : shared.size() + " shared interests: " + String.join(", ", shared.stream().map(s -> s.toLowerCase(Locale.ROOT)).toList()));
-            if (sameLearning) reasons.add("You are both learning " + them.learning());
-        }
+        List<String> reasons = intents.isEmpty() ? List.of() : reasons(intents, sameArea ? me.area().strip() : null, shared,
+                sameLearning ? them.learning() : null);
         return new Match(intents, sameArea, List.copyOf(shared), sameLearning, List.copyOf(reasons));
+    }
+
+    /** The viewer's own interests that the other person also chose, in the viewer's order and spelling. */
+    private static List<String> sharedInterests(List<String> mine, List<String> theirs) {
+        Set<String> theirKeys = new HashSet<>();
+        for (String interest : theirs) theirKeys.add(key(interest));
+        Set<String> seen = new HashSet<>();
+        List<String> shared = new ArrayList<>();
+        for (String interest : mine)
+            if (theirKeys.contains(key(interest)) && seen.add(key(interest))) shared.add(interest);
+        return shared;
+    }
+
+    private static List<String> reasons(Set<Intent> intents, String area, List<String> shared, String learning) {
+        List<String> reasons = new ArrayList<>();
+        reasons.add("You are both looking for " + String.join(" and ", intents.stream().map(i -> i.words).toList()));
+        if (area != null) reasons.add("You both chose " + area);
+        List<String> lower = shared.stream().map(s -> s.toLowerCase(Locale.ROOT)).toList();
+        if (lower.size() == 1) reasons.add("1 shared interest: " + lower.getFirst());
+        else if (!lower.isEmpty()) reasons.add(lower.size() + " shared interests: " + String.join(", ", lower));
+        if (learning != null) reasons.add("You are both learning " + learning);
+        return reasons;
     }
 
     /** More overlaps first: same area, then number of shared interests, then the same language being learned. */

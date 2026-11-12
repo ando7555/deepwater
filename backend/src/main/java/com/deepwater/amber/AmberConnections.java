@@ -22,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class AmberConnections {
     static final int MAX_PENDING_SENT = 10;
     static final int MAX_MESSAGES_PER_MINUTE = 20;
+    private static final String PENDING = "PENDING";
     private static final String NOT_FOUND = "This invitation or conversation is not available.";
 
     private final JdbcTemplate db;
@@ -53,18 +54,18 @@ public class AmberConnections {
                     "You have " + MAX_PENDING_SENT + " invitations waiting for an answer. Withdraw one or wait for answers first.");
         String id = UUID.randomUUID().toString();
         db.update("insert into amber_invitations(id,sender_id,recipient_id,status) values(?,?,?,'PENDING')", id, accountId, target);
-        return new InvitationView(id, amber.cardOf(target), match.reasons(), "PENDING", Instant.now());
+        return new InvitationView(id, amber.cardOf(target), match.reasons(), PENDING, Instant.now());
     }
 
     public Invitations invitations(String accountId) {
         amber.requireMember(accountId);
         List<InvitationView> incoming = db.query("select id, sender_id, created_at from amber_invitations where recipient_id=? and status='PENDING' " +
-                        "order by created_at desc", (rs, row) -> view(accountId, rs.getString(1), rs.getString(2), "PENDING", rs.getTimestamp(3)),
+                        "order by created_at desc", (rs, row) -> view(accountId, rs.getString(1), rs.getString(2), PENDING, rs.getTimestamp(3)),
                 accountId).stream().filter(Objects::nonNull).toList();
         // The sender sees "closed" for a declined invitation: no reason, no time of the answer.
         List<InvitationView> outgoing = db.query("select id, recipient_id, status, created_at from amber_invitations where sender_id=? " +
                         "and status in ('PENDING','DECLINED') order by created_at desc",
-                (rs, row) -> view(accountId, rs.getString(1), rs.getString(2), "PENDING".equals(rs.getString(3)) ? "PENDING" : "CLOSED",
+                (rs, row) -> view(accountId, rs.getString(1), rs.getString(2), PENDING.equals(rs.getString(3)) ? PENDING : "CLOSED",
                         rs.getTimestamp(4)), accountId).stream().filter(Objects::nonNull).toList();
         return new Invitations(incoming, outgoing);
     }

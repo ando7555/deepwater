@@ -42,7 +42,7 @@ public class AmberService {
 
     public MyProfile profile(String accountId) {
         String learning = echoLearning(accountId);
-        var rows = db.query("select * from amber_profiles where account_id=?", (rs, row) -> stored(rs), accountId);
+        var rows = find(accountId);
         if (rows.isEmpty()) return MyProfile.notJoined(learning);
         Stored p = rows.getFirst();
         return new MyProfile(true, p.memberId, p.name, p.age, p.area, names(p.intents), p.interests, p.about, p.visible,
@@ -160,7 +160,7 @@ public class AmberService {
     // ---------------------------------------------------------------- shared with AmberConnections
 
     Stored requireMember(String accountId) {
-        var rows = db.query("select * from amber_profiles where account_id=?", (rs, row) -> stored(rs), accountId);
+        var rows = find(accountId);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.CONFLICT, "Create your Amber profile first.");
         return rows.getFirst();
     }
@@ -178,17 +178,21 @@ public class AmberService {
     }
 
     Card cardOf(String accountId) {
-        var rows = db.query("select * from amber_profiles where account_id=?", (rs, row) -> stored(rs), accountId);
+        var rows = find(accountId);
         return rows.isEmpty() ? null : card(rows.getFirst());
     }
 
     AmberRules.Match matchBetween(String viewer, String other) {
         Stored me = requireMember(viewer);
-        var rows = db.query("select * from amber_profiles where account_id=?", (rs, row) -> stored(rs), other);
+        var rows = find(other);
         return rows.isEmpty() ? null : AmberRules.match(facts(me), facts(rows.getFirst()));
     }
 
     // ---------------------------------------------------------------- helpers
+
+    private List<Stored> find(String accountId) {
+        return db.query("select * from amber_profiles where account_id=?", (rs, row) -> stored(rs), accountId);
+    }
 
     private Set<String> blockedEitherWay(String accountId) {
         Set<String> result = new HashSet<>(db.queryForList("select blocked_id from amber_blocks where blocker_id=?", String.class, accountId));
@@ -214,7 +218,7 @@ public class AmberService {
         Set<Intent> result = EnumSet.noneOf(Intent.class);
         if (raw != null) for (String value : raw) {
             try { result.add(Intent.valueOf(value)); }
-            catch (IllegalArgumentException | NullPointerException ex) { throw bad("Unknown choice for what you are looking for."); }
+            catch (IllegalArgumentException | NullPointerException _) { throw bad("Unknown choice for what you are looking for."); }
         }
         return result;
     }
