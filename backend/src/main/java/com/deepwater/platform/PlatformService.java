@@ -119,7 +119,13 @@ public class PlatformService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "The teacher account owns published lessons and cannot be deleted here.");
         db.update("update echo_lessons set created_by=null where created_by=?", accountId);
         db.update("update echo_lessons set approved_by=null where approved_by=?", accountId);
-        for (String table : new String[]{"exam_attempts", "harbor_applications", "harbor_profiles", "person_profiles", "echo_cards", "echo_audio_attempts", "echo_attempts", "echo_skill_states",
+        // Amber: everything about this account, in both directions. Reports others filed about it stay for review.
+        db.update("delete from amber_messages where invitation_id in (select id from amber_invitations where sender_id=? or recipient_id=?)", accountId, accountId);
+        db.update("delete from amber_invitations where sender_id=? or recipient_id=?", accountId, accountId);
+        db.update("delete from amber_decisions where account_id=? or target_account_id=?", accountId, accountId);
+        db.update("delete from amber_blocks where blocker_id=? or blocked_id=?", accountId, accountId);
+        db.update("delete from amber_reports where reporter_id=?", accountId);
+        for (String table : new String[]{"amber_profiles", "exam_attempts", "harbor_applications", "harbor_profiles", "person_profiles", "echo_cards", "echo_audio_attempts", "echo_attempts", "echo_skill_states",
                 "echo_learner_profiles", "oauth_login_codes", "email_verification_tokens", "user_sessions"})
             db.update("delete from " + table + " where account_id=?", accountId);
         db.update("delete from accounts where id=?", accountId);

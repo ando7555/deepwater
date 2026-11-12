@@ -11,6 +11,7 @@ import DailyReview from './DailyReview.jsx';
 import ProfilePage from './ProfilePage.jsx';
 import Harbor from './Harbor.jsx';
 import PolishExam from './PolishExam.jsx';
+import Amber from './amber/Amber.jsx';
 import { BRANDS, BrandSwitch, useBrand } from './brand.jsx';
 import TeacherWorkspace from './teacher/TeacherWorkspace.jsx';
 import { Notice, Tabs } from './ui/index.jsx';
@@ -28,14 +29,16 @@ const PRODUCTS = [
   { id: 'echo', label: 'Echo', hint: 'Languages' },
   { id: 'polish', label: 'Polish B1', hint: 'Exam practice' },
   { id: 'harbor', label: 'Harbor', hint: 'Jobs' },
+  { id: 'amber', label: 'Amber', hint: 'Connections' },
 ];
-const PRODUCT_NAMES = { echo: 'Echo', polish: 'Polish B1', harbor: 'Harbor' };
+const PRODUCT_NAMES = { echo: 'Echo', polish: 'Polish B1', harbor: 'Harbor', amber: 'Amber' };
 
 /** What the welcome page offers; fashion is shown as coming soon and cannot be opened yet. */
 const WELCOME_PRODUCTS = [
   { id: 'echo', name: 'Echo', tag: 'Learn Danish or German', line: 'Short lessons that explain the pattern, then reviews just before you would forget.' },
   { id: 'polish', name: 'Polish B1', tag: 'State exam practice', line: 'All five exam parts. The examiner marks your writing and speaking and says if you look ready for B1.' },
   { id: 'harbor', name: 'Harbor', tag: 'Find a job in Denmark', line: 'Upload your CV, see matched jobs in Denmark and the Nordics, with visa and language filters.' },
+  { id: 'amber', name: 'Amber', tag: 'Meet people, by choice', line: 'Dating and new friends. Every suggestion says why it appears, and chat opens only when you both say yes.' },
   { id: 'fashion', name: 'AI Fashion', tag: 'Coming soon', line: 'How you look and how others see you, with an AI stylist. We are building it next.', soon: true },
 ];
 
@@ -151,7 +154,7 @@ function Auth({ onLogin, message, onChooseProduct }) {
     </section>
     <section className="access panel" aria-labelledby="access-title">
     <h2 id="access-title">{mode === 'register' ? `Create your ${BRANDS[brand].name} account` : 'Welcome back'}</h2>
-    <p className="access-sub">{mode === 'register' ? 'One account for Echo, Polish B1 practice and Harbor.' : 'Sign in to continue where you left off.'}</p>
+    <p className="access-sub">{mode === 'register' ? 'One account for Echo, Polish B1 practice, Harbor and Amber.' : 'Sign in to continue where you left off.'}</p>
     <form onSubmit={submit}>
       {mode === 'register' && <label>Your name<input required maxLength="160" autoComplete="name" value={name} onChange={event => setName(event.target.value)} /></label>}
       <label>Email<input required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} /></label>
@@ -573,6 +576,7 @@ function App() {
     </>}
     </>}
     {product === 'harbor' && <Harbor />}
+    {product === 'amber' && <Amber />}
     {product === 'polish' && <PolishExam examinerName={brand === 'nibble' ? 'Nibble' : 'The examiner'} />}
     {product === 'echo' && (tab === 'profile' || !home?.onboarded) && <DeleteAccount email={user.email} onDeleted={logout} />}
     <footer>{PRODUCT_NAMES[product]} by {BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
