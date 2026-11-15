@@ -37,7 +37,7 @@ class AssistantController {
     @GetMapping
     Map<String, Object> status(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
         platform.requireAccount(auth);
-        return Map.of("enabled", assistant.enabled());
+        return assistant.status();
     }
 
     @PostMapping(value = "/runs", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

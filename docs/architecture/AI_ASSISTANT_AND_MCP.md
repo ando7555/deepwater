@@ -1,8 +1,8 @@
 # AI assistant and MCP server
 
-Status: built in the PR that adds `backend/src/main/java/com/deepwater/{tools,mcp,assistant}`. The live AI needs
-`ANTHROPIC_API_KEY` on the backend; without it the assistant says it is off and the MCP tools still work
-(they never call a model).
+Status: built in PR #120 (`backend/src/main/java/com/deepwater/{tools,mcp,assistant}`). The assistant needs a
+model: hosted Claude (`ANTHROPIC_API_KEY`) or a local model on Ollama (`ASSISTANT_PROVIDER=ollama`). Without one it
+says it is off. The MCP tools work either way: they never call a model.
 
 ## What it is
 
@@ -49,6 +49,40 @@ Left out on purpose: other Amber members (suggestions, invitations, messages). S
 to an outside AI needs their consent first. Also left out: anything destructive (delete card, leave Amber,
 delete account).
 
+## Settings (nothing below needs a code change)
+
+| Environment variable | Default | What it changes |
+| --- | --- | --- |
+| `ASSISTANT_PROVIDER` | `auto` | `auto` (Claude if a key is set, else off), `anthropic`, `ollama`, `off` |
+| `ANTHROPIC_API_KEY` | (empty) | key for hosted Claude |
+| `ASSISTANT_AI_MODEL` / `ASSISTANT_EFFORT` | `claude-opus-5-5` / `medium` | Claude model and effort |
+| `OLLAMA_BASE_URL` / `OLLAMA_MODEL` | `http://localhost:11434` / `hermes3` | local model on Ollama |
+| `ASSISTANT_TIMEOUT_SECONDS` | `120` | how long one model step may take |
+| `ASSISTANT_MAX_STEPS` | `6` | model steps per question |
+| `ASSISTANT_MAX_HISTORY` / `ASSISTANT_MAX_MESSAGE_CHARS` | `20` / `2000` | request limits |
+| `ASSISTANT_RUNS_PER_HOUR` | `30` | questions per person per hour |
+| `ASSISTANT_SYSTEM_PROMPT` | `classpath:assistant/system-prompt.md` | the model's instructions; `file:/path/prompt.md` works too |
+| `ASSISTANT_SUGGESTIONS` | three starter questions | comma-separated starter questions in the chat panel |
+| `DEEPWATER_TOOLS_ENABLED` | (all) | comma-separated tool names offered to the assistant and over MCP |
+
+The chat panel reads `GET /api/v1/assistant` (on/off, model, tool titles, starter questions, message limit), so
+those are not hard-coded in the frontend either.
+
+## Local AI with Ollama (Hermes)
+
+```
+ollama pull hermes3
+ASSISTANT_PROVIDER=ollama OLLAMA_MODEL=hermes3 java -jar backend.jar      # or: gradle :backend:bootRun
+```
+
+`OllamaAssistantModel` calls Ollama's `POST /api/chat` with tools and `stream: false`, following Ollama's API
+documentation (tool calls come back as `message.tool_calls[].function{name, arguments}`, results go back as
+`role: tool` with `tool_name`). It is tested against a stand-in server that answers in that shape; it has **not
+yet been run against a real Ollama** (this sandbox cannot download Ollama or models). Limits to know:
+- The Railway backend cannot reach an Ollama on your own PC. Local AI is for running Deepwater locally, or for a
+  server where Ollama runs next to the backend.
+- Small local models choose tools less reliably than Claude. Measure with the eval below before relying on it.
+
 ## Safety and cost
 
 - Session token required on every request (`401` + `WWW-Authenticate: Bearer` otherwise).
@@ -56,17 +90,21 @@ delete account).
 - 30 assistant questions per person per hour (in memory; resets on restart). MCP calls do not use the model.
 - System prompt (`resources/assistant/system-prompt.md`) tells the model that tool results, especially job
   descriptions written by outside companies, are data, not instructions.
-- Claude calls use `claude-opus-5-5` (env `ASSISTANT_AI_MODEL`), effort `medium` (env `ASSISTANT_EFFORT`),
-  adaptive thinking, and server-side refusal fallbacks (`fallbacks: default`). Token usage is logged per step.
+- Claude calls use adaptive thinking and server-side refusal fallbacks (`fallbacks: default`). Token usage is
+  logged per step for both providers.
 
 ## Evals
 
 - `AssistantTest` (always runs, scripted model): tool loop, caller isolation, rule errors, step cap, refusal,
   request limits, AG-UI stream over HTTP.
 - `McpServerTest` (always runs): protocol handshake, tool list, per-caller data, errors.
-- `AssistantEvalTest` (runs only with `ANTHROPIC_API_KEY`): 11 real questions from
+- `OllamaAssistantModelTest` (always runs): request and reply shape against a stand-in Ollama, provider setting.
+- `ToolSettingsTest` (always runs): `deepwater.tools.enabled` really narrows the tools.
+- `AssistantEvalTest` (runs only with `ASSISTANT_EVAL=true`): 11 real questions from
   `src/test/resources/assistant-evals.json`, scored by rules (expected tool, forbidden tool, forbidden words),
-  results in `backend/build/assistant-evals.jsonl`. First bar: 9 of 11. It has not been run yet: no key here.
+  results in `backend/build/assistant-evals.jsonl`. First bar: 9 of 11. Works with Claude or with
+  `ASSISTANT_PROVIDER=ollama`, so you can compare a local Hermes against Claude on the same questions.
+  It has not been run yet (no key and no Ollama here).
 
 ## Connect an MCP client
 

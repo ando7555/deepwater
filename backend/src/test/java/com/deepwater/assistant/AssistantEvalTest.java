@@ -24,12 +24,13 @@ import tools.jackson.databind.ObjectMapper;
 
 /**
  * The live eval: real questions against the real model, scored by rules (which tool it chose, which it must
- * not use, words the answer must not contain). It costs API money, so it runs only when ANTHROPIC_API_KEY is
- * set; CI skips it. Results are written to build/assistant-evals.jsonl, one line per case.
- * Run: ANTHROPIC_API_KEY=... gradle :backend:test --tests '*AssistantEvalTest'
+ * not use, words the answer must not contain). It calls a real model (API money for Claude), so it runs only
+ * when ASSISTANT_EVAL=true; CI skips it. Results are written to build/assistant-evals.jsonl, one line per case.
+ * Claude:  ASSISTANT_EVAL=true ANTHROPIC_API_KEY=... gradle :backend:test --tests '*AssistantEvalTest'
+ * Ollama:  ASSISTANT_EVAL=true ASSISTANT_PROVIDER=ollama OLLAMA_MODEL=hermes3 gradle :backend:test --tests '*AssistantEvalTest'
  */
 @SpringBootTest
-@EnabledIfEnvironmentVariable(named = "ANTHROPIC_API_KEY", matches = ".+")
+@EnabledIfEnvironmentVariable(named = "ASSISTANT_EVAL", matches = "true")
 class AssistantEvalTest {
     private static final ObjectMapper JSON = new ObjectMapper();
     @Autowired DeepwaterTools tools;
@@ -38,10 +39,14 @@ class AssistantEvalTest {
 
     @Test
     void theModelPicksTheRightToolsAndKeepsToTheRules() throws Exception {
-        var model = new ClaudeAssistantModel(AnthropicOkHttpClient.fromEnv(),
-                System.getenv().getOrDefault("ASSISTANT_AI_MODEL", "claude-opus-5-5"),
-                System.getenv().getOrDefault("ASSISTANT_EFFORT", "medium"));
-        var assistant = new AssistantService(model, tools, JSON, Clock.systemUTC());
+        // ASSISTANT_PROVIDER=ollama runs the same eval against a local model (OLLAMA_BASE_URL, OLLAMA_MODEL).
+        AssistantModel model = "ollama".equalsIgnoreCase(System.getenv("ASSISTANT_PROVIDER"))
+                ? new OllamaAssistantModel(System.getenv().getOrDefault("OLLAMA_BASE_URL", "http://localhost:11434"),
+                        System.getenv().getOrDefault("OLLAMA_MODEL", "hermes3"), java.time.Duration.ofSeconds(300))
+                : new ClaudeAssistantModel(AnthropicOkHttpClient.fromEnv(),
+                        System.getenv().getOrDefault("ASSISTANT_AI_MODEL", "claude-opus-5-5"),
+                        System.getenv().getOrDefault("ASSISTANT_EFFORT", "medium"));
+        var assistant = new AssistantService(model, tools, JSON, Clock.systemUTC(), null);
         JsonNode cases = JSON.readTree(new ClassPathResource("assistant-evals.json").getInputStream());
         List<String> lines = new ArrayList<>();
         int passed = 0;

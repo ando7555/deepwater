@@ -10,7 +10,7 @@ import CalmProgress from './CalmProgress.jsx';
 import DailyReview from './DailyReview.jsx';
 import ProfilePage from './ProfilePage.jsx';
 import Harbor from './Harbor.jsx';
-import AskDeepwater from './AskDeepwater.jsx';
+import AskDeepwater, { openAskDeepwater } from './AskDeepwater.jsx';
 import PolishExam from './PolishExam.jsx';
 import Amber from './amber/Amber.jsx';
 import { BRANDS, BrandSwitch, useBrand } from './brand.jsx';
@@ -473,7 +473,7 @@ function App() {
       <nav className="product-switch" aria-label="Products">
         {PRODUCTS.map(option => <button key={option.id} type="button" aria-pressed={product === option.id} onClick={() => setProduct(option.id)}><b>{option.label}</b><small>{option.hint}</small></button>)}
       </nav>
-      <div className="account"><BrandSwitch /><ThemeSwitch /><button type="button" className={`account-chip${product === 'echo' && tab === 'profile' ? ' active' : ''}`} aria-current={product === 'echo' && tab === 'profile' ? 'page' : undefined}
+      <div className="account"><button type="button" className="ask-header" onClick={openAskDeepwater}><span aria-hidden="true">✦</span> Ask AI</button><BrandSwitch /><ThemeSwitch /><button type="button" className={`account-chip${product === 'echo' && tab === 'profile' ? ' active' : ''}`} aria-current={product === 'echo' && tab === 'profile' ? 'page' : undefined}
         onClick={() => { setProduct('echo'); setPolishMode(false); setReviewing(false); setWarmUp(false); setTab('profile'); }} aria-label={`Your profile: ${user.name}`}>
         <span className="account-avatar" aria-hidden="true">{(user.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0].toUpperCase()).join('')}</span>
         <span className="account-label">{user.name}</span></button><button className="link" onClick={logout}>Sign out</button></div>

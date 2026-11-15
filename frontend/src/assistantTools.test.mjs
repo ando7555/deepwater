@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { applyEvent, historyForServer, parseSse, toolLabel } from './assistantTools.js';
+import { applyEvent, historyForServer, labelsFromStatus, parseSse, toolLabel } from './assistantTools.js';
 
 test('parseSse keeps an unfinished event for the next chunk', () => {
   const first = parseSse('data:{"type":"RUN_STARTED"}\n\ndata:{"type":"TEXT_MES');
@@ -29,4 +29,12 @@ test('a failed tool shows why, and unknown tools still get a label', () => {
   assert.equal(chat[0].state, 'error');
   assert.equal(chat[0].detail, 'Set up your Echo profile first.');
   assert.equal(toolLabel('new_tool'), 'Using new_tool');
+});
+
+test('tool titles from the server replace the built-in words', () => {
+  const labels = labelsFromStatus({ tools: [{ name: 'echo_cards', title: 'Echo phrase cards' }, { name: 'x' }] });
+  assert.deepEqual(labels, { echo_cards: 'Echo phrase cards' });
+  const chat = applyEvent([], { type: 'TOOL_CALL_START', toolCallId: 't', toolCallName: 'echo_cards' }, labels);
+  assert.equal(chat[0].label, 'Echo phrase cards');
+  assert.equal(historyForServer([{ role: 'user', content: 'abcdef' }], { maxChars: 3 })[0].content, 'abc');
 });

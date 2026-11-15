@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -37,16 +36,13 @@ import tools.jackson.databind.ObjectMapper;
 /**
  * "Ask Deepwater": the orchestrator. It sends the person's question to the model together with Deepwater's
  * tools, runs each tool the model asks for <em>as the signed-in person</em> (the account id never comes from
- * the model), hands the results back, and repeats until the model answers, at most {@link #MAX_STEPS} times.
+ * the model), hands the results back, and repeats until the model answers, at most
+ * {@link AssistantSettings#maxSteps()} times (a setting, like every limit here).
  * Every step is reported as an event so the screen can show "looking at your Harbor jobs…" while it works.
  */
 @Service
 public class AssistantService {
-    static final int MAX_STEPS = 6;
-    static final int MAX_HISTORY = 20;
-    static final int MAX_MESSAGE_CHARS = 2000;
-    static final int RUNS_PER_HOUR = 30;
-    static final String OFF_MESSAGE = "The AI assistant is switched off on this server (no Anthropic API key is set). "
+    static final String OFF_MESSAGE = "The AI assistant is switched off on this server (no AI model is configured). "
             + "Your data is safe and nothing was sent anywhere.";
     private static final String TOOL_CALL_ID = "toolCallId";
     private static final String MESSAGE_ID = "messageId";
@@ -56,31 +52,49 @@ public class AssistantService {
     private final DeepwaterTools tools;
     private final ObjectMapper json;
     private final Clock clock;
+    private final AssistantSettings settings;
     private final String systemPrompt;
     private final Map<String, Deque<Instant>> recentRuns = new ConcurrentHashMap<>();
 
-    public AssistantService(AssistantModel model, DeepwaterTools tools, ObjectMapper json, Clock clock) {
+    public AssistantService(AssistantModel model, DeepwaterTools tools, ObjectMapper json, Clock clock,
+                            AssistantSettings settings) {
         this.model = model;
         this.tools = tools;
         this.json = json;
         this.clock = clock;
-        this.systemPrompt = read("assistant/system-prompt.md");
+        this.settings = settings == null ? AssistantSettings.defaults() : settings;
+        this.systemPrompt = read(this.settings.systemPrompt());
     }
 
     public boolean enabled() { return model.enabled(); }
+
+    public AssistantSettings settings() { return settings; }
+
+    /** What the chat panel needs to draw itself: on/off, which model, the tools' titles and the starter questions. */
+    public Map<String, Object> status() {
+        Map<String, Object> out = new java.util.LinkedHashMap<>();
+        out.put("enabled", model.enabled());
+        out.put("model", model.description());
+        out.put("tools", tools == null ? List.of() : tools.all().stream().map(t -> Map.of("name", t.name(), "title", t.title())).toList());
+        out.put("suggestions", settings.suggestions());
+        out.put("maxMessageChars", settings.maxMessageChars());
+        return out;
+    }
 
     /** One chat message from the screen. role is "user" or "assistant". */
     public record ChatMessage(String role, String content) {}
 
     /** Checks the request before any streaming starts, so mistakes come back as normal HTTP errors. */
     public void validate(String accountId, List<ChatMessage> messages) {
-        if (messages == null || messages.isEmpty() || messages.size() > MAX_HISTORY)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Send 1–" + MAX_HISTORY + " messages.");
+        int maxHistory = settings.maxHistory();
+        int maxChars = settings.maxMessageChars();
+        if (messages == null || messages.isEmpty() || messages.size() > maxHistory)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Send 1–" + maxHistory + " messages.");
         for (ChatMessage m : messages) {
             if (m == null || !("user".equals(m.role()) || "assistant".equals(m.role())) || m.content() == null
-                    || m.content().isBlank() || m.content().length() > MAX_MESSAGE_CHARS)
+                    || m.content().isBlank() || m.content().length() > maxChars)
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Each message needs role user or assistant and 1–" + MAX_MESSAGE_CHARS + " characters.");
+                        "Each message needs role user or assistant and 1–" + maxChars + " characters.");
         }
         if (!"user".equals(messages.getLast().role()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The last message must be the person's question.");
@@ -109,7 +123,7 @@ public class AssistantService {
                 .map(t -> new ToolSpec(t.name(), t.description(), t.inputSchema())).toList();
         List<Entry> transcript = new ArrayList<>(messages.stream()
                 .map(m -> "user".equals(m.role()) ? (Entry) new UserText(m.content()) : new AssistantText(m.content())).toList());
-        for (int stepNo = 1; stepNo <= MAX_STEPS; stepNo++) {
+        for (int stepNo = 1; stepNo <= settings.maxSteps(); stepNo++) {
             Step step = model.next(new Conversation(systemPrompt, specs, List.copyOf(transcript)));
             transcript.add(new ModelStep(step));
             if (finished(step, emit)) return;
@@ -117,7 +131,7 @@ public class AssistantService {
             for (ToolCall call : step.toolCalls()) results.add(runTool(accountId, call, emit));
             transcript.add(new ToolResults(results));
         }
-        say(emit, "I stopped after " + MAX_STEPS + " steps without a final answer. Try asking a narrower question.");
+        say(emit, "I stopped after " + settings.maxSteps() + " steps without a final answer. Try asking a narrower question.");
     }
 
     /** Shows the step's text and says whether the run ends here (an answer, a refusal or a cut-off reply). */
@@ -140,7 +154,7 @@ public class AssistantService {
         DeepwaterTools.Outcome outcome = tools.call(accountId, call.name(), call.input());
         emit.accept(event("TOOL_CALL_RESULT", MESSAGE_ID, UUID.randomUUID().toString(), TOOL_CALL_ID, call.id(),
                 "role", "tool", "content", outcome.text(), "isError", outcome.error()));
-        return new ToolResult(call.id(), outcome.text(), outcome.error());
+        return new ToolResult(call.id(), call.name(), outcome.text(), outcome.error());
     }
 
     private static void say(Consumer<Map<String, Object>> emit, String text) {
@@ -150,20 +164,21 @@ public class AssistantService {
         emit.accept(event("TEXT_MESSAGE_END", MESSAGE_ID, id));
     }
 
-    /** AI calls cost money: each person gets {@link #RUNS_PER_HOUR} questions per hour. Kept in memory. */
+    /** AI calls cost money: each person gets {@code runsPerHour} questions per hour. Kept in memory. */
     private void takeRunSlot(String accountId) {
         Instant now = clock.instant();
         Deque<Instant> runs = recentRuns.computeIfAbsent(accountId, k -> new ArrayDeque<>());
         synchronized (runs) {
             while (!runs.isEmpty() && runs.peekFirst().isBefore(now.minusSeconds(3600))) runs.pollFirst();
-            if (runs.size() >= RUNS_PER_HOUR)
+            if (runs.size() >= settings.runsPerHour())
                 throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "You have asked a lot this hour. Try again later.");
             runs.addLast(now);
         }
     }
 
-    private static String read(String path) {
-        try (var in = new ClassPathResource(path).getInputStream()) {
+    private static String read(String location) {
+        var resource = new org.springframework.core.io.DefaultResourceLoader().getResource(location);
+        try (var in = resource.getInputStream()) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException ex) {
             throw new UncheckedIOException(ex);

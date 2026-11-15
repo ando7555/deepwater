@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -45,7 +46,8 @@ public class DeepwaterTools {
     private final ObjectMapper json;
 
     DeepwaterTools(EchoService echo, EchoCardService cards, JobSearchService jobs, ApplicationService applications,
-             ExamService exams, AmberService amber, ObjectMapper json) {
+             ExamService exams, AmberService amber, ObjectMapper json,
+             @Value("${deepwater.tools.enabled:}") String enabled) {
         this.json = json;
         add(new Tool("echo_overview", "Echo learning overview",
                 "The person's Echo language-learning state: chosen language, goal, the suggested next step, "
@@ -57,7 +59,7 @@ public class DeepwaterTools {
                         + "By default only the cards due now.",
                 schema(Map.of("dueOnly", prop("boolean", "Only cards due for review now. Default true.")), List.of()), true,
                 (account, args) -> {
-                    boolean dueOnly = !Boolean.FALSE.equals(args.get("dueOnly"));
+                    boolean dueOnly = !Boolean.FALSE.equals(bool(args, "dueOnly"));
                     var list = cards.cards(account).stream().filter(c -> !dueOnly || c.due()).toList();
                     return Map.of("count", list.size(), "cards", list);
                 }));
@@ -95,6 +97,7 @@ public class DeepwaterTools {
                         + "Never returns anything about other members.",
                 schema(Map.of(), List.of()), true,
                 (account, args) -> amber.profile(account)));
+        keepOnly(enabled);
     }
 
     /** The result of one call: the JSON (or the reason it failed) as text, ready to hand to a model. */
@@ -129,6 +132,15 @@ public class DeepwaterTools {
 
     private void add(Tool tool) { tools.put(tool.name(), tool); }
 
+    /** deepwater.tools.enabled (comma-separated names) switches tools off without code changes; empty = all. */
+    private void keepOnly(String enabled) {
+        if (enabled == null || enabled.isBlank()) return;
+        var wanted = java.util.Arrays.stream(enabled.split(",")).map(String::strip).filter(n -> !n.isEmpty()).toList();
+        var unknown = wanted.stream().filter(n -> !tools.containsKey(n)).toList();
+        if (!unknown.isEmpty()) throw new IllegalStateException("deepwater.tools.enabled names unknown tools: " + unknown);
+        tools.keySet().retainAll(wanted);
+    }
+
     /** The home screen without the full exercise lists, which an assistant does not need. */
     private static Map<String, Object> overview(EchoService.EchoHome home) {
         Map<String, Object> out = new LinkedHashMap<>();
@@ -156,7 +168,7 @@ public class DeepwaterTools {
         Integer max = integer(args, "max");
         var filters = new JobSearchService.Filters(optional(args, "query"), optional(args, "country"), optional(args, "remote"),
                 optional(args, "visa"), integer(args, "minScore"), null, max == null ? 10 : Math.clamp(max, 1, MAX_JOBS),
-                null, Boolean.TRUE.equals(args.get("localLanguageNotRequired")) ? "NO_LOCAL_REQUIRED" : null);
+                null, Boolean.TRUE.equals(bool(args, "localLanguageNotRequired")) ? "NO_LOCAL_REQUIRED" : null);
         var result = jobs.search(account, filters);
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("profileHasNoSkills", result.profileIsEmpty());
@@ -209,6 +221,16 @@ public class DeepwaterTools {
     }
 
     private static Integer integer(Map<String, Object> args, String name) {
-        return args.get(name) instanceof Number n ? n.intValue() : null;
+        Object value = args.get(name);
+        if (value instanceof Number n) return n.intValue();
+        if (value instanceof String text && text.strip().matches("-?\\d{1,9}")) return Integer.valueOf(text.strip());
+        return null; // small local models sometimes send numbers as text
+    }
+
+    private static Boolean bool(Map<String, Object> args, String name) {
+        Object value = args.get(name);
+        if (value instanceof Boolean b) return b;
+        if (value instanceof String text && (text.equalsIgnoreCase("true") || text.equalsIgnoreCase("false"))) return Boolean.valueOf(text);
+        return null;
     }
 }

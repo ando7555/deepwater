@@ -46,6 +46,9 @@ public final class ClaudeAssistantModel implements AssistantModel {
     public boolean enabled() { return true; }
 
     @Override
+    public String description() { return "anthropic " + model; }
+
+    @Override
     public Step next(Conversation conversation) {
         BetaMessage reply = client.beta().messages().create(params(conversation));
         if (log.isInfoEnabled())

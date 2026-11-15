@@ -1,6 +1,6 @@
 // Pure helpers for the Ask Deepwater panel, kept out of the component so node:test can check them.
 
-/** What the panel shows while a tool runs, in plain words. */
+/** Fallback words for a running tool, used until the server's tool titles arrive (GET /api/v1/assistant). */
 export const TOOL_LABELS = {
   echo_overview: 'Looking at your Echo progress',
   echo_cards: 'Checking your phrase cards',
@@ -11,8 +11,13 @@ export const TOOL_LABELS = {
   amber_my_profile: 'Looking at your own Amber profile',
 };
 
-export function toolLabel(name) {
-  return TOOL_LABELS[name] || `Using ${name}`;
+export function toolLabel(name, labels = {}) {
+  return labels[name] || TOOL_LABELS[name] || `Using ${name}`;
+}
+
+/** Turns the server's tool list [{ name, title }] into a name -> title map. */
+export function labelsFromStatus(status) {
+  return Object.fromEntries((status?.tools || []).filter(t => t?.name && t?.title).map(t => [t.name, t.title]));
 }
 
 /**
@@ -32,14 +37,14 @@ export function parseSse(buffer) {
 }
 
 /** Folds one AG-UI event into the chat: assistant text, tool steps and errors. */
-export function applyEvent(chat, event) {
+export function applyEvent(chat, event, labels = {}) {
   switch (event.type) {
     case 'TEXT_MESSAGE_START':
       return [...chat, { id: event.messageId, role: 'assistant', content: '' }];
     case 'TEXT_MESSAGE_CONTENT':
       return chat.map(m => m.id === event.messageId ? { ...m, content: m.content + event.delta } : m);
     case 'TOOL_CALL_START':
-      return [...chat, { id: event.toolCallId, role: 'tool', name: event.toolCallName, label: toolLabel(event.toolCallName), state: 'running' }];
+      return [...chat, { id: event.toolCallId, role: 'tool', name: event.toolCallName, label: toolLabel(event.toolCallName, labels), state: 'running' }];
     case 'TOOL_CALL_RESULT':
       return chat.map(m => m.id === event.toolCallId ? { ...m, state: event.isError ? 'error' : 'done', detail: event.isError ? event.content : '' } : m);
     case 'RUN_ERROR':
@@ -50,7 +55,7 @@ export function applyEvent(chat, event) {
 }
 
 /** The messages the server needs: only the person's questions and the assistant's answers. */
-export function historyForServer(chat) {
+export function historyForServer(chat, { maxHistory = 20, maxChars = 2000 } = {}) {
   return chat.filter(m => (m.role === 'user' || m.role === 'assistant') && m.content.trim())
-    .slice(-20).map(m => ({ role: m.role, content: m.content.slice(0, 2000) }));
+    .slice(-maxHistory).map(m => ({ role: m.role, content: m.content.slice(0, maxChars) }));
 }
