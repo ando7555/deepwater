@@ -55,20 +55,20 @@ export default function PolishExam({ examinerName = 'The examiner' }) {
 
   function restart() { setAnswers({}); setResult(null); setPartId('listening'); setView('exam'); }
 
-  if (!data) return <main className="exam-shell">{error ? <Notice tone="error">{error}</Notice> : <p>Loading the practice exam…</p>}</main>;
+  if (!data) return <section className="exam-shell" aria-label="Polish B1 exam practice">{error ? <Notice tone="error">{error}</Notice> : <p>Loading the practice exam…</p>}</section>;
   const { exam: content, passPercent, aiExaminer } = data;
   const part = content.parts.find(p => p.id === partId) || content.parts[0];
   const { done, total } = progress(content, answers);
   const partIndex = content.parts.indexOf(part);
 
-  return <main className="exam-shell">
+  return <section className="exam-shell" aria-label="Polish B1 exam practice">
     {error && <Notice tone="error">{error}</Notice>}
     {view === 'intro' && <Intro content={content} passPercent={passPercent} aiExaminer={aiExaminer} examinerName={examinerName}
       history={history} onStart={() => setView('exam')} onOpen={openAttempt} />}
 
     {view === 'exam' && <Panel className="exam-panel">
       <div className="exam-top">
-        <SectionHeading eyebrow="POLISH B1 · PRACTICE" title={`${part.english} · ${part.name}`} lead={part.instructions} />
+        <SectionHeading eyebrow="ECHO · POLISH B1 PRACTICE" title={`${part.english} · ${part.name}`} lead={part.instructions} />
         <span className="exam-progress" role="status">{done} of {total} answered</span>
       </div>
       <Tabs label="Exam parts" value={part.id} onChange={setPartId} items={content.parts.map(p => ({
@@ -92,7 +92,7 @@ export default function PolishExam({ examinerName = 'The examiner' }) {
     </Panel>}
 
     {view === 'result' && result && <Result result={result} content={content} examinerName={examinerName} onRestart={restart} onBack={() => setView('intro')} />}
-  </main>;
+  </section>;
 }
 
 function Intro({ content, passPercent, aiExaminer, examinerName, history, onStart, onOpen }) {
@@ -100,7 +100,7 @@ function Intro({ content, passPercent, aiExaminer, examinerName, history, onStar
     <div className="exam-hero">
       <img src="/brand/nibble.svg" alt="" width="132" height="132" />
       <div>
-        <p className="eyebrow">POLISH B1 · STATE EXAM PRACTICE</p>
+        <p className="eyebrow">ECHO · POLISH · B1 STATE EXAM PRACTICE</p>
         <h2>Are you ready for the Polish B1 certificate?</h2>
         <p>Five parts, as in the state exam: listening, grammar, reading, writing and speaking. {examinerName} marks every part and tells you whether you look ready. Each part needs {passPercent}% or more.</p>
         <Button onClick={onStart}>Start the practice exam</Button>
