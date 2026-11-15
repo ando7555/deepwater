@@ -660,6 +660,8 @@ kbd{font:600 10px 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;border-ra
 .exam-parts li{display:grid;gap:3px;padding:12px;border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:var(--deep)}
 .exam-parts span{font-size:13px;color:var(--text-2)}.exam-parts small{color:var(--text-3)}
 .exam-hint{font-size:14px;color:var(--text-3);margin:0}
+.exam-consent{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--text-2);margin:14px 0 0;line-height:1.45}
+.exam-consent input{margin-top:3px;flex:none;width:18px;height:18px}
 .exam-history ul{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}
 .exam-history li{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .exam-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}

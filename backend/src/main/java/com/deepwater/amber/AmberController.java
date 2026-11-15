@@ -29,11 +29,13 @@ public class AmberController {
     private final PlatformService platform;
     private final AmberService amber;
     private final AmberConnections connections;
+    private final AmberModeration moderation;
 
-    public AmberController(PlatformService platform, AmberService amber, AmberConnections connections) {
+    public AmberController(PlatformService platform, AmberService amber, AmberConnections connections, AmberModeration moderation) {
         this.platform = platform;
         this.amber = amber;
         this.connections = connections;
+        this.moderation = moderation;
     }
 
     @GetMapping("/profile")
@@ -134,6 +136,21 @@ public class AmberController {
         amber.report(platform.requireAccount(auth), body.memberId(), body.reason(), body.note());
     }
 
+    /** Open reports for the reviewer (for now the teacher account). */
+    @GetMapping("/moderation/reports")
+    List<AmberModeration.ReportView> reports(@RequestHeader(value = AUTH, required = false) String auth) {
+        platform.requireTeacher(auth);
+        return moderation.openReports();
+    }
+
+    /** DISMISS closes the report; REMOVE takes the reported person out of Amber for good. */
+    @PostMapping("/moderation/reports/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void decide(@RequestHeader(value = AUTH, required = false) String auth, @PathVariable String id, @RequestBody DecisionRequest body) {
+        platform.requireTeacher(auth);
+        moderation.decide(id, body == null ? null : body.action());
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
     ResponseEntity<ProblemDetail> problem(ResponseStatusException ex) {
         return ResponseEntity.status(ex.getStatusCode()).body(ProblemDetail.forStatusAndDetail(ex.getStatusCode(), ex.getReason()));
@@ -142,4 +159,5 @@ public class AmberController {
     record MemberRequest(String memberId) {}
     record MessageRequest(String body) {}
     record ReportRequest(String memberId, String reason, String note) {}
+    record DecisionRequest(String action) {}
 }

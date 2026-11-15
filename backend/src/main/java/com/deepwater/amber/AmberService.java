@@ -34,6 +34,8 @@ public class AmberService {
 
     private final JdbcTemplate db;
 
+    private static final AmberContentFilter FILTER = AmberContentFilter.fromClasspath();
+
     public AmberService(JdbcTemplate db) {
         this.db = db;
     }
@@ -55,6 +57,8 @@ public class AmberService {
         if (in.age() == null || in.age() < MIN_AGE) throw bad("Amber is only for adults (18 or older).");
         if (in.age() > 120) throw bad("Check your age.");
         if (!Boolean.TRUE.equals(in.confirmAdult())) throw bad("Confirm that you are 18 or older.");
+        if (db.queryForObject("select count(*) from amber_removed where account_id=?", Integer.class, accountId) > 0)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This account was removed from Amber after a report.");
         String area = required(in.area(), "Choose your area, at city level.", 80);
         Set<Intent> intents = intents(in.intents());
         if (intents.isEmpty()) throw bad("Choose what you are looking for.");
@@ -63,6 +67,8 @@ public class AmberService {
         catch (IllegalArgumentException ex) { throw bad(ex.getMessage()); }
         String about = in.about() == null || in.about().isBlank() ? null : in.about().strip();
         if (about != null && about.length() > 300) throw bad("Keep the short intro under 300 characters.");
+        checkWording(name, area, about);
+        checkWording(interests.toArray(String[]::new));
         boolean visible = in.visible() == null || in.visible();
         boolean shareLearning = Boolean.TRUE.equals(in.shareLearning());
 
@@ -230,6 +236,11 @@ public class AmberService {
         String clean = value.strip();
         if (clean.length() > max) throw bad("Keep it under " + max + " characters.");
         return clean;
+    }
+
+    /** Refuses text others will read when it contains a word from the blocked list. */
+    static void checkWording(String... texts) {
+        for (String text : texts) if (FILTER.blocked(text)) throw bad(AmberContentFilter.MESSAGE);
     }
 
     static ResponseStatusException bad(String message) { return new ResponseStatusException(HttpStatus.BAD_REQUEST, message); }

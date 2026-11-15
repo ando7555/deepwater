@@ -29,6 +29,8 @@ export default function PolishExam({ examinerName = 'The examiner' }) {
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // Explicit permission to send writing and speaking to the AI examiner (Anthropic). Off until the learner ticks it.
+  const [aiConsent, setAiConsent] = useState(false);
 
   async function load() {
     try {
@@ -43,7 +45,7 @@ export default function PolishExam({ examinerName = 'The examiner' }) {
   async function submit() {
     setBusy(true); setError('');
     try {
-      const marked = await exam('/attempts', { method: 'POST', body: { answers } });
+      const marked = await exam('/attempts', { method: 'POST', body: { answers, aiConsent: Boolean(data?.aiExaminer && aiConsent) } });
       setResult(marked); setView('result'); window.scrollTo?.({ top: 0, behavior: 'smooth' });
       setHistory(await exam('/attempts'));
     } catch (e) { setError(e.message); } finally { setBusy(false); }
@@ -82,6 +84,10 @@ export default function PolishExam({ examinerName = 'The examiner' }) {
             : <OpenItem item={item} speaking={part.kind === 'SPEAKING'} value={answers[item.id] || ''} onChange={value => set(item.id, value)} />}
         </li>)}
       </ol>
+      {partIndex === content.parts.length - 1 && aiExaminer && <label className="exam-consent">
+        <input type="checkbox" checked={aiConsent} onChange={e => setAiConsent(e.target.checked)} />
+        <span>Send my writing and speaking answers to the AI examiner for marking. They go to Anthropic (the maker of Claude), are used only to mark this attempt, and are kept with your result here. If you leave this off, fixed rules mark them instead.</span>
+      </label>}
       <div className="exam-nav">
         <Button variant="quiet" disabled={partIndex === 0} onClick={() => setPartId(content.parts[partIndex - 1].id)}>← Previous part</Button>
         {partIndex < content.parts.length - 1
@@ -109,7 +115,7 @@ function Intro({ content, passPercent, aiExaminer, examinerName, history, onStar
     <ul className="exam-parts">{content.parts.map(p => <li key={p.id}><b>{p.english}</b><span lang="pl">{p.name}</span><small>{p.items.length} {p.kind === 'CHOICE' ? 'questions' : 'tasks'}</small></li>)}</ul>
     <Notice tone="info">{content.notice}</Notice>
     <p className="exam-hint">{aiExaminer
-      ? 'Writing and speaking are marked by an AI examiner. It can be wrong, so treat the mark as advice, not a grade.'
+      ? 'Writing and speaking can be marked by an AI examiner if you allow it when you hand in; otherwise fixed rules mark them. The AI can be wrong, so treat the mark as advice, not a grade.'
       : 'The AI examiner is switched off on this server, so writing and speaking get a rough estimate from fixed rules (length, linking words, word variety). It is labelled as such in your result.'}</p>
     {history.length > 0 && <div className="exam-history"><h3>Your earlier attempts</h3>
       <ul>{history.map(a => <li key={a.id}><button type="button" className="link" onClick={() => onOpen(a.id)}>{formatDate(a.createdAt)}</button>

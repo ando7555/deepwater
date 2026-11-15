@@ -45,7 +45,16 @@ public class ExamService {
 
     public int passPercent() { return passPercent; }
 
+    /** Marks with the AI examiner when there is one. Only for callers that already have the learner's permission. */
     public Result submit(String accountId, Map<String, String> answers) {
+        return submit(accountId, answers, true);
+    }
+
+    /**
+     * Marks an attempt. {@code aiConsent} is the learner's explicit permission to send their writing and speaking
+     * to the AI examiner (a third-party AI, App Store guideline 5.1.2(i)). Without it, the fixed rubric marks them.
+     */
+    public Result submit(String accountId, Map<String, String> answers, boolean aiConsent) {
         Map<String, String> given = answers == null ? Map.of() : answers;
         for (String value : given.values())
             if (value != null && value.length() > MAX_ANSWER)
@@ -57,7 +66,7 @@ public class ExamService {
                 for (ExamContent.Item item : part.items())
                     open.add(new WritingAssessor.OpenAnswer(item.id(), part.kind(), item.prompt(), item.minWords(), item.maxWords(),
                             item.topicWords(), given.getOrDefault(item.id(), "")));
-        WritingAssessor.Review review = review(open);
+        WritingAssessor.Review review = aiConsent ? review(open) : rules.review(open);
 
         List<PartResult> parts = new ArrayList<>();
         for (ExamContent.Part part : exam.parts()) parts.add(part.closed() ? closedPart(part, given) : openPart(part, review));

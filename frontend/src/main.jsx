@@ -12,6 +12,7 @@ import ProfilePage from './ProfilePage.jsx';
 import Harbor from './Harbor.jsx';
 import PolishExam from './PolishExam.jsx';
 import Amber from './amber/Amber.jsx';
+import AmberReports from './amber/AmberReports.jsx';
 import { BRANDS, BrandSwitch, useBrand } from './brand.jsx';
 import TeacherWorkspace from './teacher/TeacherWorkspace.jsx';
 import { Notice, Tabs } from './ui/index.jsx';
@@ -191,7 +192,7 @@ function Auth({ onLogin, message, onChooseProduct }) {
     <button className="link" onClick={() => { setError(''); setMode(mode === 'register' ? 'login' : 'register'); }}>{mode === 'register' ? 'Already have an account? Sign in' : 'Create an account'}</button>
   </section>
     </div>
-    <footer>{BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
+    <footer>{BRANDS[brand].name} · {BRANDS[brand].tagline} · <a href="/privacy.html">Privacy &amp; contact</a></footer>
   </main>;
 }
 
@@ -611,8 +612,9 @@ function App() {
     </>}
     {product === 'harbor' && <Harbor />}
     {product === 'amber' && <Amber />}
+    {product === 'amber' && user.role === 'TEACHER' && <AmberReports />}
     {product === 'echo' && (tab === 'profile' || (!home?.onboarded && !polishMode)) && <DeleteAccount email={user.email} onDeleted={logout} />}
-    <footer>{PRODUCT_NAMES[product]} by {BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
+    <footer>{PRODUCT_NAMES[product]} by {BRANDS[brand].name} · {BRANDS[brand].tagline} · <a href="/privacy.html">Privacy &amp; contact</a></footer>
   </main>;
 }
 

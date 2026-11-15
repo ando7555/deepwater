@@ -83,6 +83,38 @@ cross-origin to the Spring Boot backend.
 - **5.1.2(i) AI**: personal data shared with third-party AI (the Polish B1 examiner, the
   Ask Deepwater assistant) must be disclosed and the user must give explicit permission first.
 
+## Owner choice (2026-11-15): App Store now, with Amber
+
+Added to this PR so the app can pass review with Amber in it:
+
+| Apple rule | What Deepwater now does | Where |
+|---|---|---|
+| 1.2 filter objectionable material | Amber profile text and messages are checked against a word list (extend it without code changes) | `backend/.../amber/AmberContentFilter.java`, `backend/src/main/resources/amber/blocked-words.txt` |
+| 1.2 report + timely response | Reviewer screen in Amber: open reports with what the reported person wrote; Dismiss or Remove from Amber (removal deletes their Amber data and blocks rejoining) | `AmberModeration.java`, `frontend/src/amber/AmberReports.jsx` |
+| 1.2 block | Already there (block and report in one step) | Amber |
+| 1.2 published contact | "Privacy & contact" link in every footer | `frontend/public/privacy.html` |
+| 5.1.1(i) privacy policy in app | Same page; also the URL for App Store Connect: `<frontend URL>/privacy.html` | `frontend/public/privacy.html` |
+| 5.1.2(i) explicit permission for third-party AI | Polish B1 hand-in has an unticked box; without it the fixed rubric marks and nothing goes to Anthropic (server-side check too) | `PolishExam.jsx`, `ExamService.submit(..., aiConsent)` |
+
+Still open:
+- **Contact email**: `privacy.html` says `CONTACT_EMAIL_TO_BE_SET`. Do not submit until it is a real, monitored address.
+- **Reviewer**: for now the teacher account (`DEEPWATER_TEACHER_EMAIL`) reviews Amber reports. Owner to confirm.
+- **Ask Deepwater assistant (PR #120)** needs the same AI permission step before it ships in the app.
+- The word list is short and English/Danish/Polish only; it is a first filter, reports catch the rest.
+
+## App Store Connect checklist (owner, at submission)
+
+- **Age rating**: answer the questionnaire honestly; Amber is dating for adults, so expect 18+.
+- **Privacy labels** (data linked to the user, not used for tracking): contact info (name, email, phone optional),
+  user content (messages, CV, profile text, exam answers, audio is not stored), identifiers (user id),
+  sensitive info is not collected. No third-party advertising or analytics.
+- **Privacy policy URL**: `https://frontend-production-3165.up.railway.app/privacy.html` (after deploy).
+- **Review notes**: a demo account (email + password) that already has an Amber profile, a second demo
+  account so the reviewer can see an invitation and chat, and a line that Amber is 18+ with block, report
+  and human review. Guideline 2.1 requires a working demo account.
+- **4.3(b) note**: explain what is different about Amber (no swiping or scores, plain-word reasons,
+  invitation first, chat only after both say yes, Echo learning context).
+
 ## Known limits
 
 - Not run on a real iPhone or simulator from this environment (Linux). The workflow is the only

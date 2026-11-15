@@ -38,7 +38,8 @@ public class ExamController {
 
     @PostMapping("/attempts")
     ExamService.Result submit(@RequestHeader(value = AUTHORIZATION, required = false) String auth, @RequestBody Submission body) {
-        return exams.submit(platform.requireAccount(auth), body == null ? null : body.answers());
+        return exams.submit(platform.requireAccount(auth), body == null ? null : body.answers(),
+                body != null && Boolean.TRUE.equals(body.aiConsent()));
     }
 
     @GetMapping("/attempts")
@@ -56,6 +57,9 @@ public class ExamController {
         return ResponseEntity.status(ex.getStatusCode()).body(ProblemDetail.forStatusAndDetail(ex.getStatusCode(), ex.getReason()));
     }
 
-    /** answers maps an item id to the chosen option index (as text) or to the written or spoken answer. */
-    record Submission(Map<String, String> answers) {}
+    /**
+     * answers maps an item id to the chosen option index (as text) or to the written or spoken answer.
+     * aiConsent must be true for the AI examiner to see the answers; missing or false means the fixed rubric.
+     */
+    record Submission(Map<String, String> answers, Boolean aiConsent) {}
 }

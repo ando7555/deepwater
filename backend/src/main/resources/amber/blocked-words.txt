@@ -1,0 +1,52 @@
+# Words Amber does not allow in profiles and messages (App Store guideline 1.2: filter objectionable material).
+# One entry per line, lower case. A trailing * matches any word that starts with it ("fuck*" also blocks "fucking").
+# Matching is per word, after lower-casing and undoing simple look-alikes (0->o, 1->i, 3->e, 4->a, 5->s, 7->t, @->a, $->s).
+# Lines starting with # are ignored. Extend this list as reports come in.
+
+# English: sexual solicitation and explicit terms
+fuck*
+cunt*
+cock
+cocks
+dick
+dicks
+pussy
+pussies
+blowjob*
+handjob*
+cum
+cumshot*
+porn*
+nudes
+onlyfans
+escort
+escorts
+hooker*
+whore*
+slut*
+# English: hate slurs
+nigger*
+nigga*
+faggot*
+fag
+fags
+retard
+retards
+tranny
+trannies
+kike*
+spic
+spics
+chink*
+# Danish
+fisse*
+kneppe*
+luder*
+# Polish
+kurw*
+pierdol*
+jeb*
+chuj*
+cipa
+cipy
+pizda*
