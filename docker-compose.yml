@@ -8,5 +8,15 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-deepwater-local-only}
     ports: ["127.0.0.1:5432:5432"]
     volumes: ["deepwater-postgres:/var/lib/postgresql/data", "./backend/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro"]
+  # Optional, for NOTIFY_CHANNEL=signal: start with `docker compose --profile signal up signal-api`.
+  # Unofficial wrapper around signal-cli (Signal has no bot API). Pin a tested version before relying on it.
+  signal-api:
+    image: bbernhard/signal-cli-rest-api:latest
+    profiles: ["signal"]
+    environment:
+      MODE: json-rpc
+    ports: ["127.0.0.1:8085:8080"]
+    volumes: ["deepwater-signal:/home/.local/share/signal-cli"]
 volumes:
   deepwater-postgres:
+  deepwater-signal:
