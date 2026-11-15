@@ -7,6 +7,10 @@ categorisation reused for Harbor.
 
 ## Polish B1 practice exam
 
+Where it lives (owner, 2026-11-15): inside Echo, under its languages. Echo shows a language bar
+(Danish, German, Polish · B1 exam). Danish and German open the course; Polish opens the B1 exam practice.
+It is not a separate product tab or welcome card. The choice is remembered per browser.
+
 - Five parts, in the order of the state exam (egzamin certyfikatowy z języka polskiego jako obcego, level B1):
   listening (Rozumienie ze słuchu), grammar (Poprawność gramatyczna), reading (Rozumienie tekstów pisanych),
   writing (Pisanie) and speaking (Mówienie).
@@ -46,7 +50,7 @@ Jerry or Nibbles, which belong to Warner Bros. "Nibble" needs a trademark search
 
 ## Welcome page
 
-Four cards: Echo, Polish B1, Harbor and AI Fashion (coming soon). The headline frames the motivation:
+Cards: Echo (Danish, German or Polish, including the B1 exam practice), Harbor and AI Fashion (coming soon). The headline frames the motivation:
 learn the language, land the job.
 
 ## Teacher workspace

@@ -702,6 +702,16 @@ kbd{font:600 10px 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;border-ra
 :root[data-theme="light"] .harbor-categories button:not(.link):not(.swatch){background:var(--deep);color:var(--text-2)}
 :root[data-theme="light"] .harbor-categories button[aria-pressed="true"]:not(.link):not(.swatch){background:var(--accent-soft);color:var(--accent-deep)}
 
+/* Echo language bar: Danish and German open the course, Polish opens B1 exam practice */
+.echo-languages{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:18px 0 4px}
+.echo-languages .eyebrow{margin-right:6px}
+.echo-languages button{display:inline-flex;align-items:baseline;gap:6px;padding:8px 16px;border-radius:999px;background:var(--surface-glass);color:var(--text-2);box-shadow:inset 0 0 0 1px var(--line-soft);font-weight:700}
+.echo-languages button small{font-size:11px;font-weight:600;color:var(--text-3)}
+.echo-languages button:hover:not(:disabled){transform:none;box-shadow:inset 0 0 0 1px var(--accent);filter:none}
+.echo-languages button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 0 0 0 1px var(--accent)}
+:root[data-theme="light"] .echo-languages button:not(.link):not(.swatch){background:var(--deep);color:var(--text-2)}
+:root[data-theme="light"] .echo-languages button[aria-pressed="true"]:not(.link):not(.swatch){background:var(--accent-soft);color:var(--accent-deep)}
+
 /* Amber: same typefaces and shapes as Echo; only the colours change (warm ember, coral and gold). */
 .amber-app{
   --abyss:#140b09;--deep:#1d110d;--surface:#26170f;--surface-2:#311d14;--surface-3:#3d2418;
