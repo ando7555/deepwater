@@ -8,11 +8,10 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-class PostmarkMailerTest {
+class PostmarkEmailSenderTest {
     @Test
     void postsTheVerificationEmailToPostmarkWithTheServerToken() throws Exception {
         var token = new AtomicReference<String>();
@@ -26,11 +25,9 @@ class PostmarkMailerTest {
         });
         server.start();
         try {
-            var mailer = new PostmarkMailer();
-            ReflectionTestUtils.setField(mailer, "serverToken", "server-token-123");
-            ReflectionTestUtils.setField(mailer, "from", "hello@deepwater.test");
-            ReflectionTestUtils.setField(mailer, "apiUrl", "http://127.0.0.1:" + server.getAddress().getPort() + "/email");
-            mailer.sendVerification("learner@example.test", "Ana", "https://app.example.test/?verify_email=abc");
+            var sender = new PostmarkEmailSender("server-token-123", "hello@deepwater.test",
+                    "http://127.0.0.1:" + server.getAddress().getPort() + "/email");
+            new TextVerificationMailer(sender).sendVerification("learner@example.test", "Ana", "https://app.example.test/?verify_email=abc");
         } finally {
             server.stop(0);
         }
@@ -44,11 +41,9 @@ class PostmarkMailerTest {
 
     @Test
     void doesNothingWhenPostmarkIsNotConfigured() {
-        var mailer = new PostmarkMailer();
-        ReflectionTestUtils.setField(mailer, "serverToken", "");
-        ReflectionTestUtils.setField(mailer, "from", "");
-        ReflectionTestUtils.setField(mailer, "apiUrl", "http://127.0.0.1:1/email");
+        var sender = new PostmarkEmailSender("", "", "http://127.0.0.1:1/email");
+        assertThat(sender.isConfigured()).isFalse();
         assertThatNoException().isThrownBy(() ->
-                mailer.sendVerification("learner@example.test", "Ana", "https://app.example.test/?verify_email=abc"));
+                new TextVerificationMailer(sender).sendVerification("learner@example.test", "Ana", "https://app.example.test/?verify_email=abc"));
     }
 }

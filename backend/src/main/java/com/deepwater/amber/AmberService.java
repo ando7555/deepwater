@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -33,9 +34,11 @@ public class AmberService {
     private static final Map<String, String> LANGUAGE_NAMES = Map.of("da", "Danish", "de", "German", "pl", "Polish");
 
     private final JdbcTemplate db;
+    private final ApplicationEventPublisher events;
 
-    public AmberService(JdbcTemplate db) {
+    public AmberService(JdbcTemplate db, ApplicationEventPublisher events) {
         this.db = db;
+        this.events = events;
     }
 
     // ---------------------------------------------------------------- profile
@@ -155,6 +158,7 @@ public class AmberService {
         block(accountId, memberId);
         db.update("insert into amber_reports(id,reporter_id,reported_id,reason,note) values(?,?,?,?,?)",
                 UUID.randomUUID().toString(), accountId, accountOf(memberId), reason, cleanNote);
+        events.publishEvent(new AmberReportFiled(reason));
     }
 
     // ---------------------------------------------------------------- shared with AmberConnections

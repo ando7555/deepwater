@@ -8,6 +8,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.security:spring-security-crypto'
+    // SMTP client for MAIL_PROVIDER=smtp (Proton Mail SMTP submission or any other SMTP server).
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
     // Added as ports for the next vertical slices; no broker or database is required to run this MVP demo.
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.springframework.boot:spring-boot-starter-graphql'

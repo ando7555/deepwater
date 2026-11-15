@@ -10,6 +10,7 @@ import CalmProgress from './CalmProgress.jsx';
 import DailyReview from './DailyReview.jsx';
 import ProfilePage from './ProfilePage.jsx';
 import Harbor from './Harbor.jsx';
+import AskDeepwater, { openAskDeepwater } from './AskDeepwater.jsx';
 import PolishExam from './PolishExam.jsx';
 import Amber from './amber/Amber.jsx';
 import Auth from './Auth.jsx';
@@ -311,7 +312,8 @@ function App() {
   return <main className="app-shell">
     <AppHeader product={product} onProduct={chooseProduct} productLabel={productName(product)} user={user}
       profileOpen={product === 'echo' && tab === 'profile'} onSignOut={logout}
-      onProfile={() => { chooseProduct('echo'); setPolishMode(false); setReviewing(false); setWarmUp(false); setTab('profile'); }} />
+      onProfile={() => { chooseProduct('echo'); setPolishMode(false); setReviewing(false); setWarmUp(false); setTab('profile'); }}
+      accountExtras={<button type="button" className="ask-header" onClick={openAskDeepwater}><span aria-hidden="true">✦</span> Ask AI</button>} />
 
     {error && <Notice tone="error" onDismiss={() => setError('')}>{error}</Notice>}
     {notice && <Notice tone="good" onDismiss={() => setNotice('')}>{notice}</Notice>}
@@ -446,6 +448,7 @@ function App() {
     {product === 'amber' && <Amber />}
     </ErrorBoundary>
     {product === 'echo' && home && (tab === 'profile' || (!home.onboarded && !polishMode)) && <DeleteAccount email={user.email} onDeleted={logout} />}
+    <AskDeepwater />
     <footer>{productName(product)} by {BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
   </main>;
 }

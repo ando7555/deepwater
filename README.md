@@ -72,6 +72,7 @@ The backend reads these optional environment variables:
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` | Google sign-in. The redirect URI ends in `/api/v1/auth/google/callback`. |
 | `FRONTEND_BASE_URL` | Where Google sign-in and email confirmation links send people back to. |
 | `POSTMARK_SERVER_TOKEN`, `MAIL_FROM` | Sends the confirm-your-email message on sign-up. `MAIL_FROM` must be a sender signature or domain verified in Postmark. Without them, sign-up still works and no email is sent. |
+| `MAIL_PROVIDER`, `SMTP_*`, `NOTIFY_CHANNEL`, `SIGNAL_*` | Choose the email provider (`postmark`, `smtp` for Proton Mail, `none`) and optional Signal notifications to the owner. See [docs/operations/email-and-notifications.md](docs/operations/email-and-notifications.md). |
 
 ## Echo MVP flow
 
