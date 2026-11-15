@@ -237,3 +237,65 @@ create table if not exists exam_attempts (
   created_at timestamp with time zone not null default current_timestamp
 );
 create index if not exists exam_attempts_account on exam_attempts(account_id, created_at);
+-- Amber: opt-in connections. A person joins by creating an Amber profile; other members only ever see
+-- its random member id, never the account id or email. Rows are removed when the person leaves Amber
+-- or deletes the account (see AmberService.leave and PlatformService.deleteAccount).
+create table if not exists amber_profiles (
+  account_id varchar(36) primary key references accounts(id),
+  member_id varchar(36) unique not null,
+  display_name varchar(40) not null,
+  age integer not null,
+  area varchar(80) not null,
+  intents varchar(100) not null,
+  interests varchar(600) not null default '',
+  about varchar(300),
+  visible boolean not null default true,
+  share_learning boolean not null default false,
+  created_at timestamp with time zone not null default current_timestamp,
+  updated_at timestamp with time zone not null default current_timestamp
+);
+-- Pass (comes back after 30 days) or hide (never again). The other person is never told.
+create table if not exists amber_decisions (
+  account_id varchar(36) not null,
+  target_account_id varchar(36) not null,
+  decision varchar(8) not null,
+  decided_at timestamp with time zone not null default current_timestamp,
+  primary key(account_id, target_account_id)
+);
+-- An invitation becomes the connection once accepted. Status: PENDING, ACCEPTED, DECLINED, WITHDRAWN, ENDED.
+create table if not exists amber_invitations (
+  id varchar(36) primary key,
+  sender_id varchar(36) not null,
+  recipient_id varchar(36) not null,
+  status varchar(12) not null,
+  created_at timestamp with time zone not null default current_timestamp,
+  responded_at timestamp with time zone,
+  ended_at timestamp with time zone
+);
+create index if not exists amber_invitations_sender on amber_invitations(sender_id, status);
+create index if not exists amber_invitations_recipient on amber_invitations(recipient_id, status);
+create table if not exists amber_messages (
+  id varchar(36) primary key,
+  invitation_id varchar(36) not null references amber_invitations(id),
+  sender_id varchar(36) not null,
+  body varchar(1000) not null,
+  created_at timestamp with time zone not null default current_timestamp
+);
+create index if not exists amber_messages_invitation on amber_messages(invitation_id, created_at);
+-- Blocks are keyed on the account, so leaving and rejoining Amber does not undo someone else's block.
+create table if not exists amber_blocks (
+  blocker_id varchar(36) not null,
+  blocked_id varchar(36) not null,
+  created_at timestamp with time zone not null default current_timestamp,
+  primary key(blocker_id, blocked_id)
+);
+-- Reports wait here for a human reviewer. The reported person never sees them.
+create table if not exists amber_reports (
+  id varchar(36) primary key,
+  reporter_id varchar(36) not null,
+  reported_id varchar(36) not null,
+  reason varchar(24) not null,
+  note varchar(1000),
+  status varchar(12) not null default 'OPEN',
+  created_at timestamp with time zone not null default current_timestamp
+);

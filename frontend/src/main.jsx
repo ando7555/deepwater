@@ -11,6 +11,7 @@ import DailyReview from './DailyReview.jsx';
 import ProfilePage from './ProfilePage.jsx';
 import Harbor from './Harbor.jsx';
 import PolishExam from './PolishExam.jsx';
+import Amber from './amber/Amber.jsx';
 import { BRANDS, BrandSwitch, useBrand } from './brand.jsx';
 import TeacherWorkspace from './teacher/TeacherWorkspace.jsx';
 import { Notice, Tabs } from './ui/index.jsx';
@@ -27,8 +28,9 @@ const THEMES = [
 const PRODUCTS = [
   { id: 'echo', label: 'Echo', hint: 'Languages' },
   { id: 'harbor', label: 'Harbor', hint: 'Jobs' },
+  { id: 'amber', label: 'Amber', hint: 'Connections' },
 ];
-const PRODUCT_NAMES = { echo: 'Echo', harbor: 'Harbor' };
+const PRODUCT_NAMES = { echo: 'Echo', harbor: 'Harbor', amber: 'Amber' };
 
 /** Echo's languages. Danish and German have a course; Polish is B1 state-exam practice. */
 const ECHO_LANGUAGES = [
@@ -55,6 +57,7 @@ function EchoLanguageBar({ value, onChange }) {
 const WELCOME_PRODUCTS = [
   { id: 'echo', name: 'Echo', tag: 'Danish, German or Polish', line: 'Short lessons that explain the pattern, reviews just before you would forget, and Polish B1 state-exam practice with an examiner that says if you look ready.' },
   { id: 'harbor', name: 'Harbor', tag: 'Find a job in Denmark', line: 'Upload your CV, see matched jobs in Denmark and the Nordics, with visa and language filters.' },
+  { id: 'amber', name: 'Amber', tag: 'Meet people, by choice', line: 'Dating and new friends. Every suggestion says why it appears, and chat opens only when you both say yes.' },
   { id: 'fashion', name: 'AI Fashion', tag: 'Coming soon', line: 'How you look and how others see you, with an AI stylist. We are building it next.', soon: true },
 ];
 
@@ -170,7 +173,7 @@ function Auth({ onLogin, message, onChooseProduct }) {
     </section>
     <section className="access panel" aria-labelledby="access-title">
     <h2 id="access-title">{mode === 'register' ? `Create your ${BRANDS[brand].name} account` : 'Welcome back'}</h2>
-    <p className="access-sub">{mode === 'register' ? 'One account for Echo (Danish, German, Polish) and Harbor.' : 'Sign in to continue where you left off.'}</p>
+    <p className="access-sub">{mode === 'register' ? 'One account for Echo (Danish, German, Polish), Harbor and Amber.' : 'Sign in to continue where you left off.'}</p>
     <form onSubmit={submit}>
       {mode === 'register' && <label>Your name<input required maxLength="160" autoComplete="name" value={name} onChange={event => setName(event.target.value)} /></label>}
       <label>Email<input required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} /></label>
@@ -604,6 +607,7 @@ function App() {
     </>}
     </>}
     {product === 'harbor' && <Harbor />}
+    {product === 'amber' && <Amber />}
     {product === 'echo' && (tab === 'profile' || (!home?.onboarded && !polishMode)) && <DeleteAccount email={user.email} onDeleted={logout} />}
     <footer>{PRODUCT_NAMES[product]} by {BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
   </main>;
