@@ -1,0 +1,20 @@
+server: {"name":"deepwater","title":"Deepwater","version":"0.1.0"} protocol ok
+tools: echo_overview, echo_cards, echo_add_card, harbor_find_jobs, harbor_applications, polish_b1_results, amber_my_profile
+
+echo_add_card {"front":"tak for mad","back":"thanks for the meal"} -> isError=true
+  Set up your Echo profile first.
+
+echo_cards {"dueOnly":false} -> isError=true
+  Set up your Echo profile first.
+
+echo_overview {} -> isError=false
+  {"onboarded":false,"profile":null,"nextAction":"Choose a language and set your learning goal.","totalAttempts":0,"correctAttempts":0,"lessons":[]}
+
+harbor_find_jobs {"country":"DK","max":2} -> isError=false
+  {"profileHasNoSkills":true,"totalJobs":18,"jobs":[{"id":"sample-dk-02","title":"Full-stack Developer (React, Java)","company":"Aarhus Learning Lab (sample)","country":"Denmark","location":"Aarhus, Denmark","remote":false,"url":null,"summary":"Build learning to
+
+polish_b1_results {} -> isError=false
+  {"attempts":[]}
+
+amber_my_profile {} -> isError=false
+  {"joined":false,"memberId":null,"displayName":null,"age":null,"area":null,"intents":[],"interests":[],"about":null,"visible":true,"shareLearning":false,"echoLearning":null}
