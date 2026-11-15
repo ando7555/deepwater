@@ -26,7 +26,9 @@ class SignalNotifier implements Notifier {
     private final ObjectMapper json = new ObjectMapper();
 
     SignalNotifier(String apiUrl, String sender, List<String> recipients) {
-        this.apiUrl = apiUrl == null ? "" : apiUrl.strip().replaceAll("/+$", "");
+        String url = apiUrl == null ? "" : apiUrl.strip();
+        while (url.endsWith("/")) url = url.substring(0, url.length() - 1);
+        this.apiUrl = url;
         this.sender = sender == null ? "" : sender.strip();
         this.recipients = List.copyOf(recipients);
     }
