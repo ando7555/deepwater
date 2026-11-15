@@ -10,6 +10,7 @@ import CalmProgress from './CalmProgress.jsx';
 import DailyReview from './DailyReview.jsx';
 import ProfilePage from './ProfilePage.jsx';
 import Harbor from './Harbor.jsx';
+import AskDeepwater from './AskDeepwater.jsx';
 import PolishExam from './PolishExam.jsx';
 import Amber from './amber/Amber.jsx';
 import { BRANDS, BrandSwitch, useBrand } from './brand.jsx';
@@ -609,6 +610,7 @@ function App() {
     {product === 'harbor' && <Harbor />}
     {product === 'amber' && <Amber />}
     {product === 'echo' && (tab === 'profile' || (!home?.onboarded && !polishMode)) && <DeleteAccount email={user.email} onDeleted={logout} />}
+    <AskDeepwater />
     <footer>{PRODUCT_NAMES[product]} by {BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
   </main>;
 }
