@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { KEYS, read, write } from './app/storage.js';
 
 /**
  * The parent brand shown around the products. Deepwater stays as the backup brand; Nibble is the
@@ -10,17 +11,17 @@ export const BRANDS = {
   nibble: { id: 'nibble', name: 'Nibble', tagline: 'A little every day.' },
 };
 
-const KEY = 'deepwater-brand';
 const EVENT = 'deepwater-brand';
 
 export function readBrand() {
-  try { return BRANDS[localStorage.getItem(KEY)] ? localStorage.getItem(KEY) : 'deepwater'; } catch { return 'deepwater'; }
+  const stored = read(KEYS.brand);
+  return BRANDS[stored] ? stored : 'deepwater';
 }
 
 export function useBrand() {
   const [brand, setBrand] = useState(readBrand);
   useEffect(() => {
-    try { localStorage.setItem(KEY, brand); } catch { /* storage unavailable; the brand still applies for this visit */ }
+    write(KEYS.brand, brand);
     document.documentElement.dataset.brand = brand;
     document.title = `${BRANDS[brand].name} · Learn the language, find the job`;
     window.dispatchEvent(new CustomEvent(EVENT, { detail: brand }));

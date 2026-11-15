@@ -12,203 +12,46 @@ import ProfilePage from './ProfilePage.jsx';
 import Harbor from './Harbor.jsx';
 import PolishExam from './PolishExam.jsx';
 import Amber from './amber/Amber.jsx';
-import { BRANDS, BrandSwitch, useBrand } from './brand.jsx';
+import Auth from './Auth.jsx';
+import AppHeader from './AppHeader.jsx';
+import DeleteAccount from './DeleteAccount.jsx';
+import { BRANDS, useBrand } from './brand.jsx';
 import TeacherWorkspace from './teacher/TeacherWorkspace.jsx';
-import { Notice, Tabs } from './ui/index.jsx';
+import { ErrorBoundary, ErrorState, Loading, Notice, Segmented, Tabs, useDraft } from './ui/index.jsx';
 import { BAND_LABELS } from './constants.js';
-import { API, gql, formatDate } from './api.js';
+import { ECHO_LANGUAGES, PRODUCT_IDS, languageName, productName } from './app/config.js';
+import { SESSION_EXPIRED, gql, request } from './app/http.js';
+import { KEYS, read, readChoice, session, write } from './app/storage.js';
+import { applyTheme, readTheme } from './app/theme.jsx';
+import { formatDate } from './api.js';
+import { CARD_FIELDS, ECHO_HOME_FIELDS } from './echoQueries.js';
 import './style.css';
-
-const THEMES = [
-  { id: 'deep', label: 'Deep blue', mark: '/brand/mark.svg' },
-  { id: 'amber', label: 'Amber', mark: '/brand/mark-amber.svg' },
-  { id: 'light', label: 'Light', mark: '/brand/mark-light.svg' },
-];
-
-const PRODUCTS = [
-  { id: 'echo', label: 'Echo', hint: 'Languages' },
-  { id: 'harbor', label: 'Harbor', hint: 'Jobs' },
-  { id: 'amber', label: 'Amber', hint: 'Connections' },
-];
-const PRODUCT_NAMES = { echo: 'Echo', harbor: 'Harbor', amber: 'Amber' };
-
-/** Echo's languages. Danish and German have a course; Polish is B1 state-exam practice. */
-const ECHO_LANGUAGES = [
-  { code: 'da', label: 'Danish' },
-  { code: 'de', label: 'German' },
-  { code: 'pl', label: 'Polish', hint: 'B1 exam' },
-];
-const ECHO_LANGUAGE_KEY = 'deepwater-echo-language';
 
 /** True when the learner last chose Polish in Echo (or used the old separate Polish B1 tab). */
 function readPolishMode() {
-  try { return localStorage.getItem(ECHO_LANGUAGE_KEY) === 'pl' || localStorage.getItem('deepwater-product') === 'polish'; } catch { return false; }
+  return read(KEYS.echoLanguage) === 'pl' || read(KEYS.product) === 'polish';
 }
 
 function EchoLanguageBar({ value, onChange }) {
-  return <nav className="echo-languages" aria-label="Echo languages">
+  return <div className="echo-languages">
     <span className="eyebrow">Language</span>
-    {ECHO_LANGUAGES.map(option => <button key={option.code} type="button" aria-pressed={value === option.code} onClick={() => onChange(option.code)}>
-      {option.label}{option.hint && <small>{option.hint}</small>}</button>)}
-  </nav>;
-}
-
-/** What the welcome page offers; fashion is shown as coming soon and cannot be opened yet. */
-const WELCOME_PRODUCTS = [
-  { id: 'echo', name: 'Echo', tag: 'Danish, German or Polish', line: 'Short lessons that explain the pattern, reviews just before you would forget, and Polish B1 state-exam practice with an examiner that says if you look ready.' },
-  { id: 'harbor', name: 'Harbor', tag: 'Find a job in Denmark', line: 'Upload your CV, see matched jobs in Denmark and the Nordics, with visa and language filters.' },
-  { id: 'amber', name: 'Amber', tag: 'Meet people, by choice', line: 'Dating and new friends. Every suggestion says why it appears, and chat opens only when you both say yes.' },
-  { id: 'fashion', name: 'AI Fashion', tag: 'Coming soon', line: 'How you look and how others see you, with an AI stylist. We are building it next.', soon: true },
-];
-
-function readProduct() {
-  try { return PRODUCTS.some(option => option.id === localStorage.getItem('deepwater-product')) ? localStorage.getItem('deepwater-product') : 'echo'; } catch { return 'echo'; }
-}
-
-function readTheme() {
-  try { return THEMES.some(theme => theme.id === localStorage.getItem('deepwater-theme')) ? localStorage.getItem('deepwater-theme') : 'deep'; } catch { return 'deep'; }
-}
-
-function applyTheme(id) {
-  if (id === 'deep') document.documentElement.removeAttribute('data-theme');
-  else document.documentElement.setAttribute('data-theme', id);
-}
-
-function useTheme() {
-  const [theme, setTheme] = useState(readTheme);
-  useEffect(() => {
-    applyTheme(theme);
-    try { localStorage.setItem('deepwater-theme', theme); } catch { /* storage unavailable; theme still applies for this visit */ }
-    window.dispatchEvent(new CustomEvent('deepwater-theme', { detail: theme }));
-  }, [theme]);
-  useEffect(() => {
-    const sync = event => setTheme(event.detail);
-    window.addEventListener('deepwater-theme', sync);
-    return () => window.removeEventListener('deepwater-theme', sync);
-  }, []);
-  return [theme, setTheme];
-}
-
-function ThemeSwitch() {
-  const [theme, setTheme] = useTheme();
-  return <div className="theme-switch" role="group" aria-label="Color theme">
-    {THEMES.map(option => <button key={option.id} type="button" className={`swatch swatch-${option.id}`} aria-pressed={theme === option.id} aria-label={option.label} title={option.label} onClick={() => setTheme(option.id)} />)}
+    <Segmented label="Echo languages" value={value} onChange={onChange}
+      options={ECHO_LANGUAGES.map(option => ({ id: option.code, label: <>{option.name}{option.hint && <small>{option.hint}</small>}</> }))} />
   </div>;
 }
 
-function Brand({ product }) {
-  const [theme] = useTheme();
-  const [brand] = useBrand();
-  const mark = brand === 'nibble' ? '/brand/nibble.svg' : THEMES.find(option => option.id === theme)?.mark ?? THEMES[0].mark;
-  const parent = BRANDS[brand].name;
-  return <span className="brand"><img src={mark} alt="" width="40" height="40" /><span className="brand-text"><b>{product || parent}</b>{product && <small>by {parent}</small>}</span></span>;
+function readProduct() {
+  return readChoice(KEYS.product, PRODUCT_IDS, 'echo');
 }
 
-function Auth({ onLogin, message, onChooseProduct }) {
-  const [brand] = useBrand();
-  const [mode, setMode] = useState('register');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
-  const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
-
-  // Google sign-in returns here with a one-time code (or an error) that is exchanged for a session.
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('login_code');
-    const googleError = params.get('login_error');
-    if (!code && !googleError) return;
-    window.history.replaceState({}, '', window.location.pathname);
-    if (googleError) {
-      setError(googleError === 'cancelled' ? 'Google sign-in was cancelled.' : 'Google sign-in did not complete. Please try again.');
-      return;
-    }
-    setBusy(true);
-    fetch(`${API}/api/v1/auth/google/exchange`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }),
-    }).then(async response => {
-      if (!response.ok) throw new Error('Google sign-in expired. Please try again.');
-      onLogin(await response.json());
-    }).catch(exchangeError => setError(exchangeError.message)).finally(() => setBusy(false));
-  }, []);
-
-  async function submit(event) {
-    event.preventDefault(); setError(''); setBusy(true);
-    try {
-      const endpoint = mode === 'register' ? 'register' : 'login';
-      const response = await fetch(`${API}/api/v1/auth/${endpoint}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mode === 'register' ? { name, email, password, phone } : { email, password }),
-      });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.detail || body.message || 'Sign in failed.');
-      onLogin(body);
-    } catch (error) { setError(error.message); } finally { setBusy(false); }
-  }
-
-  return <main className="auth-shell">
-    <header className="auth-header"><Brand /><div className="header-tools"><BrandSwitch /><ThemeSwitch /></div></header>
-    <div className="auth-grid">
-    <section className="pitch">
-      {brand === 'nibble'
-        ? <img className="pitch-mascot" src="/brand/nibble.svg" alt="Nibble, our mouse examiner" width="200" height="200" />
-        : <DeepwaterMark3D size={260} label="Deepwater mark in 3D. Drag to turn it." />}
-      <p className="eyebrow">Learn the language. Find the job. Make it home.</p>
-      <h1>Learn the language.<br /><span>Land the job.</span></h1>
-      <p className="pitch-lead">Learn Danish, German or Polish, practise for the Polish B1 exam, and find a job in Denmark and the Nordics. One account opens all of it.</p>
-      <div className="welcome-products" role="list" aria-label="What you can do here">
-        {WELCOME_PRODUCTS.map(item => item.soon
-          ? <div key={item.id} role="listitem" className="welcome-product soon"><b>{item.name}</b><span className="pill muted">{item.tag}</span><p>{item.line}</p></div>
-          : <button key={item.id} type="button" role="listitem" className="welcome-product" onClick={() => { onChooseProduct(item.id); document.getElementById('access-title')?.scrollIntoView({ behavior: 'smooth' }); }}>
-              <b>{item.name}</b><span className="pill">{item.tag}</span><p>{item.line}</p></button>)}
-      </div>
-      <p className="eyebrow welcome-why">Why Echo is different</p>
-      <ul className="pitch-points">
-        <li><b>Understand, don’t memorise</b><span>Every lesson explains why a sentence is built the way it is.</span></li>
-        <li><b>Built around your memory</b><span>Type phrases from memory, hear them read aloud, and see each one come back just before you’d forget it.</span></li>
-        <li><b>No streak guilt</b><span>Miss a day and your reviews simply move. A slip steps back one level, never to zero.</span></li>
-      </ul>
-    </section>
-    <section className="access panel" aria-labelledby="access-title">
-    <h2 id="access-title">{mode === 'register' ? `Create your ${BRANDS[brand].name} account` : 'Welcome back'}</h2>
-    <p className="access-sub">{mode === 'register' ? 'One account for Echo (Danish, German, Polish), Harbor and Amber.' : 'Sign in to continue where you left off.'}</p>
-    <form onSubmit={submit}>
-      {mode === 'register' && <label>Your name<input required maxLength="160" autoComplete="name" value={name} onChange={event => setName(event.target.value)} /></label>}
-      <label>Email<input required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} /></label>
-      {mode === 'register' && <label><span>Phone <small className="optional">optional</small></span><input type="tel" maxLength="24" autoComplete="tel" placeholder="+45 12 34 56 78" value={phone} onChange={event => setPhone(event.target.value)} /><small>Only for your account. Never shown to others or used for marketing.</small></label>}
-      <label>Password<input required type="password" minLength="12" maxLength="72" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} value={password} onChange={event => setPassword(event.target.value)} /><small>Use 12–72 characters.</small></label>
-      <button disabled={busy}>{busy ? 'Please wait…' : mode === 'register' ? 'Create account' : 'Sign in'}</button>
-    </form>
-    {error && <p role="alert" className="error">{error}</p>}
-    {message && <p role="status" className="notice">{message}</p>}
-    <div className="auth-divider"><span>or</span></div>
-    <a href={`${API}/api/v1/auth/google`} className="google-btn">Continue with Google</a>
-    <button className="link" onClick={() => { setError(''); setMode(mode === 'register' ? 'login' : 'register'); }}>{mode === 'register' ? 'Already have an account? Sign in' : 'Create an account'}</button>
-  </section>
-    </div>
-    <footer>{BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
-  </main>;
-}
-
-const HOME_QUERY = `query EchoHome {
-  echoHome {
-    onboarded nextAction totalAttempts correctAttempts audioAttempts recommendedAudioLessonId recommendedAudioReason
-    profile { goal selfReportedLevel languageCode diagnosticScore startingRoute }
-    lessons { id title level topic objective explanation sourceReference contentStatus mastery attempts nextReviewAt due
-      exercises { id position taskType prompt lastCorrect options { key text } }
-      audio { mediaType sourceTitle creator sourceUrl playbackUrl editorialBand topicTags speechRate vocabularyDensity idiomDensity pronunciationLoad topicFamiliarity beforeListeningPrompt gistPrompt focusPrompt transcriptAllowed transcriptText rightsExpiresAt }
-    }
-  }
-}`;
+const HOME_QUERY = `query EchoHome { echoHome { ${ECHO_HOME_FIELDS} } }`;
 
 const ROUTE_COPY = 'We’ll begin with the experience level you chose and adjust as you practise.';
 
 function App() {
-  const [user, setUser] = useState(() => { try { return JSON.parse(sessionStorage.getItem('deepwater-user')); } catch { return null; } });
+  const [user, setUser] = useState(() => (session.token() ? session.user() : null));
   const [home, setHome] = useState(null);
-  const [goal, setGoal] = useState('');
+  const [goal, setGoal, clearGoal] = useDraft('echo-goal', '');
   const [languageCode, setLanguageCode] = useState('da');
   const [selfReportedLevel, setSelfReportedLevel] = useState('new');
   const [answers, setAnswers] = useState({});
@@ -216,9 +59,10 @@ function App() {
   const [results, setResults] = useState({});
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [homeError, setHomeError] = useState(null);
+  const [signedOutMessage, setSignedOutMessage] = useState('');
   const [verifyMessage, setVerifyMessage] = useState('');
   const [busy, setBusy] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [teacherLessons, setTeacherLessons] = useState([]);
   const [selectedLessonId, setSelectedLessonId] = useState('');
   const [audioFilter, setAudioFilter] = useState('ALL');
@@ -231,17 +75,28 @@ function App() {
   const [tab, setTab] = useState('today');
   const [product, setProduct] = useState(readProduct);
   const [polishMode, setPolishMode] = useState(readPolishMode);
-  useEffect(() => { try { localStorage.setItem(ECHO_LANGUAGE_KEY, polishMode ? 'pl' : 'course'); } catch { /* storage unavailable */ } }, [polishMode]);
+  useEffect(() => { write(KEYS.echoLanguage, polishMode ? 'pl' : 'course'); }, [polishMode]);
   const [brand] = useBrand();
-  useEffect(() => { try { localStorage.setItem('deepwater-product', product); } catch { /* storage unavailable */ } }, [product]);
+  useEffect(() => { write(KEYS.product, product); }, [product]);
   const [cards, setCards] = useState([]);
   const [warmUp, setWarmUp] = useState(false);
   const [reviewing, setReviewing] = useState(false);
 
   function login(account) {
-    sessionStorage.setItem('deepwater-token', account.token);
-    sessionStorage.setItem('deepwater-user', JSON.stringify(account));
-    setUser(account);
+    session.save(account);
+    setUser(account); setSignedOutMessage('');
+  }
+
+  // Any call that finds the session expired signs out here, with a sentence that says why.
+  useEffect(() => {
+    const expired = () => { if (session.token()) { logout(); setSignedOutMessage('Your session has ended. Please sign in again.'); } };
+    window.addEventListener(SESSION_EXPIRED, expired);
+    return () => window.removeEventListener(SESSION_EXPIRED, expired);
+  }, []);
+
+  /** Switching product starts clean: a banner from Echo does not follow you into Harbor. */
+  function chooseProduct(next) {
+    setError(''); setNotice(''); setProduct(next);
   }
 
   // The confirmation email links here with ?verify_email=<token>.
@@ -250,45 +105,38 @@ function App() {
     const token = params.get('verify_email');
     if (!token) return;
     window.history.replaceState({}, '', window.location.pathname);
-    fetch(`${API}/api/v1/auth/verify-email`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }),
-    }).then(async response => {
-      if (!response.ok) throw new Error((await response.json().catch(() => ({}))).detail || 'This confirmation link did not work.');
+    request('/api/v1/auth/verify-email', { method: 'POST', body: { token }, auth: false }).then(() => {
       setVerifyMessage('Your email is confirmed.');
       setUser(current => {
         if (!current) return current;
         const updated = { ...current, emailVerified: 'true' };
-        sessionStorage.setItem('deepwater-user', JSON.stringify(updated));
+        session.saveUser(updated);
         return updated;
       });
-    }).catch(verifyError => setVerifyMessage(verifyError.message));
+    }).catch(verifyError => setVerifyMessage(verifyError.kind === 'client' ? verifyError.message || 'This confirmation link did not work.' : verifyError.message));
   }, []);
 
   async function resendVerification() {
     setVerifyMessage('');
-    const response = await fetch(`${API}/api/v1/auth/verify-email/resend`, {
-      method: 'POST', headers: { Authorization: `Bearer ${sessionStorage.getItem('deepwater-token')}` },
-    });
-    setVerifyMessage(response.ok ? `A new link is on its way to ${user.email}.`
-      : (await response.json().catch(() => ({}))).detail || 'A new link could not be sent.');
+    try {
+      await request('/api/v1/auth/verify-email/resend', { method: 'POST' });
+      setVerifyMessage(`A new link is on its way to ${user.email}.`);
+    } catch (resendError) { setVerifyMessage(resendError.message || 'A new link could not be sent.'); }
   }
 
   function logout() {
-    sessionStorage.removeItem('deepwater-token');
-    sessionStorage.removeItem('deepwater-user');
-    setUser(null); setHome(null); setResults({});
+    session.clear();
+    setUser(null); setHome(null); setResults({}); setError(''); setNotice('');
   }
 
   async function loadHome() {
-    setLoading(true); setError('');
+    setHomeError(null);
     try { setHome((await gql(HOME_QUERY)).echoHome); }
-    catch (loadError) { setError(loadError.message); }
-    finally { setLoading(false); }
+    catch (loadError) { setHomeError(loadError); }
   }
 
   useEffect(() => { if (user) loadHome(); }, [user]);
 
-  const CARD_FIELDS = 'id front back lessonId box nextReviewAt due missCount lastMiss';
   async function loadCards() {
     try { setCards((await gql(`query { echoCards { ${CARD_FIELDS} } }`)).echoCards); }
     catch (cardsError) { setError(cardsError.message); }
@@ -352,12 +200,9 @@ function App() {
     event.preventDefault(); setBusy(true); setError(''); setNotice('');
     try {
       const data = await gql(`mutation StartEcho($goal: String!, $languageCode: String!, $level: String!) {
-        startEcho(goal: $goal, languageCode: $languageCode, selfReportedLevel: $level) {
-          onboarded nextAction totalAttempts correctAttempts audioAttempts recommendedAudioLessonId recommendedAudioReason profile { goal selfReportedLevel languageCode diagnosticScore startingRoute }
-          lessons { id title level topic objective explanation sourceReference contentStatus mastery attempts nextReviewAt due exercises { id position taskType prompt lastCorrect options { key text } } audio { mediaType sourceTitle creator sourceUrl playbackUrl editorialBand topicTags speechRate vocabularyDensity idiomDensity pronunciationLoad topicFamiliarity beforeListeningPrompt gistPrompt focusPrompt transcriptAllowed transcriptText rightsExpiresAt } }
-        }
+        startEcho(goal: $goal, languageCode: $languageCode, selfReportedLevel: $level) { ${ECHO_HOME_FIELDS} }
       }`, { goal, languageCode, level: selfReportedLevel });
-      setHome(data.startEcho); setNotice(`${languageCode === 'da' ? 'Danish' : 'German'} is selected. Your starting route uses your self-described experience; this is not a formal level test.`);
+      setHome(data.startEcho); clearGoal(); setNotice(`${languageName(languageCode)} is selected. Your starting route uses your self-described experience; this is not a formal level test.`);
     } catch (startError) { setError(startError.message); }
     finally { setBusy(false); }
   }
@@ -398,11 +243,8 @@ function App() {
   async function chooseLanguage(code) {
     setError(''); setNotice(''); setLanguageCode(code);
     try {
-      const data = await gql(`mutation($languageCode: String!) { chooseEchoLanguage(languageCode: $languageCode) {
-        onboarded nextAction totalAttempts correctAttempts audioAttempts recommendedAudioLessonId recommendedAudioReason profile { goal selfReportedLevel languageCode diagnosticScore startingRoute }
-        lessons { id title level topic objective explanation sourceReference contentStatus mastery attempts nextReviewAt due exercises { id position taskType prompt lastCorrect options { key text } } audio { mediaType sourceTitle creator sourceUrl playbackUrl editorialBand topicTags speechRate vocabularyDensity idiomDensity pronunciationLoad topicFamiliarity beforeListeningPrompt gistPrompt focusPrompt transcriptAllowed transcriptText rightsExpiresAt } }
-      } }`, { languageCode: code });
-      setHome(data.chooseEchoLanguage); setNotice(`Switched to ${code === 'da' ? 'Danish' : 'German'}.`);
+      const data = await gql(`mutation($languageCode: String!) { chooseEchoLanguage(languageCode: $languageCode) { ${ECHO_HOME_FIELDS} } }`, { languageCode: code });
+      setHome(data.chooseEchoLanguage); setNotice(`Switched to ${languageName(code)}.`);
     } catch (changeError) { setError(changeError.message); }
   }
 
@@ -442,11 +284,11 @@ function App() {
     finally { setBusy(false); }
   }
 
-  if (!user) return <Auth onLogin={login} message={verifyMessage} onChooseProduct={setProduct} />;
+  if (!user) return <Auth onLogin={login} message={signedOutMessage || verifyMessage} onChooseProduct={setProduct} />;
 
   function renderExercise(exercise, step, heading) {
     return <ExerciseCard key={exercise.id} exercise={exercise} step={step} heading={heading}
-      languageName={home.profile.languageCode === 'de' ? 'German' : 'Danish'}
+      languageName={languageName(home.profile.languageCode)}
       answer={answers[exercise.id]} setAnswer={value => setAnswers(current => ({ ...current, [exercise.id]: value }))}
       selfCheck={selfChecks[exercise.id]} setSelfCheck={value => setSelfChecks(current => ({ ...current, [exercise.id]: value }))}
       result={results[exercise.id]} busy={busy} onSubmit={submitExercise} onSaveCard={saveMissAsCard} />;
@@ -467,23 +309,17 @@ function App() {
   }) : [];
 
   return <main className="app-shell">
-    <header className="site-header">
-      <Brand product={PRODUCT_NAMES[product]} />
-      <nav className="product-switch" aria-label="Products">
-        {PRODUCTS.map(option => <button key={option.id} type="button" aria-pressed={product === option.id} onClick={() => setProduct(option.id)}><b>{option.label}</b><small>{option.hint}</small></button>)}
-      </nav>
-      <div className="account"><BrandSwitch /><ThemeSwitch /><button type="button" className={`account-chip${product === 'echo' && tab === 'profile' ? ' active' : ''}`} aria-current={product === 'echo' && tab === 'profile' ? 'page' : undefined}
-        onClick={() => { setProduct('echo'); setPolishMode(false); setReviewing(false); setWarmUp(false); setTab('profile'); }} aria-label={`Your profile: ${user.name}`}>
-        <span className="account-avatar" aria-hidden="true">{(user.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0].toUpperCase()).join('')}</span>
-        <span className="account-label">{user.name}</span></button><button className="link" onClick={logout}>Sign out</button></div>
-    </header>
+    <AppHeader product={product} onProduct={chooseProduct} productLabel={productName(product)} user={user}
+      profileOpen={product === 'echo' && tab === 'profile'} onSignOut={logout}
+      onProfile={() => { chooseProduct('echo'); setPolishMode(false); setReviewing(false); setWarmUp(false); setTab('profile'); }} />
 
-    {error && <Notice tone="error">{error}</Notice>}
-    {notice && <Notice tone="good">{notice}</Notice>}
-    {verifyMessage && <Notice tone="good">{verifyMessage}</Notice>}
+    {error && <Notice tone="error" onDismiss={() => setError('')}>{error}</Notice>}
+    {notice && <Notice tone="good" onDismiss={() => setNotice('')}>{notice}</Notice>}
+    {verifyMessage && <Notice tone="good" onDismiss={() => setVerifyMessage('')}>{verifyMessage}</Notice>}
     {user.emailVerified === 'false' && <Notice>Please confirm your email: we sent a link to {user.email}. <button className="link" onClick={resendVerification}>Send a new link</button></Notice>}
+    <ErrorBoundary name={productName(product)} resetKey={product}>
     {product === 'echo' && <>
-    {loading && !home && <p role="status" className="loading">Loading your Echo workspace…</p>}
+    {!home && (homeError ? <ErrorState title="Echo didn’t load" error={homeError} onRetry={loadHome} /> : <Loading label="Loading your Echo workspace…" />)}
     {home && tab !== 'profile' && <EchoLanguageBar value={polishMode ? 'pl' : home.onboarded ? home.profile.languageCode : languageCode} onChange={pickEchoLanguage} />}
     {polishMode && tab !== 'profile' && <PolishExam examinerName={brand === 'nibble' ? 'Nibble' : 'The examiner'} />}
 
@@ -492,10 +328,10 @@ function App() {
       <h1>Start with what you want to say.</h1>
       <p className="intro">Pick a language above and tell Echo what you want to be able to express. Your self-described experience sets a gentle starting point.</p>
       <form onSubmit={start}>
-        <label>What would you like to express in {languageCode === 'da' ? 'Danish' : 'German'}?<textarea required maxLength="300" value={goal} onChange={event => setGoal(event.target.value)} /></label>
-        <label>How familiar does {languageCode === 'da' ? 'Danish' : 'German'} feel today?
+        <label>What would you like to express in {languageName(languageCode)}?<textarea required maxLength="300" value={goal} onChange={event => setGoal(event.target.value)} /></label>
+        <label>How familiar does {languageName(languageCode)} feel today?
           <select value={selfReportedLevel} onChange={event => setSelfReportedLevel(event.target.value)}>
-            <option value="new">I’m new to {languageCode === 'da' ? 'Danish' : 'German'}</option><option value="some">I know a few things</option><option value="comfortable">I can manage simple conversations</option>
+            <option value="new">I’m new to {languageName(languageCode)}</option><option value="some">I know a few things</option><option value="comfortable">I can manage simple conversations</option>
           </select>
         </label>
         <button disabled={busy}>{busy ? 'Preparing your route…' : 'Build my starting route'}</button>
@@ -505,13 +341,13 @@ function App() {
     {home?.onboarded && tab === 'profile' && <>
       <button type="button" className="link back-link" onClick={() => setTab('today')}>← Back to learning</button>
       <ProfilePage home={home} cards={cards} onSaved={saved => {
-        const next = { ...user, name: saved.name }; setUser(next); sessionStorage.setItem('deepwater-user', JSON.stringify(next));
+        const next = { ...user, name: saved.name }; setUser(next); session.saveUser(next);
       }} />
     </>}
 
     {home?.onboarded && !polishMode && tab !== 'profile' && <>
       <section className="welcome">
-        <div className="welcome-row"><div><p className="eyebrow">ECHO · {home.profile.languageCode === 'de' ? 'GERMAN' : 'DANISH'} · LEARN THROUGH EXPRESSION</p>
+        <div className="welcome-row"><div><p className="eyebrow">ECHO · {languageName(home.profile.languageCode).toUpperCase()} · LEARN THROUGH EXPRESSION</p>
         <h1>Make the pattern yours.</h1>
         <p className="intro">{home.nextAction}</p></div>{lesson && <figure className="depth-mark">
           <DeepwaterMark3D size={170} depth={lesson.mastery} label={`Depth gauge: ${percent}% mastered in ${lesson.title}`} />
@@ -540,7 +376,7 @@ function App() {
         dueCards={cards.filter(card => card.due).length} onReviewCards={() => setTab('cards')}
         canWarmUp={cards.length >= 3} onWarmUp={() => setWarmUp(true)} />}
 
-      {tab === 'cards' && <PhraseCards cards={cards} languageCode={home.profile.languageCode} languageName={home.profile.languageCode === 'de' ? 'German' : 'Danish'}
+      {tab === 'cards' && <PhraseCards cards={cards} languageCode={home.profile.languageCode} languageName={languageName(home.profile.languageCode)}
         busy={busy} onSave={saveCard} onSaveMany={saveCards} onReview={reviewCard} onDelete={deleteCard} />}
 
       {tab === 'progress' && <CalmProgress home={home} cards={cards} />}
@@ -591,7 +427,7 @@ function App() {
               {orderedExercises.map((exercise, index) => renderExercise(exercise, index + 1))}
             </div>}
           </>}
-          {!lesson && <div className="empty-course"><span className="eyebrow">{home.profile.languageCode === 'de' ? 'GERMAN' : 'DANISH'} COURSE</span><h2>Your course is waiting for teacher review.</h2><p>{home.nextAction} Your teacher adds source material, checks every explanation and exercise, then publishes it here. No unreviewed or AI-generated lessons are shown as course content.</p></div>}
+          {!lesson && <div className="empty-course"><span className="eyebrow">{languageName(home.profile.languageCode).toUpperCase()} COURSE</span><h2>Your course is waiting for teacher review.</h2><p>{home.nextAction} Your teacher adds source material, checks every explanation and exercise, then publishes it here. No unreviewed or AI-generated lessons are shown as course content.</p></div>}
         </section>
 
         <aside className="progress panel">
@@ -608,41 +444,10 @@ function App() {
     </>}
     {product === 'harbor' && <Harbor />}
     {product === 'amber' && <Amber />}
-    {product === 'echo' && (tab === 'profile' || (!home?.onboarded && !polishMode)) && <DeleteAccount email={user.email} onDeleted={logout} />}
-    <footer>{PRODUCT_NAMES[product]} by {BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
+    </ErrorBoundary>
+    {product === 'echo' && home && (tab === 'profile' || (!home.onboarded && !polishMode)) && <DeleteAccount email={user.email} onDeleted={logout} />}
+    <footer>{productName(product)} by {BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
   </main>;
-}
-
-function DeleteAccount({ email, onDeleted }) {
-  const [confirmEmail, setConfirmEmail] = useState('');
-  const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
-
-  async function remove(event) {
-    event.preventDefault(); setError(''); setBusy(true);
-    try {
-      const response = await fetch(`${API}/api/v1/auth/account`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionStorage.getItem('deepwater-token')}` },
-        body: JSON.stringify({ confirmEmail }),
-      });
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        throw new Error(body.detail || body.message || 'Your account could not be deleted.');
-      }
-      onDeleted();
-    } catch (deleteError) { setError(deleteError.message); } finally { setBusy(false); }
-  }
-
-  return <details className="delete-account">
-    <summary>Delete my account</summary>
-    <form onSubmit={remove}>
-      <p>This permanently deletes your account, learning profile, answers and progress. It cannot be undone.</p>
-      <label>Type <b>{email}</b> to confirm<input required type="email" autoComplete="off" value={confirmEmail} onChange={event => setConfirmEmail(event.target.value)} /></label>
-      <button disabled={busy || confirmEmail.trim().toLowerCase() !== email.toLowerCase()}>{busy ? 'Deleting…' : 'Delete permanently'}</button>
-      {error && <p role="alert" className="error">{error}</p>}
-    </form>
-  </details>;
 }
 
 applyTheme(readTheme());

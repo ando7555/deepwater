@@ -29,6 +29,36 @@ Rules that keep screens consistent:
 | `ProblemList` | What to fix before a form can be submitted. | `<ProblemList problems={['The title is missing.']} />` |
 | `Stat`, `StatGrid` | Numbers with captions. | `<StatGrid><Stat value={12} label="cards" /></StatGrid>` |
 | `useForm` | One state object for a form; `set('key')` takes an event or a value. | `const [form, set, reset] = useForm({ title: '' });` |
+| `Loading` | A calm placeholder while data loads (announced, no spinner). | `<Loading label="Loading Harbor…" />` |
+| `ErrorState` | Something did not load: plain words, and "Try again" when retrying can help. | `<ErrorState title="Harbor didn’t load" error={error} onRetry={load} />` |
+| `ErrorBoundary` | Keeps a crash in one product from blanking the page. | `<ErrorBoundary name="Harbor" resetKey={product}>…</ErrorBoundary>` |
+| `useResource`, `ResourceStatus` | Load data with loading, error and reload in one object. | `const r = useResource(() => api('/x'), []); if (!r.data) return <ResourceStatus resource={r} label="Loading…" />;` |
+| `useDraft` | State that survives switching screens or reloading the tab (half-written answers). | `const [answers, setAnswers, clear] = useDraft('polish-b1-answers', {});` |
+| `Menu`, `MenuSection` | A small menu behind a button (the account menu). Escape and outside clicks close it. | `<Menu label="Account" summary={<Avatar />}><MenuSection title="Appearance">…</MenuSection></Menu>` |
+| `Notice` `onDismiss` | Adds a close button to a banner. | `<Notice tone="good" onDismiss={() => setNotice('')}>Saved.</Notice>` |
+
+## Below the components
+
+- `app/http.js`: the only way to call the backend. `request()` for REST, `gql()` for GraphQL, `restClient('/api/v1/harbor')` for one area.
+  It turns a dropped connection, a timeout, Railway's HTML 502 page and an expired session into an `ApiError` with a sentence a person can act on
+  (`error.kind` is offline, timeout, session, server or client; `error.retryable` says if "Try again" can help). An expired session signs the person out.
+- `app/storage.js`: localStorage and sessionStorage that never throw, with every key in `KEYS`.
+- `app/config.js`: products, themes and Echo languages as data. Add a language or product here, not in a screen.
+- `app/theme.jsx`: the colour theme hook and switch.
+
+## Design tokens
+
+`style.css` starts with the tokens. Use them instead of numbers:
+
+- Type: `--fs-2xs` 11, `--fs-xs` 12, `--fs-sm` 13, `--fs-md` 14, `--fs-base` 15, `--fs-lg` 17, `--fs-xl` 21, `--fs-2xl` 27, `--fs-display` 40.
+- Radius: `--radius-xs` 6, `--radius-sm` 10, `--radius` 14, `--radius-lg` 20, `--radius-pill`.
+- Space: `--space-1` 4 … `--space-7` 48. Motion: `--ease`, `--dur-fast`, `--dur`.
+- Breakpoints: phones `max-width:600px`, tablets `max-width:860px` (plus one wide-layout rule at 1000px).
+
+## Tests
+
+`npm test` runs every `*.test.mjs` under `src/`, including `ui/ui.test.mjs`, which renders the components with `react-dom/server`.
+`.jsx` files are compiled on the fly by `test/jsx-loader.mjs` with the JSX transform that ships in Vite, so no test packages are needed.
 
 ## Worked example: the teacher's review queue
 
