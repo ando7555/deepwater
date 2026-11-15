@@ -130,7 +130,7 @@ public class PlatformService {
         db.update("delete from amber_decisions where account_id=? or target_account_id=?", accountId, accountId);
         db.update("delete from amber_blocks where blocker_id=? or blocked_id=?", accountId, accountId);
         db.update("delete from amber_reports where reporter_id=?", accountId);
-        for (String table : new String[]{"amber_profiles", "exam_attempts", "harbor_applications", "harbor_profiles", "person_profiles", "echo_cards", "echo_audio_attempts", "echo_attempts", "echo_skill_states",
+        for (String table : new String[]{"assistant_consents", "amber_profiles", "exam_attempts", "harbor_applications", "harbor_profiles", "person_profiles", "echo_cards", "echo_audio_attempts", "echo_attempts", "echo_skill_states",
                 "echo_learner_profiles", "oauth_login_codes", "email_verification_tokens", "user_sessions"})
             db.update("delete from " + table + " where account_id=?", accountId);
         db.update("delete from accounts where id=?", accountId);

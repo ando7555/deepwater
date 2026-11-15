@@ -865,6 +865,11 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
 .ask-step.done{color:var(--good)}
 .ask-step.error{color:var(--warn)}
 .ask-suggestions{display:flex;flex-direction:column;gap:6px}
+.ask-consent{display:flex;flex-direction:column;gap:12px;color:var(--text-2);line-height:1.5}
+.ask-consent p{margin:0}
+.ask-consent-check{display:flex;gap:10px;align-items:flex-start;color:var(--text);font-weight:600}
+.ask-consent-check input{margin-top:4px}
+.ask-consent-link{align-self:flex-start;background:none;border:0;padding:0;color:var(--text-2);font-size:.85rem;text-decoration:underline;cursor:pointer}
 .ask-suggestion{text-align:left;border:1px solid var(--line-soft);background:var(--surface);color:var(--text-2);border-radius:var(--radius-sm);padding:9px 12px;cursor:pointer}
 .ask-suggestion:hover{border-color:var(--line-hover);color:var(--text)}
 .ask-form{display:flex;gap:8px}
