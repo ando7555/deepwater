@@ -299,3 +299,10 @@ create table if not exists amber_reports (
   status varchar(12) not null default 'OPEN',
   created_at timestamp with time zone not null default current_timestamp
 );
+-- Ask Deepwater: the person agreed to send their questions and Deepwater data to the named AI company.
+-- No row means no agreement; withdrawing deletes the row.
+create table if not exists assistant_consents (
+  account_id varchar(36) primary key,
+  shared_with varchar(60) not null,
+  granted_at timestamp with time zone not null default current_timestamp
+);
