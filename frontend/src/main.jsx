@@ -17,6 +17,7 @@ import TeacherWorkspace from './teacher/TeacherWorkspace.jsx';
 import { Notice, Tabs } from './ui/index.jsx';
 import { BAND_LABELS } from './constants.js';
 import { API, gql, formatDate } from './api.js';
+import { showGoogleSignIn } from './platform.js';
 import './style.css';
 
 const THEMES = [
@@ -183,8 +184,10 @@ function Auth({ onLogin, message, onChooseProduct }) {
     </form>
     {error && <p role="alert" className="error">{error}</p>}
     {message && <p role="status" className="notice">{message}</p>}
-    <div className="auth-divider"><span>or</span></div>
-    <a href={`${API}/api/v1/auth/google`} className="google-btn">Continue with Google</a>
+    {showGoogleSignIn() && <>
+      <div className="auth-divider"><span>or</span></div>
+      <a href={`${API}/api/v1/auth/google`} className="google-btn">Continue with Google</a>
+    </>}
     <button className="link" onClick={() => { setError(''); setMode(mode === 'register' ? 'login' : 'register'); }}>{mode === 'register' ? 'Already have an account? Sign in' : 'Create an account'}</button>
   </section>
     </div>
