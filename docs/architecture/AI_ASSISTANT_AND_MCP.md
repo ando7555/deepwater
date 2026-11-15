@@ -83,6 +83,16 @@ yet been run against a real Ollama** (this sandbox cannot download Ollama or mod
   server where Ollama runs next to the backend.
 - Small local models choose tools less reliably than Claude. Measure with the eval below before relying on it.
 
+## Permission before data leaves (App Store 5.1.2(i))
+
+When the answering model is run by an outside company (Claude: Anthropic), each person agrees once, in the chat
+panel, with an unticked box: "Send my questions and my Deepwater data to Anthropic". The server stores it in
+`assistant_consents` (account, company, time) and refuses a run with 403 until it is there; the screen only asks.
+`PUT /api/v1/assistant/consent` gives it, `DELETE` withdraws it ("Stop sending my data" link in the panel), and
+`GET /api/v1/assistant` reports `sharesDataWith` and `consentGiven`. A different company asks again. A self-hosted
+Ollama shares with nobody, so no question is asked. Deleting the account deletes the row. MCP is not gated: there
+the person connects their own AI client to their own data.
+
 ## Safety and cost
 
 - Session token required on every request (`401` + `WWW-Authenticate: Bearer` otherwise).

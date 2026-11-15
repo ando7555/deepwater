@@ -68,6 +68,9 @@ public class AssistantService {
 
     public boolean enabled() { return model.enabled(); }
 
+    /** The outside AI company that would receive the person's data, or null; see {@link AssistantModel#sharesDataWith()}. */
+    public String sharesDataWith() { return model.enabled() ? model.sharesDataWith() : null; }
+
     public AssistantSettings settings() { return settings; }
 
     /** What the chat panel needs to draw itself: on/off, which model, the tools' titles and the starter questions. */

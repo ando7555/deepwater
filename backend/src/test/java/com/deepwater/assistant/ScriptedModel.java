@@ -14,9 +14,14 @@ class ScriptedModel implements AssistantModel {
 
     synchronized ScriptedModel always(Function<Conversation, Step> step) { otherwise = step; return this; }
 
-    synchronized void reset() { seen.clear(); script.clear(); otherwise = c -> new Step("Done.", List.of(), Stop.DONE, null); }
+    /** Pretend to be a hosted model run by this company, so the consent rules apply. */
+    volatile String sharesWith;
+
+    synchronized void reset() { seen.clear(); script.clear(); otherwise = c -> new Step("Done.", List.of(), Stop.DONE, null); sharesWith = null; }
 
     @Override public boolean enabled() { return true; }
+
+    @Override public String sharesDataWith() { return sharesWith; }
 
     @Override
     public synchronized Step next(Conversation conversation) {

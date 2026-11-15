@@ -173,6 +173,42 @@ class AssistantTest {
         assertThat(status.get("suggestions").get(0).asString()).isEqualTo("Which cards should I review today?");
     }
 
+    @Test
+    void aHostedModelNeedsThePersonsPermissionFirstAndItCanBeWithdrawn() throws Exception {
+        model.sharesWith = "Anthropic";
+        String token = register("Consent");
+        var json = new HttpHeaders();
+        json.setBearerAuth(token);
+        json.setContentType(MediaType.APPLICATION_JSON);
+        var body = Map.of("messages", List.of(Map.of("role", "user", "content", "Hi")));
+
+        JsonNode status = JSON.readTree(http.exchange("/api/v1/assistant", HttpMethod.GET, new HttpEntity<>(json), String.class).getBody());
+        assertThat(status.get("sharesDataWith").asString()).isEqualTo("Anthropic");
+        assertThat(status.get("consentGiven").asBoolean()).isFalse();
+        var refused = http.exchange("/api/v1/assistant/runs", HttpMethod.POST, new HttpEntity<>(body, json), String.class);
+        assertThat(refused.getStatusCode().value()).isEqualTo(403);
+        assertThat(refused.getBody()).contains("Anthropic");
+        assertThat(model.seen).isEmpty();
+
+        assertThat(http.exchange("/api/v1/assistant/consent", HttpMethod.PUT, new HttpEntity<>(json), String.class)
+                .getStatusCode().value()).isEqualTo(200);
+        status = JSON.readTree(http.exchange("/api/v1/assistant", HttpMethod.GET, new HttpEntity<>(json), String.class).getBody());
+        assertThat(status.get("consentGiven").asBoolean()).isTrue();
+        model.then(c -> answer("Hello."));
+        assertThat(http.exchange("/api/v1/assistant/runs", HttpMethod.POST, new HttpEntity<>(body, json), String.class)
+                .getStatusCode().value()).isEqualTo(200);
+
+        // Switching to another company asks again.
+        model.sharesWith = "Another AI company";
+        assertThat(http.exchange("/api/v1/assistant/runs", HttpMethod.POST, new HttpEntity<>(body, json), String.class)
+                .getStatusCode().value()).isEqualTo(403);
+        model.sharesWith = "Anthropic";
+        assertThat(http.exchange("/api/v1/assistant/consent", HttpMethod.DELETE, new HttpEntity<>(json), String.class)
+                .getStatusCode().value()).isEqualTo(204);
+        assertThat(http.exchange("/api/v1/assistant/runs", HttpMethod.POST, new HttpEntity<>(body, json), String.class)
+                .getStatusCode().value()).isEqualTo(403);
+    }
+
     // ------------------------------------------------------------------ helpers
 
     private List<Map<String, Object>> run(String accountId, String question) {

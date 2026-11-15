@@ -5,12 +5,15 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,21 +31,46 @@ class AssistantController {
     private static final long TIMEOUT_MS = 180_000;
     private final PlatformService platform;
     private final AssistantService assistant;
+    private final AssistantConsent consent;
 
-    AssistantController(PlatformService platform, AssistantService assistant) {
+    AssistantController(PlatformService platform, AssistantService assistant, AssistantConsent consent) {
         this.platform = platform;
         this.assistant = assistant;
+        this.consent = consent;
     }
 
     @GetMapping
     Map<String, Object> status(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
-        platform.requireAccount(auth);
-        return assistant.status();
+        String account = platform.requireAccount(auth);
+        Map<String, Object> out = new java.util.LinkedHashMap<>(assistant.status());
+        String sharedWith = assistant.sharesDataWith();
+        out.put("sharesDataWith", sharedWith);
+        out.put("consentGiven", consent.given(account, sharedWith));
+        return out;
+    }
+
+    /** The person ticks "send my questions and my Deepwater data to ..." once; stored per account. */
+    @PutMapping("/consent")
+    Map<String, Object> giveConsent(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
+        String account = platform.requireAccount(auth);
+        String sharedWith = assistant.sharesDataWith();
+        if (sharedWith != null) consent.grant(account, sharedWith);
+        return Map.of("consentGiven", true);
+    }
+
+    @DeleteMapping("/consent")
+    ResponseEntity<Void> withdrawConsent(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
+        consent.withdraw(platform.requireAccount(auth));
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping(value = "/runs", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     SseEmitter run(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth, @RequestBody RunInput body) {
         String account = platform.requireAccount(auth);
+        String sharedWith = assistant.sharesDataWith();
+        if (!consent.given(account, sharedWith))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Ask Deepwater needs your permission first: your questions and your Deepwater data go to " + sharedWith + " to answer them.");
         RunInput input = body == null ? new RunInput(null, null) : body;
         List<AssistantService.ChatMessage> messages = input.messages();
         assistant.validate(account, messages);

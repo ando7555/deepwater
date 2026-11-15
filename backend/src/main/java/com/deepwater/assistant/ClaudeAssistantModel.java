@@ -49,6 +49,9 @@ public final class ClaudeAssistantModel implements AssistantModel {
     public String description() { return "anthropic " + model; }
 
     @Override
+    public String sharesDataWith() { return "Anthropic"; }
+
+    @Override
     public Step next(Conversation conversation) {
         BetaMessage reply = client.beta().messages().create(params(conversation));
         if (log.isInfoEnabled())
