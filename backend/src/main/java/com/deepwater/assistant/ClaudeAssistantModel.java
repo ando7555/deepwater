@@ -48,8 +48,9 @@ public final class ClaudeAssistantModel implements AssistantModel {
     @Override
     public Step next(Conversation conversation) {
         BetaMessage reply = client.beta().messages().create(params(conversation));
-        log.info("Assistant step: model={} stop={} inputTokens={} outputTokens={}", reply.model(),
-                reply.stopReason().map(Object::toString).orElse("?"), reply.usage().inputTokens(), reply.usage().outputTokens());
+        if (log.isInfoEnabled())
+            log.info("Assistant step: model={} stop={} inputTokens={} outputTokens={}", reply.model(),
+                    reply.stopReason().map(Object::toString).orElse("?"), reply.usage().inputTokens(), reply.usage().outputTokens());
         StringBuilder text = new StringBuilder();
         List<ToolCall> calls = new ArrayList<>();
         reply.content().forEach(block -> {
@@ -86,11 +87,11 @@ public final class ClaudeAssistantModel implements AssistantModel {
 
     static BetaMessageParam message(Entry entry) {
         return switch (entry) {
-            case UserText u -> BetaMessageParam.ofUser(u.text());
-            case AssistantText a -> BetaMessageParam.ofAssistant(a.text());
-            case ModelStep m -> m.step().vendorMessage() instanceof BetaMessage reply
-                    ? reply.toParam() : BetaMessageParam.ofAssistant(m.step().text());
-            case ToolResults r -> BetaMessageParam.ofUserOfContentBlockParams(r.results().stream()
+            case UserText(String text) -> BetaMessageParam.ofUser(text);
+            case AssistantText(String text) -> BetaMessageParam.ofAssistant(text);
+            case ModelStep(Step step) -> step.vendorMessage() instanceof BetaMessage reply
+                    ? reply.toParam() : BetaMessageParam.ofAssistant(step.text());
+            case ToolResults(List<ToolResult> results) -> BetaMessageParam.ofUserOfContentBlockParams(results.stream()
                     .map(result -> BetaContentBlockParam.ofToolResult(BetaToolResultBlockParam.builder()
                             .toolUseId(result.toolCallId()).content(result.content()).isError(result.error()).build()))
                     .toList());
@@ -102,7 +103,7 @@ public final class ClaudeAssistantModel implements AssistantModel {
         try {
             Map<String, Object> map = value.convert(Map.class);
             return map == null ? Map.of() : map;
-        } catch (RuntimeException ex) {
+        } catch (RuntimeException _) {
             return Map.of(); // the tool then reports what is missing
         }
     }

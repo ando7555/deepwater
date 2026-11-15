@@ -48,6 +48,8 @@ public class AssistantService {
     static final int RUNS_PER_HOUR = 30;
     static final String OFF_MESSAGE = "The AI assistant is switched off on this server (no Anthropic API key is set). "
             + "Your data is safe and nothing was sent anywhere.";
+    private static final String TOOL_CALL_ID = "toolCallId";
+    private static final String MESSAGE_ID = "messageId";
     private static final Logger log = LoggerFactory.getLogger(AssistantService.class);
 
     private final AssistantModel model;
@@ -105,22 +107,12 @@ public class AssistantService {
     private void loop(String accountId, List<ChatMessage> messages, Consumer<Map<String, Object>> emit) {
         List<ToolSpec> specs = tools.all().stream()
                 .map(t -> new ToolSpec(t.name(), t.description(), t.inputSchema())).toList();
-        List<Entry> transcript = new ArrayList<>();
-        for (ChatMessage m : messages)
-            transcript.add("user".equals(m.role()) ? new UserText(m.content()) : new AssistantText(m.content()));
-
+        List<Entry> transcript = new ArrayList<>(messages.stream()
+                .map(m -> "user".equals(m.role()) ? (Entry) new UserText(m.content()) : new AssistantText(m.content())).toList());
         for (int stepNo = 1; stepNo <= MAX_STEPS; stepNo++) {
             Step step = model.next(new Conversation(systemPrompt, specs, List.copyOf(transcript)));
             transcript.add(new ModelStep(step));
-            if (step.stop() == AssistantModel.Stop.REFUSED) {
-                say(emit, "I can't help with that one. Ask me about your Echo learning, Harbor jobs or your own Amber profile.");
-                return;
-            }
-            if (step.text() != null && !step.text().isBlank()) say(emit, step.text());
-            if (step.stop() != AssistantModel.Stop.TOOLS || step.toolCalls().isEmpty()) {
-                if (step.stop() == AssistantModel.Stop.CUT_OFF) say(emit, "(The answer was cut short.)");
-                return;
-            }
+            if (finished(step, emit)) return;
             List<ToolResult> results = new ArrayList<>();
             for (ToolCall call : step.toolCalls()) results.add(runTool(accountId, call, emit));
             transcript.add(new ToolResults(results));
@@ -128,22 +120,34 @@ public class AssistantService {
         say(emit, "I stopped after " + MAX_STEPS + " steps without a final answer. Try asking a narrower question.");
     }
 
+    /** Shows the step's text and says whether the run ends here (an answer, a refusal or a cut-off reply). */
+    private static boolean finished(Step step, Consumer<Map<String, Object>> emit) {
+        if (step.stop() == AssistantModel.Stop.REFUSED) {
+            say(emit, "I can't help with that one. Ask me about your Echo learning, Harbor jobs or your own Amber profile.");
+            return true;
+        }
+        if (step.text() != null && !step.text().isBlank()) say(emit, step.text());
+        if (step.stop() == AssistantModel.Stop.TOOLS && !step.toolCalls().isEmpty()) return false;
+        if (step.stop() == AssistantModel.Stop.CUT_OFF) say(emit, "(The answer was cut short.)");
+        return true;
+    }
+
     private ToolResult runTool(String accountId, ToolCall call, Consumer<Map<String, Object>> emit) {
-        emit.accept(event("TOOL_CALL_START", "toolCallId", call.id(), "toolCallName", call.name()));
-        emit.accept(event("TOOL_CALL_ARGS", "toolCallId", call.id(), "delta", json.writeValueAsString(call.input())));
-        emit.accept(event("TOOL_CALL_END", "toolCallId", call.id()));
+        emit.accept(event("TOOL_CALL_START", TOOL_CALL_ID, call.id(), "toolCallName", call.name()));
+        emit.accept(event("TOOL_CALL_ARGS", TOOL_CALL_ID, call.id(), "delta", json.writeValueAsString(call.input())));
+        emit.accept(event("TOOL_CALL_END", TOOL_CALL_ID, call.id()));
         // The account comes from the session, never from the model's arguments.
         DeepwaterTools.Outcome outcome = tools.call(accountId, call.name(), call.input());
-        emit.accept(event("TOOL_CALL_RESULT", "messageId", UUID.randomUUID().toString(), "toolCallId", call.id(),
+        emit.accept(event("TOOL_CALL_RESULT", MESSAGE_ID, UUID.randomUUID().toString(), TOOL_CALL_ID, call.id(),
                 "role", "tool", "content", outcome.text(), "isError", outcome.error()));
         return new ToolResult(call.id(), outcome.text(), outcome.error());
     }
 
     private static void say(Consumer<Map<String, Object>> emit, String text) {
         String id = UUID.randomUUID().toString();
-        emit.accept(event("TEXT_MESSAGE_START", "messageId", id, "role", "assistant"));
-        emit.accept(event("TEXT_MESSAGE_CONTENT", "messageId", id, "delta", text));
-        emit.accept(event("TEXT_MESSAGE_END", "messageId", id));
+        emit.accept(event("TEXT_MESSAGE_START", MESSAGE_ID, id, "role", "assistant"));
+        emit.accept(event("TEXT_MESSAGE_CONTENT", MESSAGE_ID, id, "delta", text));
+        emit.accept(event("TEXT_MESSAGE_END", MESSAGE_ID, id));
     }
 
     /** AI calls cost money: each person gets {@link #RUNS_PER_HOUR} questions per hour. Kept in memory. */

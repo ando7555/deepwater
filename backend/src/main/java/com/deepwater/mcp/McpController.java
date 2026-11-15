@@ -31,6 +31,7 @@ import tools.jackson.databind.ObjectMapper;
  */
 @RestController
 class McpController {
+    private static final String JSONRPC = "jsonrpc";
     static final List<String> PROTOCOL_VERSIONS = List.of("2025-11-25", "2025-06-18", "2025-03-26");
     private final PlatformService platform;
     private final DeepwaterTools tools;
@@ -51,12 +52,12 @@ class McpController {
         String account;
         try {
             account = platform.requireAccount(authorization);
-        } catch (ResponseStatusException ex) {
+        } catch (ResponseStatusException _) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .header(HttpHeaders.WWW_AUTHENTICATE, "Bearer realm=\"deepwater\"")
                     .body(error(null, -32001, "Send your Deepwater session token as Authorization: Bearer <token>."));
         }
-        if (message == null || !message.isObject() || !"2.0".equals(message.path("jsonrpc").asString(""))
+        if (message == null || !message.isObject() || !"2.0".equals(message.path(JSONRPC).asString(""))
                 || !message.path("method").isString())
             return ResponseEntity.badRequest().body(error(null, -32600, "Send one JSON-RPC 2.0 request."));
 
@@ -111,7 +112,7 @@ class McpController {
 
     private static Map<String, Object> result(JsonNode id, Object result) {
         Map<String, Object> out = new LinkedHashMap<>();
-        out.put("jsonrpc", "2.0");
+        out.put(JSONRPC, "2.0");
         out.put("id", id);
         out.put("result", result);
         return out;
@@ -119,7 +120,7 @@ class McpController {
 
     private static Map<String, Object> error(JsonNode id, int code, String message) {
         Map<String, Object> out = new LinkedHashMap<>();
-        out.put("jsonrpc", "2.0");
+        out.put(JSONRPC, "2.0");
         out.put("id", id);
         out.put("error", Map.of("code", code, "message", message));
         return out;

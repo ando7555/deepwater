@@ -43,9 +43,10 @@ class AssistantController {
     @PostMapping(value = "/runs", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     SseEmitter run(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth, @RequestBody RunInput body) {
         String account = platform.requireAccount(auth);
-        List<AssistantService.ChatMessage> messages = body == null ? null : body.messages();
+        RunInput input = body == null ? new RunInput(null, null) : body;
+        List<AssistantService.ChatMessage> messages = input.messages();
         assistant.validate(account, messages);
-        String threadId = body.threadId() == null || body.threadId().isBlank() ? java.util.UUID.randomUUID().toString() : body.threadId();
+        String threadId = input.threadId() == null || input.threadId().isBlank() ? java.util.UUID.randomUUID().toString() : input.threadId();
         SseEmitter emitter = new SseEmitter(TIMEOUT_MS);
         Thread.startVirtualThread(() -> {
             try {
@@ -56,7 +57,7 @@ class AssistantController {
                         throw new java.io.UncheckedIOException(ex);
                     }
                 });
-            } catch (RuntimeException ignored) {
+            } catch (RuntimeException _) {
                 // The person closed the page mid-answer; nothing left to send to.
             } finally {
                 emitter.complete();

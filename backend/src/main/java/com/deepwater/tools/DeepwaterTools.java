@@ -155,7 +155,7 @@ public class DeepwaterTools {
     private static Object findJobs(JobSearchService jobs, String account, Map<String, Object> args) {
         Integer max = integer(args, "max");
         var filters = new JobSearchService.Filters(optional(args, "query"), optional(args, "country"), optional(args, "remote"),
-                optional(args, "visa"), integer(args, "minScore"), null, max == null ? 10 : Math.min(Math.max(max, 1), MAX_JOBS),
+                optional(args, "visa"), integer(args, "minScore"), null, max == null ? 10 : Math.clamp(max, 1, MAX_JOBS),
                 null, Boolean.TRUE.equals(args.get("localLanguageNotRequired")) ? "NO_LOCAL_REQUIRED" : null);
         var result = jobs.search(account, filters);
         Map<String, Object> out = new LinkedHashMap<>();
