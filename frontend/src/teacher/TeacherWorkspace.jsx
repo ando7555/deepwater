@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
-import { Button, EmptyState, Panel, Pill, SectionHeading, Segmented, Tabs } from '../ui/index.jsx';
+import { Button, EmptyState, Panel, Pill, SectionHeading, Segmented } from '../ui/index.jsx';
 import { BAND_LABELS, LANGUAGES, languageName } from '../constants.js';
-import LessonBuilder from './LessonBuilder.jsx';
-import AudioDraftPanel from './AudioDraftForm.jsx';
-import { CONTENT_KINDS, kindById, kindOfLesson } from './contentKinds.js';
-import { fromLesson, lessonForKind } from './lessonDraft.js';
+import { kindById, kindOfLesson } from './contentKinds.js';
 
 const STATUS = {
   DRAFT: { label: 'Draft', tone: 'accent' },
@@ -15,41 +12,17 @@ const STATUS = {
 const STATUS_FILTERS = [{ id: 'ALL', label: 'All' }, { id: 'DRAFT', label: 'Drafts' }, { id: 'PUBLISHED', label: 'Published' }, { id: 'UNPUBLISHED', label: 'Unpublished' }];
 
 /**
- * The teacher's workspace, two places: "Add content" (pick a kind, fill in a short form) and
- * "Review & publish" (the queue). The parent owns the API calls and the success or error banners;
- * onSaveDraft(input) resolves to true when the draft was saved.
+ * The teacher's workspace is one place: read each lesson, then approve and publish it (or take it
+ * down). Writing lessons in the browser was removed because it was too hard to use; lessons arrive
+ * as drafts from the course import. The parent owns the API calls and the success or error banners.
  */
-export default function TeacherWorkspace({ lessons, onOpen, onSaveDraft, onPublish, onUnpublish, busy }) {
+export default function TeacherWorkspace({ lessons, onOpen, onPublish, onUnpublish, busy }) {
   const [open, setOpen] = useState(false);
-  const [view, setView] = useState('');
-  const [builder, setBuilder] = useState({ key: 0, initial: null });
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [languageFilter, setLanguageFilter] = useState('ALL');
 
   const drafts = lessons.filter(lesson => lesson.reviewStatus === 'DRAFT').length;
   const shown = lessons.filter(lesson => (statusFilter === 'ALL' || lesson.reviewStatus === statusFilter) && (languageFilter === 'ALL' || lesson.languageCode === languageFilter));
-  const current = view || (drafts ? 'queue' : 'add');
-  const defaultLanguage = languageFilter === 'ALL' ? 'da' : languageFilter;
-
-  function startLesson(initial) {
-    setBuilder(current => ({ key: current.key + 1, initial }));
-    setView('add');
-  }
-
-  function startKind(kindId) {
-    const kind = kindById(kindId);
-    startLesson(kind.id === 'listening' ? { kind: 'listening', languageCode: defaultLanguage } : lessonForKind(kind, defaultLanguage));
-  }
-
-  function backToKinds() {
-    setBuilder(current => ({ key: current.key + 1, initial: null }));
-  }
-
-  async function save(input) {
-    const saved = await onSaveDraft(input);
-    if (saved) { backToKinds(); setView('queue'); setStatusFilter('ALL'); }
-    return saved;
-  }
 
   async function toggle() {
     if (!open) await onOpen();
@@ -57,54 +30,23 @@ export default function TeacherWorkspace({ lessons, onOpen, onSaveDraft, onPubli
   }
 
   return <Panel className="teacher">
-    <SectionHeading eyebrow="TEACHER WORKSPACE" title="Add content, then approve it for learners"
-      lead="Only your configured teacher account can add or publish. Learners see a lesson only after you approve it."
-      action={<Button className="practice-button" onClick={toggle} aria-expanded={open}>{open ? 'Hide workspace' : 'Open workspace'}</Button>} />
-    {open && <div className="teacher-views">
-      <Tabs label="Teacher sections" value={current} onChange={setView} items={[
-        { id: 'add', label: builder.initial?.revisionOf ? 'Revise lesson' : 'Add content' },
-        { id: 'queue', label: 'Review & publish', badge: drafts ? `${drafts} to review` : '' },
-      ]} />
-
-      {current === 'add' && !builder.initial && <KindPicker onPick={startKind} />}
-      {current === 'add' && builder.initial?.kind === 'listening' && <div className="teacher-content">
-        <Button variant="link" onClick={backToKinds}>← Choose another kind of content</Button>
-        <AudioDraftPanel busy={busy} onSaveDraft={async input => { const saved = await onSaveDraft(input); if (saved) { backToKinds(); setView('queue'); } return saved; }} />
-      </div>}
-      {current === 'add' && builder.initial && builder.initial.kind !== 'listening' && <LessonBuilder key={builder.key} initial={builder.initial} busy={busy} onSave={save}
-        onCancel={backToKinds} cancelLabel={builder.initial.revisionOf || builder.initial.title ? 'Discard' : '← Choose another kind'} />}
-
-      {current === 'queue' && <div className="lesson-queue">
-        <div className="queue-filters">
-          <Segmented label="Filter by status" options={STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} />
-          <Segmented label="Filter by language" options={[{ id: 'ALL', label: 'All languages' }, ...LANGUAGES.map(language => ({ id: language.code, label: language.name }))]} value={languageFilter} onChange={setLanguageFilter} />
-          <Button variant="quiet" onClick={() => { backToKinds(); setView('add'); }}>+ Add content</Button>
-        </div>
-        {!shown.length && <EmptyState title={lessons.length ? 'No lessons match these filters.' : 'Nothing to review yet.'}
-          action={!lessons.length && <Button onClick={() => { backToKinds(); setView('add'); }}>Add the first lesson</Button>}>
-          {lessons.length ? 'Choose another status or language.' : 'Add content first; it lands here as a draft for you to approve.'}
-        </EmptyState>}
-        {shown.map(lesson => <LessonQueueItem key={lesson.id} lesson={lesson} busy={busy} onPublish={onPublish} onUnpublish={onUnpublish}
-          onRevise={() => startLesson(fromLesson(lesson, { revisionOf: lesson.id }))} onCopy={() => startLesson(fromLesson(lesson))} />)}
-      </div>}
+    <SectionHeading eyebrow="TEACHER WORKSPACE" title={drafts ? `Review & publish · ${drafts} waiting` : 'Review & publish'}
+      lead="Read each lesson, then approve it. Learners see a lesson only after you publish it, and you can take it down again at any time."
+      action={<Button className="practice-button" onClick={toggle} aria-expanded={open}>{open ? 'Hide lessons' : 'Open lessons'}</Button>} />
+    {open && <div className="lesson-queue">
+      <div className="queue-filters">
+        <Segmented label="Filter by status" options={STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} />
+        <Segmented label="Filter by language" options={[{ id: 'ALL', label: 'All languages' }, ...LANGUAGES.map(language => ({ id: language.code, label: language.name }))]} value={languageFilter} onChange={setLanguageFilter} />
+      </div>
+      {!shown.length && <EmptyState title={lessons.length ? 'No lessons match these filters.' : 'Nothing to review yet.'}>
+        {lessons.length ? 'Choose another status or language.' : 'New course lessons appear here as drafts for you to approve.'}
+      </EmptyState>}
+      {shown.map(lesson => <LessonQueueItem key={lesson.id} lesson={lesson} busy={busy} onPublish={onPublish} onUnpublish={onUnpublish} />)}
     </div>}
   </Panel>;
 }
 
-/** The first step of adding content: one card per kind, in plain words. */
-function KindPicker({ onPick }) {
-  return <div className="kind-picker">
-    <SectionHeading level={3} title="What do you want to add?" lead="Pick one. The form that follows is short and already laid out for that kind of content, in Danish or German." />
-    <div className="kind-grid" role="list">
-      {CONTENT_KINDS.map(kind => <button type="button" className="kind-card" role="listitem" key={kind.id} onClick={() => onPick(kind.id)}>
-        <b>{kind.label}</b>
-        <span>{kind.line}</span>
-      </button>)}
-    </div>
-  </div>;
-}
-
-function LessonQueueItem({ lesson, busy, onPublish, onUnpublish, onRevise, onCopy }) {
+function LessonQueueItem({ lesson, busy, onPublish, onUnpublish }) {
   const status = STATUS[lesson.reviewStatus] || { label: lesson.reviewStatus, tone: 'soft' };
   const kind = kindById(kindOfLesson(lesson));
   return <article className="queue-item">
@@ -133,10 +75,6 @@ function LessonQueueItem({ lesson, busy, onPublish, onUnpublish, onRevise, onCop
       {lesson.reviewStatus === 'DRAFT' && <Button disabled={busy} onClick={() => onPublish(lesson.id)}>I approve &amp; publish</Button>}
       {lesson.reviewStatus === 'PUBLISHED' && <Button variant="quiet" disabled={busy} onClick={() => onUnpublish(lesson)}>Unpublish</Button>}
       {lesson.reviewStatus === 'UNPUBLISHED' && <Button disabled={busy} onClick={() => onPublish(lesson.id)}>Publish again</Button>}
-      {!lesson.audio && lesson.reviewStatus !== 'ARCHIVED' && <>
-        {lesson.reviewStatus !== 'DRAFT' && <Button variant="link" onClick={onRevise}>Revise</Button>}
-        <Button variant="link" onClick={onCopy}>Copy as a new lesson</Button>
-      </>}
     </div>
   </article>;
 }

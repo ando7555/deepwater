@@ -60,6 +60,13 @@ class HarborApiTest {
         assertThat(ruledOut).contains("sample-se-02").doesNotContain("sample-dk-02", "sample-ie-01");
         assertThat(get("/api/v1/harbor/jobs?remote=REMOTE&q=java", token)).contains("sample-eu-01").doesNotContain("sample-se-03", "sample-dk-01");
         assertThat(get("/api/v1/harbor/jobs?minScore=101", token)).contains("\"jobs\":[]");
+
+        // Job families and the local-language filter.
+        assertThat(all).contains("\"jobsByCategory\":{", "\"categoryLabels\":{\"PRODUCT_LEAD\":\"Product & leadership\"");
+        assertThat(get("/api/v1/harbor/jobs?category=DATA_AI", token)).contains("sample-se-02", "sample-no-03", "sample-ch-03")
+                .doesNotContain("sample-dk-01", "sample-dk-04");
+        assertThat(get("/api/v1/harbor/jobs?language=NO_LOCAL_REQUIRED", token)).contains("sample-dk-01")
+                .doesNotContain("sample-dk-04", "sample-ch-02", "sample-de-02");
     }
 
     @Test

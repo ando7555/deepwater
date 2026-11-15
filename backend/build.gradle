@@ -13,6 +13,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-graphql'
     // Reads the text of uploaded PDF CVs for Harbor.
     implementation 'org.apache.pdfbox:pdfbox:3.0.5'
+    // Official Claude SDK: the AI examiner for the Polish B1 practice exam (used only when ANTHROPIC_API_KEY is set).
+    implementation 'com.anthropic:anthropic-java:3.3.0'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation 'org.springframework.boot:spring-boot-resttestclient'
     testImplementation 'org.springframework.boot:spring-boot-restclient'

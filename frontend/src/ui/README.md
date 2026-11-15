@@ -30,13 +30,13 @@ Rules that keep screens consistent:
 | `Stat`, `StatGrid` | Numbers with captions. | `<StatGrid><Stat value={12} label="cards" /></StatGrid>` |
 | `useForm` | One state object for a form; `set('key')` takes an event or a value. | `const [form, set, reset] = useForm({ title: '' });` |
 
-## Worked example: the teacher's lesson builder
+## Worked example: the teacher's review queue
 
 `frontend/src/teacher/` shows the intended split:
 
-- `lessonDraft.js`: the data model and rules as plain functions (no React), covered by `lessonDraft.test.mjs` (`npm test`).
-- `ExerciseEditor.jsx`: one exercise, built from `Field`, `FormGrid`, `Segmented` and `Button`.
-- `LessonBuilder.jsx`: the lesson form, which composes `ExerciseEditor` and shows a `ProblemList` before saving.
-- `TeacherWorkspace.jsx`: queue, filters and tabs; it calls back to `main.jsx`, which owns the API calls and banners.
+- `contentKinds.js`: plain data and functions (no React) that name the kind of a lesson, covered by `contentKinds.test.mjs` (`npm test`).
+- `TeacherWorkspace.jsx`: the review queue with `Segmented` filters, `Pill` labels and `EmptyState`; it calls back to `main.jsx`, which owns the API calls and banners.
 
-To add a new content type, write its model file first, test it, then compose the form from the components above.
+The in-browser lesson builder was removed on 2026-11-08 (the owner found it too hard to use); lessons arrive as drafts from the course import and the teacher only approves them.
+
+To add a new screen, write its model file first, test it, then compose the screen from the components above.

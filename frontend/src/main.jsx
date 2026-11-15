@@ -10,6 +10,8 @@ import CalmProgress from './CalmProgress.jsx';
 import DailyReview from './DailyReview.jsx';
 import ProfilePage from './ProfilePage.jsx';
 import Harbor from './Harbor.jsx';
+import PolishExam from './PolishExam.jsx';
+import { BRANDS, BrandSwitch, useBrand } from './brand.jsx';
 import TeacherWorkspace from './teacher/TeacherWorkspace.jsx';
 import { Notice, Tabs } from './ui/index.jsx';
 import { BAND_LABELS } from './constants.js';
@@ -25,6 +27,35 @@ const THEMES = [
 const PRODUCTS = [
   { id: 'echo', label: 'Echo', hint: 'Languages' },
   { id: 'harbor', label: 'Harbor', hint: 'Jobs' },
+];
+const PRODUCT_NAMES = { echo: 'Echo', harbor: 'Harbor' };
+
+/** Echo's languages. Danish and German have a course; Polish is B1 state-exam practice. */
+const ECHO_LANGUAGES = [
+  { code: 'da', label: 'Danish' },
+  { code: 'de', label: 'German' },
+  { code: 'pl', label: 'Polish', hint: 'B1 exam' },
+];
+const ECHO_LANGUAGE_KEY = 'deepwater-echo-language';
+
+/** True when the learner last chose Polish in Echo (or used the old separate Polish B1 tab). */
+function readPolishMode() {
+  try { return localStorage.getItem(ECHO_LANGUAGE_KEY) === 'pl' || localStorage.getItem('deepwater-product') === 'polish'; } catch { return false; }
+}
+
+function EchoLanguageBar({ value, onChange }) {
+  return <nav className="echo-languages" aria-label="Echo languages">
+    <span className="eyebrow">Language</span>
+    {ECHO_LANGUAGES.map(option => <button key={option.code} type="button" aria-pressed={value === option.code} onClick={() => onChange(option.code)}>
+      {option.label}{option.hint && <small>{option.hint}</small>}</button>)}
+  </nav>;
+}
+
+/** What the welcome page offers; fashion is shown as coming soon and cannot be opened yet. */
+const WELCOME_PRODUCTS = [
+  { id: 'echo', name: 'Echo', tag: 'Danish, German or Polish', line: 'Short lessons that explain the pattern, reviews just before you would forget, and Polish B1 state-exam practice with an examiner that says if you look ready.' },
+  { id: 'harbor', name: 'Harbor', tag: 'Find a job in Denmark', line: 'Upload your CV, see matched jobs in Denmark and the Nordics, with visa and language filters.' },
+  { id: 'fashion', name: 'AI Fashion', tag: 'Coming soon', line: 'How you look and how others see you, with an AI stylist. We are building it next.', soon: true },
 ];
 
 function readProduct() {
@@ -62,13 +93,16 @@ function ThemeSwitch() {
   </div>;
 }
 
-function Brand({ product = 'Echo' }) {
+function Brand({ product }) {
   const [theme] = useTheme();
-  const mark = THEMES.find(option => option.id === theme)?.mark ?? THEMES[0].mark;
-  return <span className="brand"><img src={mark} alt="" width="40" height="40" /><span className="brand-text"><b>{product}</b><small>by Deepwater</small></span></span>;
+  const [brand] = useBrand();
+  const mark = brand === 'nibble' ? '/brand/nibble.svg' : THEMES.find(option => option.id === theme)?.mark ?? THEMES[0].mark;
+  const parent = BRANDS[brand].name;
+  return <span className="brand"><img src={mark} alt="" width="40" height="40" /><span className="brand-text"><b>{product || parent}</b>{product && <small>by {parent}</small>}</span></span>;
 }
 
-function Auth({ onLogin, message }) {
+function Auth({ onLogin, message, onChooseProduct }) {
+  const [brand] = useBrand();
   const [mode, setMode] = useState('register');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -112,24 +146,31 @@ function Auth({ onLogin, message }) {
   }
 
   return <main className="auth-shell">
-    <header className="auth-header"><Brand /><ThemeSwitch /></header>
+    <header className="auth-header"><Brand /><div className="header-tools"><BrandSwitch /><ThemeSwitch /></div></header>
     <div className="auth-grid">
     <section className="pitch">
-      <DeepwaterMark3D size={260} label="Deepwater mark in 3D. Drag to turn it." />
-      <p className="eyebrow">Danish and German, one pattern at a time</p>
-      <h1>Hear the pattern.<br /><span>Make it yours.</span></h1>
-      <p className="pitch-lead">Echo shows you how a language works, lets you practise it in real situations, and schedules reviews so each pattern sticks.</p>
+      {brand === 'nibble'
+        ? <img className="pitch-mascot" src="/brand/nibble.svg" alt="Nibble, our mouse examiner" width="200" height="200" />
+        : <DeepwaterMark3D size={260} label="Deepwater mark in 3D. Drag to turn it." />}
+      <p className="eyebrow">Learn the language. Find the job. Make it home.</p>
+      <h1>Learn the language.<br /><span>Land the job.</span></h1>
+      <p className="pitch-lead">Learn Danish, German or Polish, practise for the Polish B1 exam, and find a job in Denmark and the Nordics. One account opens all of it.</p>
+      <div className="welcome-products" role="list" aria-label="What you can do here">
+        {WELCOME_PRODUCTS.map(item => item.soon
+          ? <div key={item.id} role="listitem" className="welcome-product soon"><b>{item.name}</b><span className="pill muted">{item.tag}</span><p>{item.line}</p></div>
+          : <button key={item.id} type="button" role="listitem" className="welcome-product" onClick={() => { onChooseProduct(item.id); document.getElementById('access-title')?.scrollIntoView({ behavior: 'smooth' }); }}>
+              <b>{item.name}</b><span className="pill">{item.tag}</span><p>{item.line}</p></button>)}
+      </div>
+      <p className="eyebrow welcome-why">Why Echo is different</p>
       <ul className="pitch-points">
         <li><b>Understand, don’t memorise</b><span>Every lesson explains why a sentence is built the way it is.</span></li>
-        <li><b>Reviewed by a teacher</b><span>Lessons are published only after a language teacher approves them.</span></li>
         <li><b>Built around your memory</b><span>Type phrases from memory, hear them read aloud, and see each one come back just before you’d forget it.</span></li>
         <li><b>No streak guilt</b><span>Miss a day and your reviews simply move. A slip steps back one level, never to zero.</span></li>
-        <li><b>Learn with real voices</b><span>Music and podcast lessons, used only with the creator’s permission.</span></li>
       </ul>
     </section>
     <section className="access panel" aria-labelledby="access-title">
-    <h2 id="access-title">{mode === 'register' ? 'Create your Echo account' : 'Welcome back'}</h2>
-    <p className="access-sub">{mode === 'register' ? 'Choose a language and a goal after you sign up.' : 'Sign in to continue where you left off.'}</p>
+    <h2 id="access-title">{mode === 'register' ? `Create your ${BRANDS[brand].name} account` : 'Welcome back'}</h2>
+    <p className="access-sub">{mode === 'register' ? 'One account for Echo (Danish, German, Polish) and Harbor.' : 'Sign in to continue where you left off.'}</p>
     <form onSubmit={submit}>
       {mode === 'register' && <label>Your name<input required maxLength="160" autoComplete="name" value={name} onChange={event => setName(event.target.value)} /></label>}
       <label>Email<input required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} /></label>
@@ -144,7 +185,7 @@ function Auth({ onLogin, message }) {
     <button className="link" onClick={() => { setError(''); setMode(mode === 'register' ? 'login' : 'register'); }}>{mode === 'register' ? 'Already have an account? Sign in' : 'Create an account'}</button>
   </section>
     </div>
-    <footer>Deepwater · Go deeper.</footer>
+    <footer>{BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
   </main>;
 }
 
@@ -186,6 +227,9 @@ function App() {
   const [audioResults, setAudioResults] = useState({});
   const [tab, setTab] = useState('today');
   const [product, setProduct] = useState(readProduct);
+  const [polishMode, setPolishMode] = useState(readPolishMode);
+  useEffect(() => { try { localStorage.setItem(ECHO_LANGUAGE_KEY, polishMode ? 'pl' : 'course'); } catch { /* storage unavailable */ } }, [polishMode]);
+  const [brand] = useBrand();
   useEffect(() => { try { localStorage.setItem('deepwater-product', product); } catch { /* storage unavailable */ } }, [product]);
   const [cards, setCards] = useState([]);
   const [warmUp, setWarmUp] = useState(false);
@@ -320,18 +364,6 @@ function App() {
     setTeacherLessons(data.teacherLessons);
   }
 
-  /** Saves a lesson draft built by the teacher workspace. Resolves to true when it was saved. */
-  async function saveDraft(input) {
-    setError(''); setNotice(''); setBusy(true);
-    try {
-      const data = await gql(`mutation($input: LessonDraftInput!) { saveEchoLessonDraft(input: $input) { id title reviewStatus } }`, { input });
-      setNotice(`Saved “${data.saveEchoLessonDraft.title}” as a private draft. It stays hidden from learners until you approve it under Review & publish.`);
-      await loadTeacherLessons();
-      return true;
-    } catch (saveError) { setError(saveError.message); return false; }
-    finally { setBusy(false); }
-  }
-
   async function publishDraft(id) {
     setError(''); setNotice('');
     try {
@@ -349,6 +381,15 @@ function App() {
       setNotice(`“${data.unpublishEchoLesson.title}” is unpublished. Learners no longer see it.`);
       await loadTeacherLessons(); await loadHome();
     } catch (unpublishError) { setError(unpublishError.message); }
+  }
+
+  /** The Echo language bar: Polish opens the B1 exam practice; Danish and German open the course. */
+  function pickEchoLanguage(code) {
+    setError(''); setNotice('');
+    if (code === 'pl') { setPolishMode(true); setReviewing(false); setWarmUp(false); return; }
+    setPolishMode(false);
+    if (home?.onboarded && home.profile.languageCode !== code) chooseLanguage(code);
+    else if (!home?.onboarded) setLanguageCode(code);
   }
 
   async function chooseLanguage(code) {
@@ -398,7 +439,7 @@ function App() {
     finally { setBusy(false); }
   }
 
-  if (!user) return <Auth onLogin={login} message={verifyMessage} />;
+  if (!user) return <Auth onLogin={login} message={verifyMessage} onChooseProduct={setProduct} />;
 
   function renderExercise(exercise, step, heading) {
     return <ExerciseCard key={exercise.id} exercise={exercise} step={step} heading={heading}
@@ -424,12 +465,12 @@ function App() {
 
   return <main className="app-shell">
     <header className="site-header">
-      <Brand product={product === 'harbor' ? 'Harbor' : 'Echo'} />
-      <nav className="product-switch" aria-label="Deepwater products">
+      <Brand product={PRODUCT_NAMES[product]} />
+      <nav className="product-switch" aria-label="Products">
         {PRODUCTS.map(option => <button key={option.id} type="button" aria-pressed={product === option.id} onClick={() => setProduct(option.id)}><b>{option.label}</b><small>{option.hint}</small></button>)}
       </nav>
-      <div className="account"><ThemeSwitch /><button type="button" className={`account-chip${product === 'echo' && tab === 'profile' ? ' active' : ''}`} aria-current={product === 'echo' && tab === 'profile' ? 'page' : undefined}
-        onClick={() => { setProduct('echo'); setReviewing(false); setWarmUp(false); setTab('profile'); }} aria-label={`Your profile: ${user.name}`}>
+      <div className="account"><BrandSwitch /><ThemeSwitch /><button type="button" className={`account-chip${product === 'echo' && tab === 'profile' ? ' active' : ''}`} aria-current={product === 'echo' && tab === 'profile' ? 'page' : undefined}
+        onClick={() => { setProduct('echo'); setPolishMode(false); setReviewing(false); setWarmUp(false); setTab('profile'); }} aria-label={`Your profile: ${user.name}`}>
         <span className="account-avatar" aria-hidden="true">{(user.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0].toUpperCase()).join('')}</span>
         <span className="account-label">{user.name}</span></button><button className="link" onClick={logout}>Sign out</button></div>
     </header>
@@ -440,13 +481,14 @@ function App() {
     {user.emailVerified === 'false' && <Notice>Please confirm your email: we sent a link to {user.email}. <button className="link" onClick={resendVerification}>Send a new link</button></Notice>}
     {product === 'echo' && <>
     {loading && !home && <p role="status" className="loading">Loading your Echo workspace…</p>}
+    {home && tab !== 'profile' && <EchoLanguageBar value={polishMode ? 'pl' : home.onboarded ? home.profile.languageCode : languageCode} onChange={pickEchoLanguage} />}
+    {polishMode && tab !== 'profile' && <PolishExam examinerName={brand === 'nibble' ? 'Nibble' : 'The examiner'} />}
 
-    {home && !home.onboarded && <section className="onboarding panel">
+    {home && !polishMode && !home.onboarded && <section className="onboarding panel">
       <p className="eyebrow">ECHO · YOUR LANGUAGE START</p>
       <h1>Start with what you want to say.</h1>
-      <p className="intro">Choose a language and tell Echo what you want to be able to express. Your self-described experience sets a gentle starting point.</p>
+      <p className="intro">Pick a language above and tell Echo what you want to be able to express. Your self-described experience sets a gentle starting point.</p>
       <form onSubmit={start}>
-        <label>Language<select value={languageCode} onChange={event => setLanguageCode(event.target.value)}><option value="da">Danish</option><option value="de">German</option></select></label>
         <label>What would you like to express in {languageCode === 'da' ? 'Danish' : 'German'}?<textarea required maxLength="300" value={goal} onChange={event => setGoal(event.target.value)} /></label>
         <label>How familiar does {languageCode === 'da' ? 'Danish' : 'German'} feel today?
           <select value={selfReportedLevel} onChange={event => setSelfReportedLevel(event.target.value)}>
@@ -464,14 +506,14 @@ function App() {
       }} />
     </>}
 
-    {home?.onboarded && tab !== 'profile' && <>
+    {home?.onboarded && !polishMode && tab !== 'profile' && <>
       <section className="welcome">
         <div className="welcome-row"><div><p className="eyebrow">ECHO · {home.profile.languageCode === 'de' ? 'GERMAN' : 'DANISH'} · LEARN THROUGH EXPRESSION</p>
         <h1>Make the pattern yours.</h1>
         <p className="intro">{home.nextAction}</p></div>{lesson && <figure className="depth-mark">
           <DeepwaterMark3D size={170} depth={lesson.mastery} label={`Depth gauge: ${percent}% mastered in ${lesson.title}`} />
           <figcaption>{percent}% deep in this lesson</figcaption>
-        </figure>}<label className="language-switch">Learning language<select value={home.profile.languageCode} onChange={event => chooseLanguage(event.target.value)}><option value="da">Danish</option><option value="de">German</option></select></label></div>
+        </figure>}</div>
         <div className="route-note"><b>{startingRoute} route</b><span>{ROUTE_COPY}</span></div>
       </section>
 
@@ -557,13 +599,13 @@ function App() {
           <div className="method-note"><b>How Echo adapts</b><p>Your chosen experience level sets a guided start. Correct and missed answers update a simple practice estimate and a 1 / 3 / 7 / 14-day review interval. Your free-writing example is saved without automatic grading.</p></div>
         </aside>
       </div>}
-      {user.role === 'TEACHER' && <TeacherWorkspace lessons={teacherLessons} busy={busy} onSaveDraft={saveDraft} onPublish={publishDraft} onUnpublish={unpublishLesson}
+      {user.role === 'TEACHER' && <TeacherWorkspace lessons={teacherLessons} busy={busy} onPublish={publishDraft} onUnpublish={unpublishLesson}
         onOpen={async () => { try { await loadTeacherLessons(); } catch (loadError) { setError(loadError.message); } }} />}
     </>}
     </>}
     {product === 'harbor' && <Harbor />}
-    {product === 'echo' && (tab === 'profile' || !home?.onboarded) && <DeleteAccount email={user.email} onDeleted={logout} />}
-    <footer>{product === 'harbor' ? 'Harbor' : 'Echo'} by Deepwater · Go deeper.</footer>
+    {product === 'echo' && (tab === 'profile' || (!home?.onboarded && !polishMode)) && <DeleteAccount email={user.email} onDeleted={logout} />}
+    <footer>{PRODUCT_NAMES[product]} by {BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
   </main>;
 }
 

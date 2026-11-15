@@ -1,4 +1,4 @@
-const VOICE_LANG = { da: 'da-DK', de: 'de-DE' };
+const VOICE_LANG = { da: 'da-DK', de: 'de-DE', pl: 'pl-PL' };
 
 export const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window;
 

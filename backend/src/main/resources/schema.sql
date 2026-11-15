@@ -225,3 +225,15 @@ create table if not exists harbor_applications (
 );
 -- Styling and formatting check of the last uploaded CV, as JSON (CvCheck).
 alter table harbor_profiles add column if not exists cv_check varchar(8000);
+-- Polish B1 practice exam attempts. result is the whole marked attempt as JSON (ExamService.Result).
+create table if not exists exam_attempts (
+  id varchar(36) primary key,
+  account_id varchar(36) not null references accounts(id),
+  exam_id varchar(40) not null,
+  eligible boolean not null,
+  level_estimate varchar(8) not null,
+  average_percent integer not null,
+  result varchar(60000) not null,
+  created_at timestamp with time zone not null default current_timestamp
+);
+create index if not exists exam_attempts_account on exam_attempts(account_id, created_at);
