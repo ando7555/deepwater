@@ -1,21 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { API, formatDate } from './api.js';
+import { formatDate } from './api.js';
+import { restClient } from './app/http.js';
 import { canSpeak, speak } from './speech.js';
 import { LEVEL_TEXT, answeredIn, appendDictation, lengthNote, progress } from './examTools.js';
-import { Button, Notice, Panel, Pill, SectionHeading, Tabs } from './ui/index.jsx';
+import { Button, ErrorState, Loading, Notice, Panel, Pill, SectionHeading, Tabs, useDraft } from './ui/index.jsx';
 
 // Polish B1 practice exam: the five parts of the state exam, marked by the answer key and by an examiner
 // (the AI examiner when the server has an API key, otherwise a fixed rubric that says so).
 
-async function exam(path = '', { method = 'GET', body } = {}) {
-  const token = sessionStorage.getItem('deepwater-token');
-  const headers = { Authorization: `Bearer ${token}` };
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
-  const response = await fetch(`${API}/api/v1/exam/polish-b1${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.detail || 'The request could not be completed.');
-  return payload;
-}
+const exam = restClient('/api/v1/exam/polish-b1');
 
 const MAX_PLAYS = 2;
 const Recognition = typeof window === 'undefined' ? null : window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -23,8 +16,9 @@ const Recognition = typeof window === 'undefined' ? null : window.SpeechRecognit
 export default function PolishExam({ examinerName = 'The examiner' }) {
   const [data, setData] = useState(null);
   const [history, setHistory] = useState([]);
-  const [answers, setAnswers] = useState({});
-  const [view, setView] = useState('intro');
+  // Answers survive switching to Danish or to Harbor and back, and a reload of the tab.
+  const [answers, setAnswers, clearAnswers] = useDraft('polish-b1-answers', {});
+  const [view, setView] = useState(() => (Object.keys(answers).length ? 'exam' : 'intro'));
   const [partId, setPartId] = useState('listening');
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -46,7 +40,7 @@ export default function PolishExam({ examinerName = 'The examiner' }) {
     setBusy(true); setError('');
     try {
       const marked = await exam('/attempts', { method: 'POST', body: { answers, aiConsent: Boolean(data?.aiExaminer && aiConsent) } });
-      setResult(marked); setView('result'); window.scrollTo?.({ top: 0, behavior: 'smooth' });
+      setResult(marked); setView('result'); clearAnswers(); window.scrollTo?.({ top: 0, behavior: 'smooth' });
       setHistory(await exam('/attempts'));
     } catch (e) { setError(e.message); } finally { setBusy(false); }
   }
@@ -55,9 +49,9 @@ export default function PolishExam({ examinerName = 'The examiner' }) {
     try { setResult(await exam(`/attempts/${encodeURIComponent(id)}`)); setView('result'); } catch (e) { setError(e.message); }
   }
 
-  function restart() { setAnswers({}); setResult(null); setPartId('listening'); setView('exam'); }
+  function restart() { clearAnswers(); setResult(null); setPartId('listening'); setView('exam'); }
 
-  if (!data) return <section className="exam-shell" aria-label="Polish B1 exam practice">{error ? <Notice tone="error">{error}</Notice> : <p>Loading the practice exam…</p>}</section>;
+  if (!data) return <section className="exam-shell" aria-label="Polish B1 exam practice">{error ? <ErrorState title="The practice exam didn’t load" error={error} onRetry={load} /> : <Loading label="Loading the practice exam…" />}</section>;
   const { exam: content, passPercent, aiExaminer } = data;
   const part = content.parts.find(p => p.id === partId) || content.parts[0];
   const { done, total } = progress(content, answers);

@@ -15,6 +15,7 @@ export default function AskDeepwater() {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState(null);
   const [error, setError] = useState('');
+  const [agree, setAgree] = useState(false);
   const threadId = useRef(crypto.randomUUID());
   const end = useRef(null);
   const token = sessionStorage.getItem('deepwater-token');
@@ -26,6 +27,18 @@ export default function AskDeepwater() {
   }, [open, status, token]);
   const labels = labelsFromStatus(status);
   const maxChars = status?.maxMessageChars || 2000;
+  // A hosted AI company sees the questions and the data the tools read, so the person agrees first (stored on the server).
+  const needsConsent = Boolean(status?.sharesDataWith) && !status?.consentGiven;
+
+  async function setConsent(given) {
+    setError('');
+    const response = await fetch(`${API}/api/v1/assistant/consent`, {
+      method: given ? 'PUT' : 'DELETE', headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => null);
+    if (!response?.ok) { setError('Could not save your choice. Please try again.'); return; }
+    setAgree(false);
+    setStatus(current => ({ ...current, consentGiven: given }));
+  }
   useEffect(() => { end.current?.scrollIntoView?.({ block: 'end' }); }, [chat]);
   // The header's "Ask AI" button (and anything else) opens the panel with this event.
   useEffect(() => {
@@ -73,6 +86,18 @@ export default function AskDeepwater() {
     </header>
     {status?.enabled === false && <Notice>The AI is switched off on this server for now. You can still try it: it will tell you so.</Notice>}
     <p className="ask-privacy">It reads only your own Echo, Harbor and Amber data, and never other Amber members.</p>
+    {needsConsent ? <div className="ask-consent">
+      <p>To answer, Ask Deepwater sends your questions and the Deepwater data it looks up for you (your cards, jobs,
+        applications, exam results and Amber profile) to <strong>{status.sharesDataWith}</strong>, the company that runs the AI.
+        They use it only to answer you. You can stop this at any time here.</p>
+      <label className="ask-consent-check">
+        <input type="checkbox" checked={agree} onChange={event => setAgree(event.target.checked)} />
+        Send my questions and my Deepwater data to {status.sharesDataWith}
+      </label>
+      <Button disabled={!agree} onClick={() => setConsent(true)}>Allow and continue</Button>
+      <a className="ask-consent-link" href="/privacy.html" target="_blank" rel="noreferrer">Privacy policy</a>
+      {error && <Notice tone="error">{error}</Notice>}
+    </div> : <>
     <div className="ask-log" aria-live="polite">
       {chat.length === 0 && <div className="ask-suggestions">
         {(status?.suggestions || []).map(s => <button key={s} type="button" className="ask-suggestion" onClick={() => ask(s)}>{s}</button>)}
@@ -90,5 +115,8 @@ export default function AskDeepwater() {
         onChange={event => setQuestion(event.target.value)} disabled={busy} />
       <Button type="submit" disabled={busy || !question.trim()}>Ask</Button>
     </form>
+    {status?.sharesDataWith && <button type="button" className="ask-consent-link" onClick={() => setConsent(false)}>
+      Stop sending my data to {status.sharesDataWith}</button>}
+    </>}
   </aside>;
 }

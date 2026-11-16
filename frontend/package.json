@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "node --test \"src/**/*.test.mjs\"",
+    "test": "node --import ./test/jsx-loader.mjs --test \"src/**/*.test.mjs\"",
     "ios:build": "VITE_API_URL=${VITE_API_URL:-https://backend-production-c912.up.railway.app} vite build && cap sync ios",
     "ios:open": "cap open ios"
   },

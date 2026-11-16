@@ -20,7 +20,7 @@ Implemented:
 - Audio reflections store response length and support/confidence metadata rather than raw free text, reducing the chance of retaining copyrighted lyrics or personal notes.
 - End-to-end tests cover unapproved visibility, unverified-rights publication rejection, cleared publishing, transcript exposure, and learner evidence ownership.
 - An implementation walkthrough for the teacher/product owner in TEACHER_GUIDE.md.
-- Account safety: Google sign-in, five failed password sign-ins per email lock that email out for 15 minutes, signing in with Google removes an unverified password set on the same email, and learners can permanently delete their account and learning records. Password sign-ups get a single-use, 24-hour confirmation link by email (Postmark); signing in with Google keeps the password of an account whose email is confirmed.
+- Account safety: Google sign-in, five failed password sign-ins per email lock that email out for 15 minutes, signing in with Google removes an unverified password set on the same email, and learners can permanently delete their account and learning records. Password sign-ups get a single-use, 24-hour confirmation link by email (Postmark by default, or Proton Mail / any SMTP server via `MAIL_PROVIDER=smtp`; optional Signal notifications to the owner, see docs/operations/email-and-notifications.md); signing in with Google keeps the password of an account whose email is confirmed.
 
 Still needed:
 

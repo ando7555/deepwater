@@ -16,6 +16,13 @@ public interface AssistantModel {
     /** Shown on the status endpoint, for example "anthropic claude-opus-5-5" or "ollama hermes3". */
     default String description() { return enabled() ? getClass().getSimpleName() : "off"; }
 
+    /**
+     * The outside company that receives the person's questions and Deepwater data when this model answers, for
+     * example "Anthropic", or null when nothing leaves servers we run (a self-hosted Ollama, or the assistant is off).
+     * When it is not null the person must agree first (Apple App Store guideline 5.1.2(i)); see {@link AssistantConsent}.
+     */
+    default String sharesDataWith() { return null; }
+
     /** One model step: read the conversation so far and answer with text, tool calls, or both. */
     Step next(Conversation conversation);
 

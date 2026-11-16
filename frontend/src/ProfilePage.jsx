@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { gql } from './api.js';
 import DeepwaterMark3D from './DeepwaterMark3D.jsx';
+import { initials, languageName } from './app/config.js';
+import { Notice } from './ui/index.jsx';
 
 const FIELDS = 'name email emailVerified phone city country nativeLanguage about';
 const EMPTY = { name: '', phone: '', city: '', country: '', nativeLanguage: '', about: '' };
 
-function initials(name) {
-  return (name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0].toUpperCase()).join('');
-}
 
 /** The person's own details. They belong to the Deepwater account, so a future Amber profile can reuse them. */
 export default function ProfilePage({ home, cards, onSaved }) {
@@ -66,11 +65,11 @@ export default function ProfilePage({ home, cards, onSaved }) {
           <datalist id="first-languages">{['English', 'Arabic', 'Armenian', 'Polish', 'Ukrainian', 'Romanian', 'Spanish', 'Portuguese', 'Turkish', 'Persian', 'Russian', 'Hindi', 'Chinese'].map(name => <option key={name} value={name} />)}</datalist>
         </label>
         <label className="wide"><span>Why you are learning <small>optional</small></span><textarea maxLength="500" value={form.about} onChange={update('about')}
-          placeholder={`For example: talk with my partner’s family in ${home.profile.languageCode === 'de' ? 'German' : 'Danish'}`} /></label>
+          placeholder={`For example: talk with my partner’s family in ${languageName(home.profile.languageCode)}`} /></label>
       </div>
       <div className="profile-actions"><button disabled={busy || !profile}>{busy ? 'Saving…' : 'Save profile'}</button>
         {status && <span role="status" className="saved-note">{status}</span>}</div>
-      {error && <p role="alert" className="error">{error}</p>}
+      {error && <Notice tone="error">{error}</Notice>}
       <p className="privacy-note"><b>Private by default.</b> Only you can see these details. Echo does not show them to other learners, and
         they are deleted with your account. Your phone number is not used for marketing.</p>
     </form>

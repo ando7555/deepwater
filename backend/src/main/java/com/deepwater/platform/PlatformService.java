@@ -3,6 +3,7 @@ package com.deepwater.platform;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,10 +21,12 @@ public class PlatformService {
     @Value("${deepwater.teacher.email:}") private String teacherEmail;
 
     private final LoginThrottle throttle;
+    private final ApplicationEventPublisher events;
 
-    public PlatformService(JdbcTemplate db, LoginThrottle throttle) {
+    public PlatformService(JdbcTemplate db, LoginThrottle throttle, ApplicationEventPublisher events) {
         this.db = db;
         this.throttle = throttle;
+        this.events = events;
     }
 
     @Transactional
@@ -41,6 +44,7 @@ public class PlatformService {
         } catch (org.springframework.dao.DuplicateKeyException _) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already registered.");
         }
+        events.publishEvent(new AccountRegistered("password"));
         return session(id, name.strip(), email.strip().toLowerCase());
     }
 
@@ -83,6 +87,7 @@ public class PlatformService {
         if (displayName.length() > 160) displayName = displayName.substring(0, 160);
         String id = UUID.randomUUID().toString();
         db.update("insert into accounts(id,name,email,google_sub,email_verified) values(?,?,?,?,true)", id, displayName, normalizedEmail, googleSub);
+        events.publishEvent(new AccountRegistered("google"));
         return id;
     }
 
@@ -125,7 +130,7 @@ public class PlatformService {
         db.update("delete from amber_decisions where account_id=? or target_account_id=?", accountId, accountId);
         db.update("delete from amber_blocks where blocker_id=? or blocked_id=?", accountId, accountId);
         db.update("delete from amber_reports where reporter_id=?", accountId);
-        for (String table : new String[]{"amber_profiles", "exam_attempts", "harbor_applications", "harbor_profiles", "person_profiles", "echo_cards", "echo_audio_attempts", "echo_attempts", "echo_skill_states",
+        for (String table : new String[]{"assistant_consents", "amber_profiles", "exam_attempts", "harbor_applications", "harbor_profiles", "person_profiles", "echo_cards", "echo_audio_attempts", "echo_attempts", "echo_skill_states",
                 "echo_learner_profiles", "oauth_login_codes", "email_verification_tokens", "user_sessions"})
             db.update("delete from " + table + " where account_id=?", accountId);
         db.update("delete from accounts where id=?", accountId);

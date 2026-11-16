@@ -1,21 +1,13 @@
 import React, { useState } from 'react';
-import { API, formatDate } from '../api.js';
+import { formatDate } from '../api.js';
+import { restClient } from '../app/http.js';
 import { Button, EmptyState, Notice, Panel, Pill, SectionHeading } from '../ui/index.jsx';
 import { REPORT_REASONS } from './amberTools.js';
 
 // The reviewer's screen for Amber reports (only the teacher account sees it for now).
 // Each report shows what the reported person wrote; the reviewer dismisses it or removes them from Amber.
 
-async function moderation(path = '', body) {
-  const token = sessionStorage.getItem('deepwater-token');
-  const headers = { Authorization: `Bearer ${token}` };
-  if (body) headers['Content-Type'] = 'application/json';
-  const response = await fetch(`${API}/api/v1/amber/moderation/reports${path}`, { method: body ? 'POST' : 'GET', headers, body: body ? JSON.stringify(body) : undefined });
-  if (response.status === 204) return null;
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.detail || 'The request could not be completed.');
-  return payload;
-}
+const moderation = restClient('/api/v1/amber/moderation/reports');
 
 const reasonLabel = id => REPORT_REASONS.find(reason => reason.id === id)?.label || id;
 
@@ -31,7 +23,7 @@ export default function AmberReports() {
 
   async function decide(id, action) {
     setBusy(true); setError('');
-    try { await moderation(`/${encodeURIComponent(id)}`, { action }); await load(); }
+    try { await moderation(`/${encodeURIComponent(id)}`, { method: 'POST', body: { action } }); await load(); }
     catch (e) { setError(e.message); } finally { setBusy(false); }
   }
 
