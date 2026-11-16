@@ -3,6 +3,7 @@ package com.deepwater.tools;
 import com.deepwater.amber.AmberService;
 import com.deepwater.echo.EchoCardService;
 import com.deepwater.echo.EchoService;
+import com.deepwater.exam.ExamContent;
 import com.deepwater.exam.ExamService;
 import com.deepwater.harbor.ApplicationService;
 import com.deepwater.harbor.JobSearchService;
@@ -91,7 +92,12 @@ public class DeepwaterTools {
                 "The person's Polish B1 practice exam attempts, newest first: average percent, level estimate and "
                         + "whether the examiner judged them ready for B1.",
                 schema(Map.of(), List.of()), true,
-                (account, args) -> Map.of("attempts", exams.history(account))));
+                (account, args) -> Map.of("attempts", exams.history(account, ExamContent.POLISH_B1))));
+        add(new Tool("danish_pd3_results", "Danish PD3 practice results",
+                "The person's Danish practice exam attempts (in the shape of Prøve i Dansk 3, level B2), newest first: "
+                        + "average percent, level estimate and whether the examiner judged them ready for PD3.",
+                schema(Map.of(), List.of()), true,
+                (account, args) -> Map.of("attempts", exams.history(account, ExamContent.DANISH_PD3))));
         add(new Tool("amber_my_profile", "My Amber profile",
                 "The person's own Amber profile, or joined=false if they have not joined Amber. "
                         + "Never returns anything about other members.",

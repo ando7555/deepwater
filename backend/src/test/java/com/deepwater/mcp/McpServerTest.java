@@ -57,7 +57,8 @@ class McpServerTest {
 
         JsonNode tools = body(post(token, rpc(3, "tools/list", Map.of()))).at("/result/tools");
         assertThat(tools.findValuesAsString("name")).containsExactly("echo_overview", "echo_cards", "echo_add_card",
-                "harbor_find_jobs", "harbor_applications", "polish_b1_results", "amber_my_profile");
+                "harbor_find_jobs", "harbor_applications", "polish_b1_results", "danish_pd3_results",
+                "amber_my_profile");
         for (JsonNode tool : tools) {
             assertThat(tool.at("/inputSchema/type").asString()).isEqualTo("object");
             assertThat(tool.get("description").asString()).isNotBlank();
@@ -103,6 +104,7 @@ class McpServerTest {
         assertThat(jobs.get("jobs").size()).isLessThanOrEqualTo(3);
         assertThat(text(call(token, "harbor_applications", Map.of())).get("applications").isArray()).isTrue();
         assertThat(text(call(token, "polish_b1_results", Map.of())).get("attempts").isArray()).isTrue();
+        assertThat(text(call(token, "danish_pd3_results", Map.of())).get("attempts").isArray()).isTrue();
         JsonNode amber = text(call(token, "amber_my_profile", Map.of()));
         assertThat(amber.get("joined").asBoolean()).isFalse();
     }

@@ -15,9 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-/** The Polish B1 practice exam: the tasks (without answers), marking an attempt, and the learner's past attempts. */
+/**
+ * The practice exams (polish-b1, danish-pd3): the tasks (without answers), marking an attempt, and the
+ * learner's past attempts at that exam. An unknown exam id is a 404.
+ */
 @RestController
-@RequestMapping("/api/v1/exam/polish-b1")
+@RequestMapping("/api/v1/exam/{examId}")
 public class ExamController {
     private static final String AUTHORIZATION = "Authorization";
     private final PlatformService platform;
@@ -31,24 +34,27 @@ public class ExamController {
     }
 
     @GetMapping
-    Map<String, Object> exam(@RequestHeader(value = AUTHORIZATION, required = false) String auth) {
+    Map<String, Object> exam(@RequestHeader(value = AUTHORIZATION, required = false) String auth, @PathVariable String examId) {
         platform.requireAccount(auth);
-        return Map.of("exam", content.publicExam(), "passPercent", exams.passPercent(), "aiExaminer", exams.aiExaminer());
+        return Map.of("exam", content.publicExam(examId), "passPercent", exams.passPercent(), "aiExaminer", exams.aiExaminer());
     }
 
     @PostMapping("/attempts")
-    ExamService.Result submit(@RequestHeader(value = AUTHORIZATION, required = false) String auth, @RequestBody Submission body) {
-        return exams.submit(platform.requireAccount(auth), body == null ? null : body.answers());
+    ExamService.Result submit(@RequestHeader(value = AUTHORIZATION, required = false) String auth, @PathVariable String examId,
+                              @RequestBody Submission body) {
+        return exams.submit(platform.requireAccount(auth), examId, body == null ? null : body.answers());
     }
 
     @GetMapping("/attempts")
-    List<ExamService.AttemptSummary> history(@RequestHeader(value = AUTHORIZATION, required = false) String auth) {
-        return exams.history(platform.requireAccount(auth));
+    List<ExamService.AttemptSummary> history(@RequestHeader(value = AUTHORIZATION, required = false) String auth,
+                                             @PathVariable String examId) {
+        return exams.history(platform.requireAccount(auth), examId);
     }
 
     @GetMapping("/attempts/{id}")
-    ExamService.Result attempt(@RequestHeader(value = AUTHORIZATION, required = false) String auth, @PathVariable String id) {
-        return exams.attempt(platform.requireAccount(auth), id);
+    ExamService.Result attempt(@RequestHeader(value = AUTHORIZATION, required = false) String auth, @PathVariable String examId,
+                               @PathVariable String id) {
+        return exams.attempt(platform.requireAccount(auth), examId, id);
     }
 
     @ExceptionHandler(ResponseStatusException.class)
