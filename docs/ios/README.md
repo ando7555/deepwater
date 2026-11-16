@@ -47,7 +47,37 @@ In Spring terms: the frontend is a static bundle; Capacitor is a thin native she
 (`WKWebView`) that serves it locally, much like Tomcat serving `static/`, and the API calls go
 cross-origin to the Spring Boot backend.
 
-## Steps only the owner can do (route 2)
+## TestFlight without a Mac (owner has an Apple Developer account and an iPhone, no Mac)
+
+`.github/workflows/ios-testflight.yml` builds, signs and uploads the app on a GitHub macOS runner.
+Apple signs it in the cloud with an App Store Connect API key, so no Mac and no certificate files are
+needed. Everything below is done in a web browser (Windows PC or iPhone). Never paste the key or ids in chat.
+
+1. **Team ID**: developer.apple.com > Account > Membership details > Team ID (10 characters).
+2. **App ID**: developer.apple.com > Certificates, Identifiers & Profiles > Identifiers > + > App IDs > App,
+   Bundle ID (explicit) `com.deepwater.app`. If it is taken, pick another (for example
+   `com.<yourname>.deepwater`) and add it as the repository *variable* `IOS_BUNDLE_ID`.
+3. **App record**: appstoreconnect.apple.com > Apps > + > New App: iOS, a name (must be unique on the
+   App Store; "Deepwater" may be taken, so try for example "Deepwater: Learn & Work"), language, the bundle id
+   from step 2, SKU `deepwater-ios`, full access.
+4. **API key**: App Store Connect > Users and Access > Integrations > App Store Connect API > Team Keys > +,
+   access **Admin** (needed for cloud signing). Note the **Key ID** and the **Issuer ID**, and download the
+   `.p8` file (Apple lets you download it only once). In Users and Access, make sure your user has
+   "Access to Cloud Managed Distribution Certificate" (the account holder normally has it).
+5. **GitHub secrets**: github.com/ando7555/deepwater > Settings > Secrets and variables > Actions >
+   New repository secret: `APPLE_TEAM_ID`, `ASC_KEY_ID`, `ASC_ISSUER_ID`, and `ASC_KEY_P8` (open the
+   `.p8` in Notepad and paste the whole text, including the BEGIN/END lines).
+6. **Run it**: Actions > iOS TestFlight upload > Run workflow. GitHub shows that button only for workflows
+   on `main`, so this works after this PR is merged.
+7. **Install**: App Store Connect > your app > TestFlight. The build appears after Apple's processing
+   (often 10 to 30 minutes). Add yourself under Internal Testing, install the TestFlight app on the iPhone,
+   and open Deepwater from there.
+
+Each run uses the GitHub run number as the build number, so every upload is accepted as a new build.
+Not verified yet: no Apple keys exist in this repo, so the signed archive and upload steps have never run.
+Signing problems in CI are common on the first try; the run log names the failing step.
+
+## Steps only the owner can do (route 2, with a Mac)
 
 1. Join the Apple Developer Program (USD 99 per year, individual or organisation).
 2. Get Xcode 26 or later on a Mac (own Mac, borrowed Mac, or a cloud Mac / CI service).
