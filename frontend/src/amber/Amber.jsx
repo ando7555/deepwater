@@ -1,24 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { API } from '../api.js';
-import { Button, Choice, EmptyState, Field, FormGrid, Notice, Panel, Pill, ProblemList, SectionHeading, Tabs } from '../ui/index.jsx';
+import { restClient } from '../app/http.js';
+import { Button, Choice, EmptyState, ErrorState, Field, Loading, FormGrid, Notice, Panel, Pill, ProblemList, SectionHeading, Tabs } from '../ui/index.jsx';
 import { INTENTS, REPORT_REASONS, addInterest, initial, intentWords, isShared, profileProblems } from './amberTools.js';
 
 // Amber: connection by choice. Suggestions explain themselves, and a conversation opens only when both say yes.
 
-async function amber(path, { method = 'GET', body } = {}) {
-  const token = sessionStorage.getItem('deepwater-token');
-  const headers = { Authorization: `Bearer ${token}` };
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
-  const response = await fetch(`${API}/api/v1/amber${path}`, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined });
-  if (response.status === 204) return null;
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const error = new Error(payload.detail || 'The request could not be completed.');
-    error.status = response.status;
-    throw error;
-  }
-  return payload;
-}
+const amber = restClient('/api/v1/amber');
 
 export default function Amber() {
   const [profile, setProfile] = useState(null);
@@ -30,11 +17,11 @@ export default function Amber() {
     amber('/invitations').then(list => setIncoming(list.incoming.length)).catch(() => {});
   }, []);
 
-  useEffect(() => { amber('/profile').then(setProfile).catch(e => setError(e.message)); }, []);
+  const loadProfile = useCallback(() => { setError(''); amber('/profile').then(setProfile).catch(e => setError(e.message)); }, []);
+  useEffect(loadProfile, [loadProfile]);
   useEffect(() => { if (profile?.joined) refreshCount(); }, [profile?.joined, view, refreshCount]);
 
-  if (error && !profile) return <Notice tone="error">{error}</Notice>;
-  if (!profile) return <p role="status" className="loading">Loading Amber…</p>;
+  if (!profile) return error ? <ErrorState title="Amber didn’t load" error={error} onRetry={loadProfile} /> : <Loading label="Loading Amber…" />;
 
   if (!profile.joined) return <div className="amber-app">
     <AmberIntro />
@@ -212,8 +199,7 @@ function Discover({ profile, goToProfile }) {
   };
 
   if (paused) return <EmptyState title="Suggestions are paused" action={<Button variant="quiet" onClick={goToProfile}>Open my profile</Button>}>{paused}</EmptyState>;
-  if (error && !list) return <Notice tone="error">{error}</Notice>;
-  if (!list) return <p role="status" className="loading">Finding people…</p>;
+  if (!list) return error ? <ErrorState title="Suggestions didn’t load" error={error} onRetry={() => { setError(''); load(); }} /> : <Loading label="Finding people…" />;
 
   return <div className="amber-stack">
     {notice && <Notice tone="good">{notice}</Notice>}
@@ -270,8 +256,7 @@ function Invitations({ onChanged, openConversations }) {
     } catch (e) { setError(e.message); }
   };
 
-  if (error && !data) return <Notice tone="error">{error}</Notice>;
-  if (!data) return <p role="status" className="loading">Loading invitations…</p>;
+  if (!data) return error ? <ErrorState title="Invitations didn’t load" error={error} onRetry={() => { setError(''); load(); }} /> : <Loading label="Loading invitations…" />;
 
   return <div className="amber-stack">
     {notice && <Notice tone="good">{notice} {notice.startsWith('You both') && <button type="button" className="link" onClick={openConversations}>Open conversations</button>}</Notice>}
@@ -307,8 +292,7 @@ function Conversations() {
   const load = useCallback(() => { amber('/connections').then(setList).catch(e => setError(e.message)); }, []);
   useEffect(load, [load]);
 
-  if (error && !list) return <Notice tone="error">{error}</Notice>;
-  if (!list) return <p role="status" className="loading">Loading conversations…</p>;
+  if (!list) return error ? <ErrorState title="Conversations didn’t load" error={error} onRetry={() => { setError(''); load(); }} /> : <Loading label="Loading conversations…" />;
   if (open) return <Chat connection={open} onBack={() => { setOpen(null); load(); }} />;
 
   return <div className="amber-stack">

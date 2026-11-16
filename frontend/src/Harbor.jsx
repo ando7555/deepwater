@@ -1,20 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { API } from './api.js';
+import { restClient } from './app/http.js';
+import { ErrorState, Loading, Notice, Tabs } from './ui/index.jsx';
 
 // Harbor: a talent profile from your CV, matched jobs with visa filters, and your own application tracker.
 
-async function harbor(path, { method = 'GET', body, form } = {}) {
-  const token = sessionStorage.getItem('deepwater-token');
-  const headers = { Authorization: `Bearer ${token}` };
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
-  const response = await fetch(`${API}/api/v1/harbor${path}`, {
-    method, headers, body: form ?? (body !== undefined ? JSON.stringify(body) : undefined),
-  });
-  if (response.status === 204) return null;
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.detail || 'The request could not be completed.');
-  return payload;
-}
+const harbor = restClient('/api/v1/harbor');
 
 const FOCUS_COUNTRIES = ['DK', 'SE', 'NO', 'CH'];
 const STATUS_LABELS = { SAVED: 'Saved', APPLIED: 'Applied', INTERVIEW: 'Interview', OFFER: 'Offer', REJECTED: 'Rejected', WITHDRAWN: 'Withdrawn' };
@@ -43,15 +33,18 @@ export default function Harbor() {
   const [sources, setSources] = useState(null);
   const [error, setError] = useState('');
 
-  useEffect(() => {
+  const [loadError, setLoadError] = useState(null);
+
+  function load() {
+    setLoadError(null);
     Promise.all([harbor('/profile'), harbor('/sources')]).then(([p, s]) => {
       setProfile(p); setSources(s);
       if (!p.skills.length) setView('profile');
-    }).catch(e => setError(e.message));
-  }, []);
+    }).catch(setLoadError);
+  }
+  useEffect(load, []);
 
-  if (error && !profile) return <p role="alert" className="banner error">{error}</p>;
-  if (!profile || !sources) return <p role="status" className="loading">Loading Harbor…</p>;
+  if (!profile || !sources) return loadError ? <ErrorState title="Harbor didn’t load" error={loadError} onRetry={load} /> : <Loading label="Loading Harbor…" />;
 
   return <div className="harbor">
     <section className="welcome">
@@ -59,11 +52,10 @@ export default function Harbor() {
       <h1>Your CV becomes your <span className="harbor-accent">talent profile</span>.</h1>
       <p className="intro">Harbor reads your CV, ranks postings by how well they fit you, and tells you plainly whether you would need a work permit, so visa questions never surprise you.</p>
     </section>
-    <nav className="learn-tabs" aria-label="Harbor sections">
-      {[['jobs', 'Matched jobs'], ['profile', 'Talent profile'], ['applications', 'My applications']].map(([id, label]) =>
-        <button key={id} type="button" className={view === id ? 'active' : ''} aria-current={view === id ? 'page' : undefined} onClick={() => setView(id)}>{label}</button>)}
-    </nav>
-    {error && <p role="alert" className="banner error">{error}</p>}
+    <Tabs label="Harbor sections" value={view} onChange={setView} items={[
+      { id: 'jobs', label: 'Matched jobs' }, { id: 'profile', label: 'Talent profile' }, { id: 'applications', label: 'My applications' },
+    ]} />
+    {error && <Notice tone="error" onDismiss={() => setError('')}>{error}</Notice>}
     {view === 'profile' && <ProfileView profile={profile} sources={sources} onSaved={next => { setProfile(next); setError(''); }} onDone={() => setView('jobs')} />}
     {view === 'jobs' && <JobsView profile={profile} sources={sources} onSources={setSources} goToProfile={() => setView('profile')} />}
     {view === 'applications' && <ApplicationsView />}
@@ -150,8 +142,8 @@ function ProfileView({ profile, sources, onSaved, onDone }) {
       <label>Remote work<select value={draft.remotePreference} onChange={e => set('remotePreference', e.target.value)}><option value="ANY">On-site or remote</option><option value="REMOTE_ONLY">Remote only</option><option value="ONSITE">On-site only</option></select></label>
       <label>Summary<textarea maxLength="2000" value={draft.summary || ''} onChange={e => set('summary', e.target.value)} /></label>
       <div className="harbor-actions"><button disabled={busy}>{busy ? 'Saving…' : 'Save my profile'}</button>{profile.skills.length > 0 && <button type="button" className="secondary" onClick={onDone}>See my matches →</button>}</div>
-      {message && <p role="status" className="notice">{message}</p>}
-      {error && <p role="alert" className="error">{error}</p>}
+      {message && <Notice tone="good">{message}</Notice>}
+      {error && <Notice tone="error">{error}</Notice>}
     </form>
   </div>;
 }
@@ -216,10 +208,11 @@ function JobsView({ profile, sources, onSources, goToProfile }) {
         <button type="button" key={code} aria-pressed={filters.category === code} onClick={() => set('category', code)}>{label} ({result.jobsByCategory[code]})</button>)}
     </div>}
     {profile.citizenship === 'UNKNOWN' && <p className="harbor-hint">Tell Harbor your citizenship group in your <button className="link" onClick={goToProfile}>talent profile</button> to see whether you need a work permit for each job.</p>}
-    {error && <p role="alert" className="banner error">{error}</p>}
+    {error && <Notice tone="error" onDismiss={() => setError('')}>{error}</Notice>}
 
     <div className="harbor-results-grid">
       <section aria-label="Matched jobs" className="harbor-results">
+        {!result && !error && <Loading label="Finding jobs that fit you…" />}
         {result && <p className="harbor-count" role="status">{result.jobs.length} of {result.totalJobs} postings match your filters, best fit first.</p>}
         {result?.jobs.map(item => <JobCard key={item.job.id} item={item} onTrack={track} />)}
         {result && !result.jobs.length && <div className="panel harbor-card"><h3>No postings match these filters.</h3><p>Try “Any” for visa, or widen the country.</p></div>}
@@ -273,7 +266,7 @@ function ApplicationsView() {
   const [items, setItems] = useState(null);
   const [notes, setNotes] = useState({});
   const [error, setError] = useState('');
-  const load = () => harbor('/applications').then(setItems).catch(e => setError(e.message));
+  const load = () => harbor('/applications').then(list => { setItems(list); setError(''); }).catch(e => setError(e.message));
   useEffect(() => { load(); }, []);
 
   async function update(item, status, note) {
@@ -282,11 +275,12 @@ function ApplicationsView() {
   async function remove(item) {
     try { await harbor(`/applications/${encodeURIComponent(item.job.id)}`, { method: 'DELETE' }); await load(); } catch (e) { setError(e.message); }
   }
-  if (!items) return <p className="loading">Loading your applications…</p>;
   const counts = Object.keys(STATUS_LABELS).map(s => [s, items.filter(i => i.status === s).length]).filter(([, n]) => n);
 
+  if (!items) return error ? <ErrorState title="Your tracker didn’t load" error={error} onRetry={load} /> : <Loading label="Loading your applications…" />;
+
   return <section className="harbor-applications">
-    {error && <p role="alert" className="banner error">{error}</p>}
+    {error && <Notice tone="error" onDismiss={() => setError('')}>{error}</Notice>}
     <div className="panel harbor-card">
       <p className="eyebrow">YOUR TRACKER</p>
       <h2>{items.length ? `${items.length} role${items.length === 1 ? '' : 's'} you are following` : 'Nothing saved yet'}</h2>

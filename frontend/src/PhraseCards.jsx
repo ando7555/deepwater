@@ -1,3 +1,4 @@
+import { languageExample } from './app/config.js';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { formatDate } from './api.js';
 import { canSpeak, speak } from './speech.js';
@@ -274,7 +275,7 @@ export default function PhraseCards({ cards, languageCode, languageName, busy, o
             <button type="button" aria-pressed={adding === 'list'} onClick={() => setAdding('list')}>Paste a list</button>
           </div></div>
         {adding === 'one' ? <form onSubmit={submit} className="one-card">
-          <label>Phrase in {languageName}<input required maxLength="300" value={front} placeholder={languageCode === 'da' ? 'For example: en kat' : 'For example: die Katze'} onChange={event => setFront(event.target.value)} /></label>
+          <label>Phrase in {languageName}<input required maxLength="300" value={front} placeholder={`For example: ${languageExample(languageCode)}`} onChange={event => setFront(event.target.value)} /></label>
           {articleOf(front, languageCode) && <small>Good: the article is part of the card, so you learn it with the noun.</small>}
           <label>What it means to you<input required maxLength="300" value={back} onChange={event => setBack(event.target.value)} /></label>
           <button disabled={busy}>Save card</button>
