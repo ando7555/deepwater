@@ -45,19 +45,23 @@ public class ExamService {
 
     public int passPercent() { return passPercent; }
 
+    /** Marks with the AI examiner when there is one. Only for callers that already have the learner's permission. */
     public Result submit(String accountId, Map<String, String> answers) {
+        return submit(accountId, answers, true);
+    }
+
+    /**
+     * Marks an attempt. {@code aiConsent} is the learner's explicit permission to send their writing and speaking
+     * to the AI examiner (a third-party AI, App Store guideline 5.1.2(i)). Without it, the fixed rubric marks them.
+     */
+    public Result submit(String accountId, Map<String, String> answers, boolean aiConsent) {
         Map<String, String> given = answers == null ? Map.of() : answers;
         for (String value : given.values())
             if (value != null && value.length() > MAX_ANSWER)
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keep each answer under " + MAX_ANSWER + " characters.");
         ExamContent.Exam exam = content.exam();
-        List<WritingAssessor.OpenAnswer> open = new ArrayList<>();
-        for (ExamContent.Part part : exam.parts())
-            if (!part.closed())
-                for (ExamContent.Item item : part.items())
-                    open.add(new WritingAssessor.OpenAnswer(item.id(), part.kind(), item.prompt(), item.minWords(), item.maxWords(),
-                            item.topicWords(), given.getOrDefault(item.id(), "")));
-        WritingAssessor.Review review = review(open);
+        List<WritingAssessor.OpenAnswer> open = openAnswers(exam, given);
+        WritingAssessor.Review review = aiConsent ? review(open) : rules.review(open);
 
         List<PartResult> parts = new ArrayList<>();
         for (ExamContent.Part part : exam.parts()) parts.add(part.closed() ? closedPart(part, given) : openPart(part, review));
@@ -86,6 +90,17 @@ public class ExamService {
         List<String> rows = db.queryForList("select result from exam_attempts where account_id=? and id=?", String.class, accountId, id);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Attempt not found.");
         return json.readValue(rows.getFirst(), Result.class);
+    }
+
+    /** The writing and speaking answers, the ones an examiner marks. */
+    private static List<WritingAssessor.OpenAnswer> openAnswers(ExamContent.Exam exam, Map<String, String> given) {
+        List<WritingAssessor.OpenAnswer> open = new ArrayList<>();
+        for (ExamContent.Part part : exam.parts())
+            if (!part.closed())
+                for (ExamContent.Item item : part.items())
+                    open.add(new WritingAssessor.OpenAnswer(item.id(), part.kind(), item.prompt(), item.minWords(), item.maxWords(),
+                            item.topicWords(), given.getOrDefault(item.id(), "")));
+        return open;
     }
 
     private WritingAssessor.Review review(List<WritingAssessor.OpenAnswer> open) {

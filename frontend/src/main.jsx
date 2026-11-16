@@ -13,6 +13,7 @@ import Harbor from './Harbor.jsx';
 import AskDeepwater, { openAskDeepwater } from './AskDeepwater.jsx';
 import PolishExam from './PolishExam.jsx';
 import Amber from './amber/Amber.jsx';
+import AmberReports from './amber/AmberReports.jsx';
 import Auth from './Auth.jsx';
 import AppHeader from './AppHeader.jsx';
 import DeleteAccount from './DeleteAccount.jsx';
@@ -448,8 +449,9 @@ function App() {
     {product === 'amber' && <Amber />}
     </ErrorBoundary>
     {product === 'echo' && home && (tab === 'profile' || (!home.onboarded && !polishMode)) && <DeleteAccount email={user.email} onDeleted={logout} />}
+    {product === 'amber' && user.role === 'TEACHER' && <AmberReports />}
     <AskDeepwater />
-    <footer>{productName(product)} by {BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
+    <footer>{productName(product)} by {BRANDS[brand].name} · {BRANDS[brand].tagline} · <a href="/privacy.html">Privacy &amp; contact</a></footer>
   </main>;
 }
 

@@ -5,6 +5,7 @@ import { BRANDS, BrandSwitch, useBrand } from './brand.jsx';
 import { COMING_SOON, PRODUCTS } from './app/config.js';
 import { API, request } from './app/http.js';
 import { ThemeSwitch } from './app/theme.jsx';
+import { showGoogleSignIn } from './platform.js';
 import { Notice } from './ui/index.jsx';
 
 /** The welcome page: what Deepwater offers on the left, create account or sign in on the right. */
@@ -81,11 +82,13 @@ export default function Auth({ onLogin, message, onChooseProduct }) {
     </form>
     {error && <Notice tone="error">{error}</Notice>}
     {message && <Notice tone="good">{message}</Notice>}
-    <div className="auth-divider"><span>or</span></div>
-    <a href={`${API}/api/v1/auth/google`} className="google-btn">Continue with Google</a>
+    {showGoogleSignIn() && <>
+      <div className="auth-divider"><span>or</span></div>
+      <a href={`${API}/api/v1/auth/google`} className="google-btn">Continue with Google</a>
+    </>}
     <button className="link" onClick={() => { setError(''); setMode(mode === 'register' ? 'login' : 'register'); }}>{mode === 'register' ? 'Already have an account? Sign in' : 'Create an account'}</button>
   </section>
     </div>
-    <footer>{BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
+    <footer>{BRANDS[brand].name} · {BRANDS[brand].tagline} · <a href="/privacy.html">Privacy &amp; contact</a></footer>
   </main>;
 }

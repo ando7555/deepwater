@@ -108,6 +108,22 @@ class ExamApiTest {
     }
 
     @Test
+    void withoutPermissionTheAiExaminerNeverSeesTheAnswers() {
+        String accountId = accountId(register());
+        var calls = new java.util.concurrent.atomic.AtomicInteger();
+        WritingAssessor ai = answers -> { calls.incrementAndGet(); return new WritingAssessor.Review(Map.of("w1", mark(70)), "B1", null, WritingAssessor.AI); };
+        var service = new ExamService(content, ai, db, json, 60);
+
+        var refused = service.submit(accountId, Map.of("w1", INVITATION), false);
+        assertThat(refused.markedBy()).isEqualTo(WritingAssessor.RULES);
+        assertThat(calls.get()).isZero();
+
+        var allowed = service.submit(accountId, Map.of("w1", INVITATION), true);
+        assertThat(allowed.markedBy()).isEqualTo(WritingAssessor.AI);
+        assertThat(calls.get()).isEqualTo(1);
+    }
+
+    @Test
     void overlongAnswersAreRefused() {
         String token = register();
         var response = send(HttpMethod.POST, "/api/v1/exam/polish-b1/attempts", token, Map.of("answers", Map.of("w1", "a".repeat(4001))));

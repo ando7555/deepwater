@@ -1,0 +1,32 @@
+name: iOS app build
+# Builds the Capacitor iOS app for the simulator on a GitHub macOS runner, without signing.
+# It proves the Xcode project compiles; it does not sign, upload or test on a real iPhone.
+on:
+  pull_request:
+    paths: ['frontend/**', '.github/workflows/ios.yml']
+  push:
+    branches: [main]
+    paths: ['frontend/**', '.github/workflows/ios.yml']
+  workflow_dispatch:
+permissions: { contents: read }
+jobs:
+  ios-simulator-build:
+    runs-on: macos-latest
+    defaults: { run: { working-directory: frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - name: Use the newest Xcode on the runner
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+      - run: npm ci
+      - run: npm run ios:build
+      - name: Build for the iOS simulator (no signing)
+        run: |
+          set -o pipefail
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build | tail -40

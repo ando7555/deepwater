@@ -109,6 +109,7 @@ public class AmberConnections {
         if (body == null || body.isBlank()) throw AmberService.bad("Write a message first.");
         String clean = body.strip();
         if (clean.length() > 1000) throw AmberService.bad("Keep a message under 1000 characters.");
+        AmberService.checkWording(clean);
         if (count("select count(*) from amber_messages where sender_id=? and created_at>?", accountId,
                 Timestamp.from(Instant.now().minusSeconds(60))) >= MAX_MESSAGES_PER_MINUTE)
             throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Slow down a little and try again in a minute.");

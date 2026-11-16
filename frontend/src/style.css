@@ -27,6 +27,8 @@ body{margin:0;min-width:320px;min-height:100vh;background:
   radial-gradient(ellipse 70% 50% at 80% -10%,var(--glow-1) 0%,transparent 60%),
   radial-gradient(ellipse 60% 40% at 0% 100%,var(--glow-2) 0%,transparent 70%),
   var(--abyss);background-attachment:fixed}
+/* iPhone notch and home bar: zero in a normal browser, real insets in the home-screen app and the iOS app. */
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 button,input,textarea,select{font:inherit}
 button{background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--radius-sm);padding:12px 20px;font-weight:650;cursor:pointer;transition:filter var(--dur-fast) var(--ease),box-shadow var(--dur-fast) var(--ease),background-color var(--dur-fast) var(--ease);box-shadow:0 1px 2px var(--accent-shadow)}
 button:hover:not(:disabled){filter:brightness(1.06);box-shadow:0 4px 14px var(--accent-shadow)}
@@ -663,6 +665,8 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
 .exam-parts li{display:grid;gap:3px;padding:12px;border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:var(--deep)}
 .exam-parts span{font-size:var(--fs-sm);color:var(--text-2)}.exam-parts small{color:var(--text-3)}
 .exam-hint{font-size:var(--fs-md);color:var(--text-3);margin:0}
+.exam-consent{display:flex;gap:10px;align-items:flex-start;font-size:var(--fs-md);color:var(--text-2);margin:14px 0 0;line-height:1.45}
+.exam-consent input{margin-top:3px;flex:none;width:18px;height:18px}
 .exam-history ul{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}
 .exam-history li{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .exam-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}

@@ -1,0 +1,9 @@
+{
+  "appId": "com.deepwater.app",
+  "appName": "Deepwater",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#060f22"
+  }
+}
