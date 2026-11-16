@@ -105,7 +105,7 @@ function partsSentence(parts) {
 function Intro({ content, passPercent, aiExaminer, examinerName, history, onStart, onOpen }) {
   return <Panel className="exam-panel exam-intro">
     <div className="exam-hero">
-      <img src="/brand/nibble.svg" alt="" width="132" height="132" />
+      <img src="/brand/mark.svg" alt="" width="112" height="112" />
       <div>
         <p className="eyebrow">ECHO · {content.title.toUpperCase()}</p>
         <h2>{content.question}</h2>
@@ -176,7 +176,7 @@ function Result({ result, content, examinerName, onRestart, onBack }) {
   const items = Object.fromEntries(content.parts.flatMap(p => p.items.map(i => [i.id, i])));
   return <Panel className="exam-panel">
     <div className={`exam-verdict ${isReady(result) ? 'ready' : 'not-yet'}`}>
-      <img src="/brand/nibble.svg" alt="" width="96" height="96" />
+      <img src="/brand/mark.svg" alt="" width="80" height="80" />
       <div>
         <p className="eyebrow">{examinerName.toUpperCase()} SAYS</p>
         <h2>{isReady(result) ? `You look ready for ${content.shortName}` : `Not ready for ${content.shortName} yet`}</h2>

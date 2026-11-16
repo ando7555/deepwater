@@ -42,7 +42,7 @@ function EchoLanguageBar({ value, onChange }) {
   return <div className="echo-languages">
     <span className="eyebrow">Language</span>
     <Segmented label="Echo languages" value={value} onChange={onChange}
-      options={ECHO_LANGUAGES.map(option => ({ id: option.code, label: <>{option.name}{option.hint && <small>{option.hint}</small>}</> }))} />
+      options={ECHO_LANGUAGES.map(option => ({ id: option.code, label: <><img className="flag" src={`/flags/${option.code}.svg`} alt="" width="22" height="16" />{option.name}{option.hint && <small>{option.hint}</small>}</> }))} />
   </div>;
 }
 
@@ -353,7 +353,7 @@ function App() {
     {home && tab !== 'profile' && <EchoLanguageBar value={echoLanguage.code} onChange={pickEchoLanguage} />}
     {home && tab !== 'profile' && echoLanguage.course && echoLanguage.exam && <EchoModeSwitch language={echoLanguage} examOpen={Boolean(examId)}
       onChange={pickEchoMode} />}
-    {examId && tab !== 'profile' && <ExamPractice key={examId} examId={examId} examinerName={brand === 'nibble' ? 'Nibble' : 'The examiner'} />}
+    {examId && tab !== 'profile' && <ExamPractice key={examId} examId={examId} />}
 
     {home && !examId && !home.onboarded && <section className="onboarding panel">
       <p className="eyebrow">ECHO · YOUR LANGUAGE START</p>
