@@ -42,6 +42,7 @@ public class DeepwaterTools {
 
     private static final int MAX_JOBS = 20;
     private static final int DESCRIPTION_CHARS = 400;
+    private static final String ATTEMPTS = "attempts";
     private static final Logger log = LoggerFactory.getLogger(DeepwaterTools.class);
     private final Map<String, Tool> tools = new LinkedHashMap<>();
     private final ObjectMapper json;
@@ -92,12 +93,12 @@ public class DeepwaterTools {
                 "The person's Polish B1 practice exam attempts, newest first: average percent, level estimate and "
                         + "whether the examiner judged them ready for B1.",
                 schema(Map.of(), List.of()), true,
-                (account, args) -> Map.of("attempts", exams.history(account, ExamContent.POLISH_B1))));
+                (account, args) -> Map.of(ATTEMPTS, exams.history(account, ExamContent.POLISH_B1))));
         add(new Tool("danish_pd3_results", "Danish PD3 practice results",
                 "The person's Danish practice exam attempts (in the shape of Prøve i Dansk 3, level B2), newest first: "
                         + "average percent, level estimate and whether the examiner judged them ready for PD3.",
                 schema(Map.of(), List.of()), true,
-                (account, args) -> Map.of("attempts", exams.history(account, ExamContent.DANISH_PD3))));
+                (account, args) -> Map.of(ATTEMPTS, exams.history(account, ExamContent.DANISH_PD3))));
         add(new Tool("amber_my_profile", "My Amber profile",
                 "The person's own Amber profile, or joined=false if they have not joined Amber. "
                         + "Never returns anything about other members.",
@@ -162,7 +163,7 @@ public class DeepwaterTools {
             lesson.put("level", l.level());
             lesson.put("topic", l.topic());
             lesson.put("mastery", l.mastery());
-            lesson.put("attempts", l.attempts());
+            lesson.put(ATTEMPTS, l.attempts());
             lesson.put("due", l.due());
             lesson.put("nextReviewAt", l.nextReviewAt());
             return lesson;
