@@ -51,7 +51,9 @@ h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;line-height:1.1;letter-spacin
 .app-shell{max-width:1240px;margin:0 auto;padding:22px 34px 12px}
 .auth-shell{max-width:1180px;margin:0 auto;padding:24px 34px;min-height:100vh;display:flex;flex-direction:column}
 .auth-header{padding:4px 0 10px}
-.auth-grid{flex:1;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:56px;align-items:center;padding:5vh 0}
+.auth-grid{flex:1;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(340px,.85fr);grid-template-areas:'head access' 'more access';column-gap:64px;row-gap:var(--space-6);align-items:start;padding:4vh 0}
+.pitch-head{grid-area:head}.pitch-more{grid-area:more}
+.auth-grid>.access{grid-area:access;position:sticky;top:var(--space-5)}
 
 /* Sign-in page: product pitch */
 .pitch h1{font-size:clamp(42px,6vw,72px);margin:18px 0 20px}
@@ -85,7 +87,8 @@ small{color:var(--text-3);font-size:var(--fs-xs);line-height:1.5}
 .site-header{position:relative;display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:4px 0 18px}
 .site-header::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:var(--ribbon);opacity:.5}
 .account{display:flex;align-items:center;gap:var(--space-3);color:var(--text-2)}
-.welcome{max-width:850px;margin:44px auto 28px}
+.welcome{max-width:none;margin:var(--space-6) 0 var(--space-5)}
+.welcome>p,.welcome .intro{max-width:720px}
 .welcome-row{display:flex;justify-content:space-between;align-items:flex-end;gap:20px}
 .language-switch{min-width:190px;margin-bottom:10px}
 .route-note{display:flex;gap:14px;align-items:flex-start;margin-top:22px;padding:15px 18px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);color:var(--text-2);line-height:1.5}
@@ -157,7 +160,7 @@ small{color:var(--text-3);font-size:var(--fs-xs);line-height:1.5}
 .diagnostic .choice{margin-top:7px}
 
 /* Messages */
-.banner{max-width:850px;margin:15px auto;padding:12px 16px;border-radius:var(--radius-sm)}
+.banner{max-width:none;margin:var(--space-3) 0;padding:12px 16px;border-radius:var(--radius-sm)}
 .error{color:var(--warn);background:var(--warn-bg);border:1px solid var(--warn-line);padding:12px 14px;border-radius:var(--radius-sm)}
 .notice{color:var(--good);background:var(--good-bg);border:1px solid var(--good-line)}
 .loading{text-align:center;padding:60px;color:var(--text-2)}
@@ -250,7 +253,7 @@ footer{text-align:center;color:var(--text-3);font-size:var(--fs-sm);letter-spaci
 /* Theme switcher: Deep (default, above), Amber (warm) and Light. Only tokens change. */
 .auth-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
 
-@media(max-width:860px){.auth-grid{grid-template-columns:1fr;gap:32px;padding:3vh 0}}
+@media(max-width:860px){.auth-grid{grid-template-columns:1fr;grid-template-areas:'head' 'access' 'more';row-gap:var(--space-6);padding:2vh 0}.auth-grid>.access{position:static}}
 @media(max-width:860px){.workspace-grid{grid-template-columns:1fr}.progress{position:static}.welcome{margin-top:32px}}
 @media(max-width:600px){
   .app-shell,.auth-shell{padding:16px}.site-header{align-items:flex-start;gap:10px}
@@ -275,22 +278,24 @@ footer{text-align:center;color:var(--text-3);font-size:var(--fs-sm);letter-spaci
 .delete-account button{justify-self:start;background:var(--warn-line);color:var(--on-accent);box-shadow:none}
 
 /* 3D Deepwater mark: drag to turn; on the home page its lit nodes show lesson mastery */
-.mark-3d{display:block;max-width:100%;height:auto!important;aspect-ratio:1;touch-action:none;cursor:grab;filter:drop-shadow(0 18px 40px var(--accent-shadow))}
+/* The glow is a background, not a CSS filter: a filter on a canvas can paint as a black box on some graphics drivers. */
+.mark-3d{display:block;max-width:100%;height:auto!important;aspect-ratio:1;touch-action:none;cursor:grab;background:radial-gradient(circle at 50% 55%,var(--accent-shadow) 0%,transparent 62%)}
 .mark-3d:active{cursor:grabbing}
-.pitch .mark-3d{margin:-20px 0 0 -30px}
-@media(max-width:600px){.pitch .mark-3d{margin:-10px auto 0}}
+/* The drawing sits inside the canvas with some air around it; the negative margin lines its left edge up with the text. */
+.pitch .mark-3d{margin:-12px 0 0 -18px}
+@media(max-width:600px){.pitch .mark-3d{width:150px!important;margin:-8px 0 0 -14px}}
 .welcome-row>div:first-child{flex:1;min-width:0}
 .depth-mark{margin:0;display:grid;justify-items:center;gap:2px;flex:0 0 auto}
 .depth-mark figcaption{font-size:var(--fs-xs);letter-spacing:.06em;color:var(--text-3)}
 
 /* Section tabs */
-.learn-tabs{display:flex;gap:6px;flex-wrap:wrap;max-width:850px;margin:0 auto 24px;padding:6px;border:1px solid var(--line-soft);border-radius:var(--radius-pill);background:var(--surface-glass);width:fit-content}
+.learn-tabs{display:flex;gap:6px;flex-wrap:wrap;max-width:100%;margin:0 0 var(--space-5);padding:6px;border:1px solid var(--line-soft);border-radius:var(--radius-pill);background:var(--surface-glass);width:fit-content}
 .learn-tabs button{white-space:nowrap;background:transparent;color:var(--text-2);box-shadow:none;border-radius:var(--radius-pill);padding:9px 18px;font-weight:600;letter-spacing:.04em}
 .learn-tabs button.active{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 0 0 0 1px var(--line-hover)}
 
 /* Practice hub */
-.practice-hub,.phrase-cards,.calm-progress{max-width:1100px;margin:0 auto 32px}
-.practice-intro{max-width:720px;margin:0 auto 22px;text-align:center}
+.practice-hub,.phrase-cards,.calm-progress{max-width:none;margin:0 0 var(--space-6)}
+.practice-intro{max-width:720px;margin:0 0 var(--space-5);text-align:left}
 .practice-intro h2{font-size:clamp(28px,4vw,40px);margin:10px 0}
 .mode-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
 .mode-card{display:grid;align-content:end;justify-items:start;gap:6px;min-height:210px;padding:20px;text-align:left;border-radius:var(--radius-lg);
@@ -329,7 +334,7 @@ button.secondary{background:transparent;color:var(--text);box-shadow:inset 0 0 0
 .danger-link{color:var(--warn)}
 
 /* Matching warm-up */
-.matching{max-width:850px;margin:0 auto 26px;padding:22px}
+.matching{max-width:none;margin:0 0 var(--space-5);padding:22px}
 .matching-heading{display:flex;justify-content:space-between;align-items:start}
 .matching-heading h3{margin:6px 0 14px}
 .matching-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -384,10 +389,10 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
 .save-card{display:block;margin:4px 0 6px;padding:4px 0}
 
 /* Daily review */
-.review-launch{max-width:850px;margin:0 auto 22px;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 20px;border-radius:var(--radius);
+.review-launch{max-width:none;margin:0 0 var(--space-5);display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 20px;border-radius:var(--radius);
   border:1px solid var(--line-hover);background:linear-gradient(100deg,var(--accent-soft),transparent)}
 .review-launch div{display:grid;gap:3px}.review-launch span{font-size:var(--fs-md);color:var(--text-2)}
-.daily-review{max-width:850px;margin:0 auto 26px;padding:22px;display:grid;gap:14px}
+.daily-review{max-width:none;margin:0 0 var(--space-5);padding:22px;display:grid;gap:14px}
 .daily-review .progress-track{margin:0}
 .next-button{margin-top:12px}
 .session-summary p{margin:4px 0}
@@ -533,7 +538,7 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
 @media(max-width:1000px){.harbor-filters{grid-template-columns:repeat(3,minmax(0,1fr))}.harbor-results-grid{grid-template-columns:1fr}.harbor-guides{position:static}}
 @media(max-width:860px){.harbor-grid{grid-template-columns:1fr}}
 @media(max-width:600px){.harbor-filters{grid-template-columns:1fr 1fr}.harbor-job-head{flex-direction:column}}
-.harbor .welcome{margin:28px auto 22px}.harbor .welcome h1{font-size:clamp(32px,4.4vw,46px);margin:10px 0}
+.harbor .welcome{margin:var(--space-6) 0 var(--space-5)}.harbor .welcome h1{font-size:clamp(32px,4.4vw,46px);margin:10px 0}
 @media(max-width:600px){.site-header{flex-wrap:wrap}.product-switch{order:3;width:100%;justify-content:center}.product-switch button{flex:1}}
 
 /* Reusable UI primitives (frontend/src/ui) */
@@ -542,7 +547,7 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
 .ui-heading .ui-lead{margin:0;max-width:640px}
 .ui-heading-action{flex:0 0 auto}
 .ui-field{align-content:start}
-.ui-field .ui-label{display:block}
+.ui-field .ui-label{display:block;font-weight:600;font-size:var(--fs-md);color:var(--text)}
 .ui-field .optional{font-weight:500;color:var(--text-3)}
 .ui-button-quiet{background:transparent;color:var(--accent-text);box-shadow:inset 0 0 0 1px var(--line-hover)}
 .ui-button-quiet:hover:not(:disabled){background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent);filter:none;transform:none}
@@ -585,7 +590,7 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
 .exam-hero{display:flex;gap:24px;align-items:center}
 .exam-hero h2{margin:6px 0 8px}
 .exam-hero img{flex:0 0 auto}
-.exam-parts{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.exam-parts{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
 .exam-parts li{display:grid;gap:3px;padding:12px;border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:var(--deep)}
 .exam-parts span{font-size:var(--fs-sm);color:var(--text-2)}.exam-parts small{color:var(--text-3)}
 .exam-hint{font-size:var(--fs-md);color:var(--text-3);margin:0}
@@ -753,7 +758,10 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
   .welcome .depth-mark .mark-3d{width:76px!important;height:76px!important}
 }
 /* Four or more tabs on a phone: a tidy 2 × 2 grid instead of a ragged wrap. */
-@media(max-width:600px){.learn-tabs:has(>:nth-child(4)){display:grid;grid-template-columns:1fr 1fr}}
+/* Phone: one row like an iOS segmented control; only very narrow screens fall back to two rows. */
+@media(max-width:600px){.learn-tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;border-radius:var(--radius-pill)}.learn-tabs button{padding:8px 4px}
+  .echo-languages,.echo-languages .segmented{flex-wrap:nowrap;gap:6px}.echo-languages>.eyebrow{display:none}.echo-languages button{padding:8px 10px;font-size:var(--fs-md);white-space:nowrap}}
+@media(max-width:350px){.learn-tabs:has(>:nth-child(4)){grid-auto-flow:row;grid-template-columns:1fr 1fr;border-radius:var(--radius)}.echo-languages,.echo-languages .segmented{flex-wrap:wrap}}
 
 /* Ask Deepwater assistant */
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -809,3 +817,22 @@ h1{letter-spacing:-.035em}
 .eyebrow,.exercise-heading{font-family:var(--font-display);font-weight:500;letter-spacing:.2em}
 button,.pill,.learn-tabs button,.segmented button,.echo-languages button,.ui-menu summary{font-family:var(--font-display);font-weight:500;letter-spacing:.01em}
 .pill{border:1px solid var(--line);background:#0d1f3dcc;color:var(--amber);letter-spacing:.08em;text-transform:uppercase}
+
+/* Apple Human Interface Guidelines pass (2026-11-17): every tappable control is at least 44px high,
+   pills and chips centre their content, and choice chips keep the box beside the words. */
+.amber-intents .choice{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 16px}
+.amber-intents .choice input,.choice input{margin:0}
+.choice{align-items:center;min-height:44px}
+.echo-languages button{align-items:center;min-height:40px}
+.echo-languages.echo-modes button{min-height:36px}
+.learn-tabs button{min-height:40px}
+@media(pointer:coarse){
+  button,.google-btn,.echo-languages button,.echo-languages.echo-modes button,.learn-tabs button,.segmented button{min-height:44px}
+  input,select{min-height:44px}
+}
+/* iPhone: the page runs edge to edge (viewport-fit=cover), so keep content clear of the notch, the status bar and the home indicator. */
+.app-shell,.auth-shell{padding-left:max(34px,env(safe-area-inset-left));padding-right:max(34px,env(safe-area-inset-right));padding-top:max(22px,env(safe-area-inset-top))}
+@media(max-width:600px){.app-shell,.auth-shell{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));padding-top:max(16px,env(safe-area-inset-top))}}
+.ask-launcher{bottom:calc(20px + env(safe-area-inset-bottom))}
+@media(max-width:520px){.ask-launcher{bottom:calc(16px + env(safe-area-inset-bottom))}}
+.exam-hero{margin-bottom:var(--space-3)}
