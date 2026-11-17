@@ -52,8 +52,9 @@ test('storage round-trips values and rejects unknown choices', () => {
   } finally { delete globalThis.localStorage; }
 });
 
-test('Danish has a course and PD3 exam practice; Polish has B1 exam practice only', () => {
-  assert.deepEqual(EXAM_IDS, ['danish-pd3', 'polish-b1']);
+test('Danish and German have a course and exam practice; Polish has B1 exam practice only', () => {
+  assert.deepEqual(EXAM_IDS, ['danish-pd3', 'german-b1', 'polish-b1']);
+  assert.equal(languageOfExam('german-b1').code, 'de');
   assert.equal(languageOfExam('danish-pd3').code, 'da');
   assert.equal(languageOfExam('polish-b1').course, false);
   assert.equal(languageOfExam(null), undefined);

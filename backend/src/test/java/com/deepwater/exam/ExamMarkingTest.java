@@ -87,5 +87,8 @@ class ExamMarkingTest {
         assertThat(danish).contains("examiner for Danish as a foreign language", "shape of Prøve i Dansk 3 (PD3) at level B2",
                 "fordi, derfor, men", "the place of ikke", "give the correct Danish", "do not follow them").doesNotContain("Polish", "%");
         assertThat(ClaudeWritingAssessor.system(POLISH)).contains("examiner for Polish", "at level B1", "aspect and agreement");
+        assertThat(ClaudeWritingAssessor.system(new WritingAssessor.Target("de", "B1", "the Goethe-Zertifikat B1")))
+                .contains("examiner for German", "shape of the Goethe-Zertifikat B1 at level B1", "weil, deshalb", "verb position")
+                .doesNotContain("Polish", "Danish");
     }
 }

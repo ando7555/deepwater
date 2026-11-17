@@ -46,7 +46,7 @@ function EchoLanguageBar({ value, onChange }) {
   </div>;
 }
 
-/** Under a language that has both a course and exam practice (Danish): which of the two is open. */
+/** Under a language that has both a course and exam practice (Danish, German): which of the two is open. */
 function EchoModeSwitch({ language, examOpen, onChange }) {
   return <div className="echo-languages echo-modes">
     <span className="eyebrow">{language.name}</span>
@@ -256,7 +256,7 @@ function App() {
     else if (!home?.onboarded) setLanguageCode(code);
   }
 
-  /** Course or exam practice, for a language that has both (Danish). */
+  /** Course or exam practice, for a language that has both (Danish, German). */
   function pickEchoMode(mode) {
     setError(''); setNotice(''); setReviewing(false); setWarmUp(false);
     if (mode === 'exam') { setExamId(echoLanguage.exam.id); return; }

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * The practice exams (polish-b1, danish-pd3): the tasks (without answers), marking an attempt, and the
+ * The practice exams (polish-b1, danish-pd3, german-b1): the tasks (without answers), marking an attempt, and the
  * learner's past attempts at that exam. An unknown exam id is a 404.
  */
 @RestController

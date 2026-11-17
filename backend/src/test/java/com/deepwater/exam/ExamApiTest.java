@@ -38,6 +38,13 @@ class ExamApiTest {
             at du sender en VVS-mand inden fredag, så varmen kan blive repareret. Hvis det ikke er muligt, vil jeg gerne have en del af
             huslejen tilbage for de uger, hvor lejligheden har været kold. Du kan ringe til mig på 22 33 44 55 hele dagen.
             Med venlig hilsen, Amira Haddad""";
+    static final String MOVE = """
+            Liebe Julia, endlich habe ich eine neue Wohnung gefunden! Sie liegt im dritten Stock und hat zwei helle Zimmer, eine
+            kleine Küche und einen Balkon mit Blick auf den Park. Ich bin umgezogen, weil meine alte Wohnung zu weit von meiner
+            Arbeit entfernt war. Jetzt fahre ich nur zehn Minuten mit dem Fahrrad, deshalb habe ich morgens mehr Zeit. Außerdem
+            ist die Miete nicht teurer als vorher. Am Samstag, den 6. Dezember, mache ich eine Einweihungsparty und möchte dich
+            herzlich einladen. Wir fangen um sieben Uhr an. Kannst du vielleicht einen Salat mitbringen? Ich freue mich auf dich!
+            Viele Grüße, Amira""";
     @Autowired TestRestTemplate http;
     @Autowired JdbcTemplate db;
     @Autowired ExamContent content;
@@ -52,6 +59,25 @@ class ExamApiTest {
                 .doesNotContain("\"answer\"", "topicWords");
         assertThat(content.exam("danish-pd3").parts()).hasSize(4);
         assertThat(send(HttpMethod.GET, "/api/v1/exam/swedish-sfi", token, null).getStatusCode().value()).isEqualTo(404);
+    }
+
+    @Test
+    void theGermanExamHasTheFourGoetheModulesAndIsMarkedInGerman() {
+        String token = register();
+        String exam = send(HttpMethod.GET, "/api/v1/exam/german-b1", token, null).getBody();
+        assertThat(exam).contains("\"name\":\"Lesen\"", "\"name\":\"Hören\"", "\"name\":\"Schreiben\"", "\"name\":\"Sprechen\"",
+                "\"language\":\"de\"", "\"level\":\"B1\"", "not official exam tasks").doesNotContain("\"answer\"", "topicWords");
+        assertThat(content.exam("german-b1").parts()).hasSize(4);
+
+        Map<String, String> answers = correctClosedAnswers("german-b1");
+        answers.put("w1", MOVE);
+        answers.put("w3", "I cannot come on Friday, sorry, because I have to work late that evening.");
+        var response = send(HttpMethod.POST, "/api/v1/exam/german-b1/attempts", token, Map.of("answers", answers));
+        assertThat(response.getBody()).contains("\"examId\":\"german-b1\"", "\"targetLevel\":\"B1\"", "This does not look like German",
+                "\"name\":\"Lesen\",\"english\":\"Reading\",\"percent\":100");
+        var writing = json.readTree(response.getBody()).get("parts").get(2).get("items").get(0).get("assessment");
+        assertThat(writing.get("score").asInt()).isGreaterThanOrEqualTo(60);
+        assertThat(json.readTree(send(HttpMethod.GET, "/api/v1/exam/danish-pd3/attempts", token, null).getBody())).isEmpty();
     }
 
     @Test
