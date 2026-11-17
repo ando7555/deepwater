@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Marks the open answers of the practice exam (writing, and speaking as a transcript). There are two
+ * Marks the open answers of a practice exam (writing, and speaking as a transcript). There are two
  * implementations: an AI examiner on the Claude API, and a fixed rubric used when no API key is set or
  * the AI is unavailable.
  */
@@ -13,7 +13,15 @@ public interface WritingAssessor {
     String RULES = "RULES";
 
     /** Marks every answer in one go. Returns an assessment for each item id it could mark. */
-    Review review(List<OpenAnswer> answers);
+    Review review(Target target, List<OpenAnswer> answers);
+
+    /**
+     * The exam being marked. language is a code such as "pl" or "da"; level is the CEFR level the exam
+     * tests (for example B1); examName names the real exam it is shaped like.
+     */
+    record Target(String language, String level, String examName) {
+        ExamLanguage rules() { return ExamLanguage.of(language); }
+    }
 
     /** One task and the learner's text. kind is WRITING or SPEAKING. */
     record OpenAnswer(String itemId, String kind, String prompt, int minWords, int maxWords, List<String> topicWords, String text) {}

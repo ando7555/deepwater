@@ -69,8 +69,8 @@ class AssistantTest {
         var second = model.seen.get(1).transcript();
         assertThat(second.getLast()).isInstanceOf(ToolResults.class);
         assertThat(((ToolResults) second.getLast()).results().getFirst().content()).contains("good morning");
-        // The model was offered all seven tools and the system prompt.
-        assertThat(model.seen.getFirst().tools()).hasSize(7);
+        // The model was offered all eight tools and the system prompt.
+        assertThat(model.seen.getFirst().tools()).hasSize(8);
         assertThat(model.seen.getFirst().system()).contains("Ask Deepwater");
     }
 

@@ -38,6 +38,8 @@ It is not a separate product tab or welcome card. The choice is remembered per b
 
 ### API
 
+Since 2026-11-16 the same engine also serves Danish PD3 practice (see `docs/product/danish-pd3/README.md`); the path is `/api/v1/exam/{examId}`.
+
 `GET /api/v1/exam/polish-b1` (tasks, no answer keys), `POST /api/v1/exam/polish-b1/attempts` with
 `{"answers": {"g1": "1", "w1": "text"}}`, `GET /api/v1/exam/polish-b1/attempts` and `/attempts/{id}`.
 Attempts are stored in `exam_attempts` and deleted with the account.

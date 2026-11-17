@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { COURSE_LANGUAGES, PRODUCTS, initials, languageExample, languageName, productName } from './config.js';
+import { COURSE_LANGUAGES, EXAM_IDS, PRODUCTS, initials, languageExample, languageName, languageOfExam, productName } from './config.js';
 import { KEYS, read, readChoice, readJson, write, writeJson } from './storage.js';
 
 test('languages come from one list', () => {
@@ -49,4 +49,11 @@ test('storage round-trips values and rejects unknown choices', () => {
     write(KEYS.product, null);
     assert.equal(memory.has(KEYS.product), false);
   } finally { delete globalThis.localStorage; }
+});
+
+test('Danish has a course and PD3 exam practice; Polish has B1 exam practice only', () => {
+  assert.deepEqual(EXAM_IDS, ['danish-pd3', 'polish-b1']);
+  assert.equal(languageOfExam('danish-pd3').code, 'da');
+  assert.equal(languageOfExam('polish-b1').course, false);
+  assert.equal(languageOfExam(null), undefined);
 });
