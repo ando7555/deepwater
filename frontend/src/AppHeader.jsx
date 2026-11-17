@@ -1,16 +1,12 @@
 import React from 'react';
-import { BRANDS, BrandSwitch, useBrand } from './brand.jsx';
+import { BRAND } from './brand.jsx';
 import { PRODUCTS, initials } from './app/config.js';
-import { ThemeSwitch, themeMark, useTheme } from './app/theme.jsx';
 import { Menu, MenuSection } from './ui/index.jsx';
 
 /** The brand lockup: the product name with "by Deepwater" under it, or just the parent brand. */
 export function Brand({ product }) {
-  const [theme] = useTheme();
-  const [brand] = useBrand();
-  const mark = brand === 'nibble' ? '/brand/nibble.svg' : themeMark(theme);
-  const parent = BRANDS[brand].name;
-  return <span className="brand"><img src={mark} alt="" width="40" height="40" />
+  const parent = BRAND.name;
+  return <span className="brand"><img src={BRAND.mark} alt="" width="40" height="40" />
     <span className="brand-text"><b>{product || parent}</b>{product && <small>by {parent}</small>}</span></span>;
 }
 
@@ -23,7 +19,7 @@ export function ProductSwitch({ value, onChange }) {
 }
 
 /**
- * The account corner. Appearance, brand and sign-out live in one menu behind the avatar, so the
+ * The account corner. Profile and sign-out live in one menu behind the avatar, so the
  * header keeps three things: where you are, which product, and you. `children` go before the menu
  * (for example an "Ask AI" button).
  */
@@ -40,8 +36,6 @@ export function AccountMenu({ user, profileOpen, onProfile, onSignOut, children 
         <span className="ui-menu-email">{user.email}</span>
       </MenuSection>
       <button type="button" className="ui-menu-item" data-menu-close aria-current={profileOpen ? 'page' : undefined} onClick={onProfile}>Your profile</button>
-      <MenuSection title="Appearance"><ThemeSwitch /></MenuSection>
-      <MenuSection title="Brand"><BrandSwitch /></MenuSection>
       <button type="button" className="ui-menu-item" data-menu-close onClick={onSignOut}>Sign out</button>
     </Menu>
   </div>;

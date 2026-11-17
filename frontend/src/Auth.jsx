@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import DeepwaterMark3D from './DeepwaterMark3D.jsx';
 import { Brand } from './AppHeader.jsx';
-import { BRANDS, BrandSwitch, useBrand } from './brand.jsx';
+import { BRAND } from './brand.jsx';
 import { COMING_SOON, PRODUCTS } from './app/config.js';
 import { API, request } from './app/http.js';
-import { ThemeSwitch } from './app/theme.jsx';
 import { Notice } from './ui/index.jsx';
 
 /** The welcome page: what Deepwater offers on the left, create account or sign in on the right. */
 export default function Auth({ onLogin, message, onChooseProduct }) {
-  const [brand] = useBrand();
   const [mode, setMode] = useState('register');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -47,12 +45,10 @@ export default function Auth({ onLogin, message, onChooseProduct }) {
   }
 
   return <main className="auth-shell">
-    <header className="auth-header"><Brand /><div className="header-tools"><BrandSwitch /><ThemeSwitch /></div></header>
+    <header className="auth-header"><Brand /></header>
     <div className="auth-grid">
     <section className="pitch">
-      {brand === 'nibble'
-        ? <img className="pitch-mascot" src="/brand/nibble.svg" alt="Nibble, our mouse examiner" width="200" height="200" />
-        : <DeepwaterMark3D size={260} label="Deepwater mark in 3D. Drag to turn it." />}
+      <DeepwaterMark3D size={260} label="Deepwater mark in 3D. Drag to turn it." />
       <p className="eyebrow">Learn the language. Find the job. Make it home.</p>
       <h1>Learn the language.<br /><span>Land the job.</span></h1>
       <p className="pitch-lead">Learn Danish, German or Polish, practise for the Polish B1 exam, and find a job in Denmark and the Nordics. One account opens all of it.</p>
@@ -70,7 +66,7 @@ export default function Auth({ onLogin, message, onChooseProduct }) {
       </ul>
     </section>
     <section className="access panel" aria-labelledby="access-title">
-    <h2 id="access-title">{mode === 'register' ? `Create your ${BRANDS[brand].name} account` : 'Welcome back'}</h2>
+    <h2 id="access-title">{mode === 'register' ? `Create your ${BRAND.name} account` : 'Welcome back'}</h2>
     <p className="access-sub">{mode === 'register' ? 'One account for Echo (Danish, German, Polish), Harbor and Amber.' : 'Sign in to continue where you left off.'}</p>
     <form onSubmit={submit}>
       {mode === 'register' && <label>Your name<input required maxLength="160" autoComplete="name" value={name} onChange={event => setName(event.target.value)} /></label>}
@@ -86,6 +82,7 @@ export default function Auth({ onLogin, message, onChooseProduct }) {
     <button className="link" onClick={() => { setError(''); setMode(mode === 'register' ? 'login' : 'register'); }}>{mode === 'register' ? 'Already have an account? Sign in' : 'Create an account'}</button>
   </section>
     </div>
-    <footer>{BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
+    <footer>{BRAND.name} · {BRAND.tagline}</footer>
+    <div className="auth-ribbon" aria-hidden="true" />
   </main>;
 }

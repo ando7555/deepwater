@@ -7,8 +7,6 @@
 export const KEYS = {
   token: 'deepwater-token',
   user: 'deepwater-user',
-  theme: 'deepwater-theme',
-  brand: 'deepwater-brand',
   product: 'deepwater-product',
   echoLanguage: 'deepwater-echo-language',
   draft: id => `deepwater-draft:${id}`,
