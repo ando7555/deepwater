@@ -8,6 +8,7 @@ export const TOOL_LABELS = {
   harbor_find_jobs: 'Searching matched jobs in Harbor',
   harbor_applications: 'Opening your application tracker',
   polish_b1_results: 'Reading your Polish B1 results',
+  danish_pd3_results: 'Reading your Danish PD3 results',
   amber_my_profile: 'Looking at your own Amber profile',
 };
 

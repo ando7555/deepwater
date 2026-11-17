@@ -5,7 +5,7 @@
 
 export const PRODUCTS = [
   { id: 'echo', name: 'Echo', hint: 'Languages', tag: 'Danish, German or Polish',
-    line: 'Short lessons that explain the pattern, reviews just before you would forget, and Polish B1 state-exam practice with an examiner that says if you look ready.' },
+    line: 'Short lessons that explain the pattern, reviews just before you would forget, and Danish PD3 and Polish B1 exam practice with an examiner that says if you look ready.' },
   { id: 'harbor', name: 'Harbor', hint: 'Jobs', tag: 'Find a job in Denmark',
     line: 'Upload your CV, see matched jobs in Denmark and the Nordics, with visa and language filters.' },
   { id: 'amber', name: 'Amber', hint: 'Connections', tag: 'Meet people, by choice',
@@ -31,14 +31,20 @@ export const THEMES = [
 export const THEME_IDS = THEMES.map(theme => theme.id);
 
 /**
- * Echo's languages. `course` languages have lessons and cards; Polish is B1 state-exam practice.
- * `example` is the placeholder shown when a learner adds a card.
+ * Echo's languages. `course` languages have lessons and cards; `exam` is exam practice with an examiner
+ * (Danish has both; Polish is B1 exam practice only). `example` is the placeholder shown when a learner adds a card.
  */
 export const ECHO_LANGUAGES = [
-  { code: 'da', name: 'Danish', course: true, example: 'en kat' },
+  { code: 'da', name: 'Danish', course: true, example: 'en kat', exam: { id: 'danish-pd3', label: 'PD3 exam practice' } },
   { code: 'de', name: 'German', course: true, example: 'die Katze' },
-  { code: 'pl', name: 'Polish', hint: 'B1 exam', course: false },
+  { code: 'pl', name: 'Polish', hint: 'B1 exam', course: false, exam: { id: 'polish-b1', label: 'B1 exam practice' } },
 ];
+export const EXAM_IDS = ECHO_LANGUAGES.filter(language => language.exam).map(language => language.exam.id);
+
+/** The Echo language an exam belongs to: 'danish-pd3' -> the Danish entry. */
+export function languageOfExam(examId) {
+  return ECHO_LANGUAGES.find(language => language.exam?.id === examId);
+}
 export const COURSE_LANGUAGES = ECHO_LANGUAGES.filter(language => language.course);
 
 export function languageName(code) {

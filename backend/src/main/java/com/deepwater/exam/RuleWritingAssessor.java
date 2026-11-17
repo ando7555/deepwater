@@ -6,49 +6,41 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
  * A fixed rubric for open answers, used when the AI examiner is off. It cannot judge grammar the way
- * a teacher can, so it only measures what it can count (length, linking words, word variety, Polish
- * letters, whether the answer is on the topic) and says that its mark is a rough estimate.
+ * a teacher can, so it only measures what it can count (length, linking words, word variety, the
+ * language's own letters, whether the answer is on the topic) and says that its mark is a rough estimate.
  */
 public final class RuleWritingAssessor implements WritingAssessor {
     private static final Pattern WORD = Pattern.compile("[\\p{L}]+");
-    private static final Pattern POLISH_LETTERS = Pattern.compile("[ąćęłńóśźż]");
-    private static final Set<String> LINKING_WORDS = Set.of("że", "ponieważ", "bo", "ale", "więc", "dlatego", "który", "która", "które",
-            "którym", "której", "kiedy", "jeśli", "jeżeli", "gdy", "chociaż", "choć", "oraz", "również", "natomiast", "żeby", "gdyby",
-            "potem", "najpierw", "następnie", "jednak", "także", "zatem", "przede");
-    /** Common Polish words that are not also English words, so "i" and "to" do not count. */
-    private static final Set<String> POLISH_FUNCTION_WORDS = Set.of("nie", "się", "jest", "że", "jak", "mam", "jestem", "ale", "mnie",
-            "moja", "mój", "moje", "bardzo", "czy", "też", "lub", "albo", "dla", "już", "tak", "będzie", "który", "która", "które", "oraz",
-            "przez", "mieszkam", "lubię");
 
     @Override
-    public Review review(List<OpenAnswer> answers) {
+    public Review review(Target target, List<OpenAnswer> answers) {
+        ExamLanguage language = target.rules();
         Map<String, ItemAssessment> items = new LinkedHashMap<>();
-        for (OpenAnswer answer : answers) items.put(answer.itemId(), assess(answer));
+        for (OpenAnswer answer : answers) items.put(answer.itemId(), assess(language, answer));
         return new Review(items, null, null, RULES);
     }
 
-    static ItemAssessment assess(OpenAnswer answer) {
+    static ItemAssessment assess(ExamLanguage language, OpenAnswer answer) {
         String text = answer.text() == null ? "" : answer.text().strip();
         List<String> words = WORD.matcher(text.toLowerCase(Locale.ROOT)).results().map(m -> m.group()).toList();
         if (words.isEmpty())
             return new ItemAssessment(0, new Criteria(0, 0, 0, 0), "A1", "No answer was given.", List.of(),
                     List.of(), List.of("Write or say something for every task: an empty answer scores 0."), RULES);
-        if (!looksPolish(words))
-            return new ItemAssessment(0, new Criteria(0, 0, 0, 0), "A1", "This does not look like Polish, so it was not marked.", List.of(),
-                    List.of(), List.of("Answer in Polish."), RULES);
+        if (!looksLike(language, words))
+            return new ItemAssessment(0, new Criteria(0, 0, 0, 0), "A1", "This does not look like " + language.name() + ", so it was not marked.",
+                    List.of(), List.of(), List.of("Answer in " + language.name() + "."), RULES);
 
         List<String> strengths = new ArrayList<>();
         List<String> tips = new ArrayList<>();
         int task = taskScore(answer, words, strengths, tips);
-        int coherence = coherenceScore(text, words, strengths, tips);
+        int coherence = coherenceScore(language, text, words, strengths, tips);
         int vocabulary = vocabularyScore(words, strengths, tips);
-        // Without a teacher or the AI, grammar is only guessed from the Polish letters and sentence shape.
-        int grammar = grammarGuess(text, words);
+        // Without a teacher or the AI, grammar is only guessed from the language's letters and sentence shape.
+        int grammar = grammarGuess(language, text, words);
         tips.add("This mark comes from fixed rules (length, linking words, word variety), not from a teacher or the AI examiner, "
                 + "so grammar is only roughly estimated (at most 15 of 25).");
         int score = task + coherence + vocabulary + grammar;
@@ -77,12 +69,12 @@ public final class RuleWritingAssessor implements WritingAssessor {
         return length + topicScore;
     }
 
-    private static int coherenceScore(String text, List<String> words, List<String> strengths, List<String> tips) {
-        long linking = words.stream().filter(LINKING_WORDS::contains).distinct().count();
+    private static int coherenceScore(ExamLanguage language, String text, List<String> words, List<String> strengths, List<String> tips) {
+        long linking = words.stream().filter(language.linkingWords()::contains).distinct().count();
         long sentences = Arrays.stream(text.split("[.!?]+")).filter(s -> !s.isBlank()).count();
         int score = (int) Math.min(15, linking * 3) + (int) Math.min(10, sentences * 2);
         if (linking >= 3) strengths.add("You join ideas with linking words (" + linking + " different ones).");
-        else tips.add("Join sentences with words like: bo, ponieważ, dlatego, ale, który, kiedy.");
+        else tips.add("Join sentences with words like: " + language.linkingExamples() + ".");
         return Math.min(25, score);
     }
 
@@ -95,18 +87,18 @@ public final class RuleWritingAssessor implements WritingAssessor {
         return score;
     }
 
-    private static int grammarGuess(String text, List<String> words) {
-        long withPolishLetters = words.stream().filter(w -> POLISH_LETTERS.matcher(w).find()).count();
-        double share = (double) withPolishLetters / words.size();
-        int letters = share >= 0.12 ? 10 : (int) Math.round(share / 0.12 * 10);
+    private static int grammarGuess(ExamLanguage language, String text, List<String> words) {
+        long withOwnLetters = words.stream().filter(w -> language.letters().matcher(w).find()).count();
+        double share = (double) withOwnLetters / words.size();
+        int letters = share >= language.letterShare() ? 10 : (int) Math.round(share / language.letterShare() * 10);
         boolean capitalised = Arrays.stream(text.split("[.!?]+\\s*")).filter(s -> !s.isBlank())
                 .allMatch(s -> Character.isUpperCase(s.strip().charAt(0)));
         return letters + (capitalised ? 5 : 2);
     }
 
-    private static boolean looksPolish(List<String> words) {
-        long polish = words.stream().filter(w -> POLISH_FUNCTION_WORDS.contains(w) || POLISH_LETTERS.matcher(w).find()).count();
-        return polish * 6 >= words.size();
+    private static boolean looksLike(ExamLanguage language, List<String> words) {
+        long own = words.stream().filter(w -> language.functionWords().contains(w) || language.letters().matcher(w).find()).count();
+        return own * 6 >= words.size();
     }
 
     static String levelFor(int score) {

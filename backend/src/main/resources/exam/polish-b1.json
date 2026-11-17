@@ -2,6 +2,11 @@
   "id": "polish-b1",
   "title": "Polish B1 practice exam",
   "notice": "Practice items written for Deepwater in the shape of the five parts of the Polish state certificate exam at B1 (egzamin certyfikatowy z języka polskiego jako obcego). They are not official exam tasks, and the result is an estimate, not an official grade. The official exam and its rules: certyfikatpolski.pl.",
+  "language": "pl",
+  "level": "B1",
+  "examName": "the Polish state certificate exam",
+  "shortName": "B1",
+  "question": "Are you ready for the Polish B1 certificate?",
   "parts": [
     {
       "id": "listening",

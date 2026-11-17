@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { answeredIn, appendDictation, lengthNote, progress, wordCount } from './examTools.js';
+import { answeredIn, appendDictation, lengthNote, levelText, progress, wordCount } from './examTools.js';
 
 test('words are counted with Polish letters and without punctuation', () => {
   assert.equal(wordCount('Zażółć gęślą jaźń!'), 3);
@@ -27,4 +27,18 @@ test('dictation is appended with one space', () => {
   assert.equal(appendDictation('Mam na imię Ana.', ' mieszkam w Danii '), 'Mam na imię Ana. mieszkam w Danii');
   assert.equal(appendDictation('', 'Cześć'), 'Cześć');
   assert.equal(appendDictation('Cześć', ''), 'Cześć');
+});
+
+test('the level estimate reads against the level the exam tests', () => {
+  assert.equal(levelText('B1+', 'B1'), 'Strong B1');
+  assert.equal(levelText('B1', 'B1'), 'B1');
+  assert.equal(levelText('A2', 'B1'), 'A2, getting close to B1');
+  assert.equal(levelText('A1-A2', 'B1'), 'A1 to A2');
+  assert.equal(levelText('B1', 'B2'), 'B1, getting close to B2');
+  assert.equal(levelText('A2-B1', 'B2'), 'A2 to B1');
+  assert.equal(levelText(null, 'B2'), '');
+});
+
+test('Danish letters count as word letters', () => {
+  assert.equal(wordCount('Jeg bor på Østerbro og går på sprogskole.'), 8);
 });

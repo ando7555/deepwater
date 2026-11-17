@@ -11,7 +11,7 @@ import DailyReview from './DailyReview.jsx';
 import ProfilePage from './ProfilePage.jsx';
 import Harbor from './Harbor.jsx';
 import AskDeepwater, { openAskDeepwater } from './AskDeepwater.jsx';
-import PolishExam from './PolishExam.jsx';
+import ExamPractice from './ExamPractice.jsx';
 import Amber from './amber/Amber.jsx';
 import Auth from './Auth.jsx';
 import AppHeader from './AppHeader.jsx';
@@ -20,7 +20,7 @@ import { BRANDS, useBrand } from './brand.jsx';
 import TeacherWorkspace from './teacher/TeacherWorkspace.jsx';
 import { ErrorBoundary, ErrorState, Loading, Notice, Segmented, Tabs, useDraft } from './ui/index.jsx';
 import { BAND_LABELS } from './constants.js';
-import { ECHO_LANGUAGES, PRODUCT_IDS, languageName, productName } from './app/config.js';
+import { ECHO_LANGUAGES, EXAM_IDS, PRODUCT_IDS, languageName, languageOfExam, productName } from './app/config.js';
 import { SESSION_EXPIRED, gql, request } from './app/http.js';
 import { KEYS, read, readChoice, session, write } from './app/storage.js';
 import { applyTheme, readTheme } from './app/theme.jsx';
@@ -28,16 +28,30 @@ import { formatDate } from './api.js';
 import { CARD_FIELDS, ECHO_HOME_FIELDS } from './echoQueries.js';
 import './style.css';
 
-/** True when the learner last chose Polish in Echo (or used the old separate Polish B1 tab). */
-function readPolishMode() {
-  return read(KEYS.echoLanguage) === 'pl' || read(KEYS.product) === 'polish';
+/**
+ * The exam practice the learner last had open in Echo ('polish-b1' or 'danish-pd3'), or null for the course.
+ * 'pl' and the old separate Polish tab are how earlier versions remembered Polish.
+ */
+function readExamMode() {
+  const saved = read(KEYS.echoLanguage);
+  if (saved === 'pl' || read(KEYS.product) === 'polish') return 'polish-b1';
+  return EXAM_IDS.includes(saved) ? saved : null;
 }
 
 function EchoLanguageBar({ value, onChange }) {
   return <div className="echo-languages">
     <span className="eyebrow">Language</span>
     <Segmented label="Echo languages" value={value} onChange={onChange}
-      options={ECHO_LANGUAGES.map(option => ({ id: option.code, label: <>{option.name}{option.hint && <small>{option.hint}</small>}</> }))} />
+      options={ECHO_LANGUAGES.map(option => ({ id: option.code, label: <><img className="flag" src={`/flags/${option.code}.svg`} alt="" width="22" height="16" />{option.name}{option.hint && <small>{option.hint}</small>}</> }))} />
+  </div>;
+}
+
+/** Under a language that has both a course and exam practice (Danish): which of the two is open. */
+function EchoModeSwitch({ language, examOpen, onChange }) {
+  return <div className="echo-languages echo-modes">
+    <span className="eyebrow">{language.name}</span>
+    <Segmented label={`${language.name}: course or exam practice`} value={examOpen ? 'exam' : 'course'} onChange={onChange}
+      options={[{ id: 'course', label: 'Course' }, { id: 'exam', label: language.exam.label }]} />
   </div>;
 }
 
@@ -75,8 +89,8 @@ function App() {
   const [audioResults, setAudioResults] = useState({});
   const [tab, setTab] = useState('today');
   const [product, setProduct] = useState(readProduct);
-  const [polishMode, setPolishMode] = useState(readPolishMode);
-  useEffect(() => { write(KEYS.echoLanguage, polishMode ? 'pl' : 'course'); }, [polishMode]);
+  const [examId, setExamId] = useState(readExamMode);
+  useEffect(() => { write(KEYS.echoLanguage, examId || 'course'); }, [examId]);
   const [brand] = useBrand();
   useEffect(() => { write(KEYS.product, product); }, [product]);
   const [cards, setCards] = useState([]);
@@ -235,10 +249,20 @@ function App() {
   /** The Echo language bar: Polish opens the B1 exam practice; Danish and German open the course. */
   function pickEchoLanguage(code) {
     setError(''); setNotice('');
-    if (code === 'pl') { setPolishMode(true); setReviewing(false); setWarmUp(false); return; }
-    setPolishMode(false);
+    const language = ECHO_LANGUAGES.find(option => option.code === code);
+    if (!language?.course) { setExamId(language?.exam?.id ?? null); setReviewing(false); setWarmUp(false); return; }
+    setExamId(null);
     if (home?.onboarded && home.profile.languageCode !== code) chooseLanguage(code);
     else if (!home?.onboarded) setLanguageCode(code);
+  }
+
+  /** Course or exam practice, for a language that has both (Danish). */
+  function pickEchoMode(mode) {
+    setError(''); setNotice(''); setReviewing(false); setWarmUp(false);
+    if (mode === 'exam') { setExamId(echoLanguage.exam.id); return; }
+    setExamId(null);
+    if (home?.onboarded && home.profile.languageCode !== echoLanguage.code) chooseLanguage(echoLanguage.code);
+    else if (!home?.onboarded) setLanguageCode(echoLanguage.code);
   }
 
   async function chooseLanguage(code) {
@@ -309,10 +333,14 @@ function App() {
     return a.position - b.position;
   }) : [];
 
+  // The language the bar shows: the open exam's language, otherwise the course language.
+  const courseCode = home?.onboarded ? home.profile.languageCode : languageCode;
+  const echoLanguage = languageOfExam(examId) || ECHO_LANGUAGES.find(option => option.code === courseCode) || ECHO_LANGUAGES[0];
+
   return <main className="app-shell">
     <AppHeader product={product} onProduct={chooseProduct} productLabel={productName(product)} user={user}
       profileOpen={product === 'echo' && tab === 'profile'} onSignOut={logout}
-      onProfile={() => { chooseProduct('echo'); setPolishMode(false); setReviewing(false); setWarmUp(false); setTab('profile'); }}
+      onProfile={() => { chooseProduct('echo'); setExamId(null); setReviewing(false); setWarmUp(false); setTab('profile'); }}
       accountExtras={<button type="button" className="ask-header" onClick={openAskDeepwater}><span aria-hidden="true">✦</span> Ask AI</button>} />
 
     {error && <Notice tone="error" onDismiss={() => setError('')}>{error}</Notice>}
@@ -322,10 +350,12 @@ function App() {
     <ErrorBoundary name={productName(product)} resetKey={product}>
     {product === 'echo' && <>
     {!home && (homeError ? <ErrorState title="Echo didn’t load" error={homeError} onRetry={loadHome} /> : <Loading label="Loading your Echo workspace…" />)}
-    {home && tab !== 'profile' && <EchoLanguageBar value={polishMode ? 'pl' : home.onboarded ? home.profile.languageCode : languageCode} onChange={pickEchoLanguage} />}
-    {polishMode && tab !== 'profile' && <PolishExam examinerName={brand === 'nibble' ? 'Nibble' : 'The examiner'} />}
+    {home && tab !== 'profile' && <EchoLanguageBar value={echoLanguage.code} onChange={pickEchoLanguage} />}
+    {home && tab !== 'profile' && echoLanguage.course && echoLanguage.exam && <EchoModeSwitch language={echoLanguage} examOpen={Boolean(examId)}
+      onChange={pickEchoMode} />}
+    {examId && tab !== 'profile' && <ExamPractice key={examId} examId={examId} />}
 
-    {home && !polishMode && !home.onboarded && <section className="onboarding panel">
+    {home && !examId && !home.onboarded && <section className="onboarding panel">
       <p className="eyebrow">ECHO · YOUR LANGUAGE START</p>
       <h1>Start with what you want to say.</h1>
       <p className="intro">Pick a language above and tell Echo what you want to be able to express. Your self-described experience sets a gentle starting point.</p>
@@ -347,7 +377,7 @@ function App() {
       }} />
     </>}
 
-    {home?.onboarded && !polishMode && tab !== 'profile' && <>
+    {home?.onboarded && !examId && tab !== 'profile' && <>
       <section className="welcome">
         <div className="welcome-row"><div><p className="eyebrow">ECHO · {languageName(home.profile.languageCode).toUpperCase()} · LEARN THROUGH EXPRESSION</p>
         <h1>Make the pattern yours.</h1>
@@ -447,7 +477,7 @@ function App() {
     {product === 'harbor' && <Harbor />}
     {product === 'amber' && <Amber />}
     </ErrorBoundary>
-    {product === 'echo' && home && (tab === 'profile' || (!home.onboarded && !polishMode)) && <DeleteAccount email={user.email} onDeleted={logout} />}
+    {product === 'echo' && home && (tab === 'profile' || (!home.onboarded && !examId)) && <DeleteAccount email={user.email} onDeleted={logout} />}
     <AskDeepwater />
     <footer>{productName(product)} by {BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
   </main>;

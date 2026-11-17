@@ -878,3 +878,8 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
 .ask-header{border:1px solid var(--line);border-radius:999px;padding:8px 14px;background:var(--accent-soft);color:var(--accent-text);font-weight:700;cursor:pointer;white-space:nowrap}
 .ask-header:hover{border-color:var(--line-hover)}
 .ask-header:focus-visible{outline:3px solid var(--accent-ring);outline-offset:2px}
+/* Course or exam practice, under a language that has both (Danish). */
+.echo-languages.echo-modes{margin:4px 0}
+.echo-languages.echo-modes button{padding:6px 14px;font-size:var(--fs-sm)}
+/* Language flags in the Echo language bar (SVG files, so they also show on Windows, which has no emoji flags). */
+.echo-languages .flag{width:22px;height:16px;border-radius:3px;object-fit:cover;align-self:center;box-shadow:0 0 0 1px #ffffff26}

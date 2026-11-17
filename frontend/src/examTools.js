@@ -1,4 +1,4 @@
-// Plain helpers for the Polish B1 practice exam screen (no React), covered by examTools.test.mjs.
+// Plain helpers for the exam practice screen (no React), covered by examTools.test.mjs.
 
 /** Words in a written or spoken answer, counted the way the backend rubric counts them (letters only). */
 export function wordCount(text) {
@@ -34,9 +34,14 @@ export function appendDictation(current, spoken) {
   return before ? `${before} ${added}` : added;
 }
 
-export const LEVEL_TEXT = {
-  'B1+': 'Strong B1',
-  B1: 'B1',
-  A2: 'A2, getting close to B1',
-  'A1-A2': 'A1 to A2',
-};
+/**
+ * The level estimate in words, for an exam that tests `target`:
+ * "B1+" -> "Strong B1", "A2" for a B1 exam -> "A2, getting close to B1", "A2-B1" -> "A2 to B1".
+ */
+export function levelText(estimate, target) {
+  if (!estimate) return '';
+  if (estimate.endsWith('+')) return `Strong ${estimate.slice(0, -1)}`;
+  if (estimate.includes('-')) return estimate.replace('-', ' to ');
+  if (target && estimate !== target) return `${estimate}, getting close to ${target}`;
+  return estimate;
+}

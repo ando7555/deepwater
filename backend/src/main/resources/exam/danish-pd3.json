@@ -1,0 +1,76 @@
+{
+  "id": "danish-pd3",
+  "title": "Danish PD3 practice exam",
+  "notice": "Practice items written for Deepwater in the shape of Prøve i Dansk 3 (PD3), the Danish test at about level B2 that ends Danskuddannelse 3: listening, reading, written presentation and oral communication. They are not official test tasks, and the result is an estimate, not an official grade. You take the real test at a Danish language school (sprogcenter); ask there for dates and rules.",
+  "language": "da",
+  "level": "B2",
+  "examName": "Prøve i Dansk 3 (PD3), the Danish test that ends Danskuddannelse 3",
+  "shortName": "PD3 (B2)",
+  "question": "Are you ready for Prøve i Dansk 3?",
+  "parts": [
+    {
+      "id": "listening",
+      "name": "Lytteforståelse",
+      "english": "Listening",
+      "kind": "CHOICE",
+      "instructions": "Lyt til optagelsen, og vælg det rigtige svar. Each recording can be played twice.",
+      "items": [
+        {"id": "l1", "audio": "Hej, det er Mette fra HR-afdelingen hos Nordlys Energi. Tak for din ansøgning til stillingen som projektkoordinator. Vi vil gerne invitere dig til en samtale torsdag den fjortende klokken et. Hvis tidspunktet ikke passer, må du meget gerne ringe tilbage inden onsdag middag, så finder vi en anden tid.",
+         "prompt": "Hvad skal man gøre, hvis tidspunktet ikke passer?", "options": ["Sende en ny ansøgning", "Ringe tilbage inden onsdag middag", "Møde op torsdag alligevel"], "answer": 1},
+        {"id": "l2", "audio": "Kære passagerer. På grund af sporarbejde mellem Odense og Nyborg kører der togbusser på strækningen hele weekenden. Rejsen bliver cirka fyrre minutter længere. Vi anbefaler, at I tjekker Rejseplanen, inden I tager af sted.",
+         "prompt": "Hvorfor tager rejsen længere tid i weekenden?", "options": ["Fordi der er sporarbejde, og der kører busser i stedet for tog", "Fordi der kører færre tog om lørdagen", "Fordi der er strejke blandt lokomotivførerne"], "answer": 0},
+        {"id": "l3", "audio": "En ny undersøgelse viser, at hver tredje virksomhed i Region Midtjylland har svært ved at finde kvalificerede medarbejdere. Især inden for it, sundhed og byggeri mangler der folk. Flere virksomheder fortæller, at de nu ansætter medarbejdere fra udlandet og tilbyder dem gratis danskundervisning.",
+         "prompt": "Hvad gør flere virksomheder ifølge nyheden?", "options": ["De sænker lønnen for nye medarbejdere", "De flytter produktionen til udlandet", "De ansætter folk fra udlandet og betaler for danskundervisning"], "answer": 2},
+        {"id": "l4", "audio": "Har du hørt, at kantinen lukker i to uger fra mandag? De skal have nyt køkken. I mellemtiden får vi sandwich leveret fra bageren, men man skal bestille dagen før på intranettet.",
+         "prompt": "Hvad skal medarbejderne gøre for at få frokost i de to uger?", "options": ["Bestille sandwich dagen før på intranettet", "Tage madpakke med hver dag", "Gå hen til bageren i frokostpausen"], "answer": 0},
+        {"id": "l5", "audio": "Jeg synes egentlig, at fire dages arbejdsuge er en god idé, men kun hvis opgaverne kan løses på den tid. Ellers ender man bare med at arbejde lige så meget på færre dage, og så bliver man mere stresset, ikke mindre.",
+         "prompt": "Hvad mener personen om fire dages arbejdsuge?", "options": ["Det er altid en dårlig idé", "Det er en god idé, hvis arbejdet kan nås på fire dage", "Det vil gøre alle mindre stressede"], "answer": 1}
+      ]
+    },
+    {
+      "id": "reading",
+      "name": "Læseforståelse",
+      "english": "Reading",
+      "kind": "CHOICE",
+      "instructions": "Læs teksterne, og vælg det rigtige svar. The first text is short and practises finding information; the second is longer and practises detailed reading.",
+      "passages": [
+        {"id": "p1", "title": "Jobopslag: Kundekonsulent", "text": "Vi søger en serviceminded kundekonsulent til vores kontor i Aarhus. Du skal besvare henvendelser fra kunder på telefon og mail og hjælpe dem med spørgsmål om regninger og abonnementer. Vi forventer, at du taler og skriver dansk og engelsk på et sikkert niveau, og at du har erfaring med kundeservice. Det er en fordel, men ikke et krav, hvis du også taler tysk. Vi tilbyder en fast stilling på 37 timer om ugen, fleksible arbejdstider og mulighed for at arbejde hjemme én dag om ugen. Send din ansøgning og dit CV senest den 1. december."},
+        {"id": "p2", "title": "Når kollegaerne taler dansk i frokostpausen", "text": "Mange udenlandske medarbejdere i Danmark arbejder i virksomheder, hvor engelsk er koncernsprog. Alligevel oplever en del af dem, at det er svært at blive en del af fællesskabet. Ifølge en rundspørge blandt internationale medarbejdere er det især i frokostpausen og til sociale arrangementer, at sproget bliver en barriere. Her skifter samtalen ofte til dansk, selv om alle kan tale engelsk. »Mine kollegaer er meget søde, men når vi spiser sammen, taler de dansk, og så sidder jeg bare og lytter,« fortæller en spansk ingeniør, der har boet i Danmark i to år. Hun har derfor meldt sig til danskundervisning om aftenen. Flere eksperter peger på, at ansvaret ikke kun ligger hos den enkelte medarbejder. Virksomhederne kan for eksempel give medarbejderne fri til at gå til dansk i arbejdstiden eller oprette sprogcaféer, hvor danske og udenlandske kollegaer øver sig sammen. Ifølge eksperterne betyder det ikke kun noget for trivslen, men også for, om de internationale medarbejdere bliver i Danmark på længere sigt."}
+      ],
+      "items": [
+        {"id": "r1", "passage": "p1", "prompt": "Hvad er en af kundekonsulentens opgaver?", "options": ["At sælge abonnementer på gaden", "At hjælpe kunder med spørgsmål om regninger", "At oversætte dokumenter til tysk"], "answer": 1},
+        {"id": "r2", "passage": "p1", "prompt": "Hvilke sprog skal ansøgeren kunne?", "options": ["Dansk og engelsk", "Dansk, engelsk og tysk", "Kun engelsk"], "answer": 0},
+        {"id": "r3", "passage": "p1", "prompt": "Hvad tilbyder virksomheden?", "options": ["Hjemmearbejde hver dag", "En midlertidig stilling i seks måneder", "Fleksible arbejdstider og én hjemmearbejdsdag om ugen"], "answer": 2},
+        {"id": "r4", "passage": "p2", "prompt": "Hvornår oplever de internationale medarbejdere især, at sproget er en barriere?", "options": ["Til møder med kunder", "I frokostpausen og til sociale arrangementer", "Når de skal skrive rapporter"], "answer": 1},
+        {"id": "r5", "passage": "p2", "prompt": "Hvad har den spanske ingeniør gjort?", "options": ["Hun har bedt kollegaerne om at tale engelsk", "Hun har skiftet job", "Hun har meldt sig til danskundervisning om aftenen"], "answer": 2},
+        {"id": "r6", "passage": "p2", "prompt": "Hvad kan virksomhederne gøre ifølge eksperterne?", "options": ["Give fri til danskundervisning og oprette sprogcaféer", "Forbyde engelsk på arbejdspladsen", "Kun ansætte medarbejdere, der taler dansk"], "answer": 0},
+        {"id": "r7", "passage": "p2", "prompt": "Hvorfor er det vigtigt ifølge eksperterne?", "options": ["Fordi loven kræver det", "Fordi virksomhederne sparer penge", "Fordi det påvirker trivslen, og om medarbejderne bliver i Danmark"], "answer": 2}
+      ]
+    },
+    {
+      "id": "writing",
+      "name": "Skriftlig fremstilling",
+      "english": "Writing",
+      "kind": "WRITING",
+      "instructions": "Skriv teksterne på dansk. The word ranges are practice targets for this mock exam.",
+      "items": [
+        {"id": "w1", "prompt": "Du bor i en lejlighed, og varmen har ikke virket i to uger. Skriv en mail til din udlejer. Forklar problemet, hvad du allerede har gjort, hvordan det påvirker dig, og hvad du forventer, at udlejeren gør nu.",
+         "minWords": 100, "maxWords": 150, "topicWords": ["varme", "radiator", "lejlighed", "udlejer", "repar"]},
+        {"id": "w2", "prompt": "Skriv et debatindlæg til en hjemmeside om emnet: Bør alle, der flytter til Danmark, lære dansk, også hvis de arbejder på engelsk? Giv mindst to argumenter, tag stilling til et modargument, og afslut med din egen holdning.",
+         "minWords": 180, "maxWords": 250, "topicWords": ["dansk", "sprog", "arbejd", "mener", "argument"]}
+      ]
+    },
+    {
+      "id": "speaking",
+      "name": "Mundtlig kommunikation",
+      "english": "Speaking",
+      "kind": "SPEAKING",
+      "instructions": "Svar højt (your browser writes down what you say), eller skriv dit svar. The first task is a topic you know well; the other two are topics you get on the day. Only the words are checked, not your pronunciation.",
+      "items": [
+        {"id": "s1", "prompt": "Fortæl om dit arbejde eller din uddannelse: hvad du laver, hvad du godt kan lide ved det, og hvad du gerne vil arbejde med om fem år.", "minWords": 80, "maxWords": 200, "topicWords": ["arbejd", "uddannelse", "job", "lide", "gerne"]},
+        {"id": "s2", "prompt": "Er det bedre at bo i en storby eller på landet, når man har børn? Nævn fordele og ulemper, og sig, hvad du selv mener.", "minWords": 80, "maxWords": 200, "topicWords": ["storby", "landet", "børn", "fordel", "ulempe", "mener"]},
+        {"id": "s3", "prompt": "Skal medarbejdere have lov til at arbejde hjemme, så tit de vil? Giv argumenter for og imod, og forklar din holdning.", "minWords": 80, "maxWords": 200, "topicWords": ["hjemme", "kollega", "arbejd", "mener", "fordi"]}
+      ]
+    }
+  ]
+}
