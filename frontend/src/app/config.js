@@ -23,13 +23,6 @@ export function productName(id) {
   return PRODUCTS.find(product => product.id === id)?.name ?? '';
 }
 
-export const THEMES = [
-  { id: 'deep', label: 'Deep blue', mark: '/brand/mark.svg' },
-  { id: 'amber', label: 'Amber', mark: '/brand/mark-amber.svg' },
-  { id: 'light', label: 'Light', mark: '/brand/mark-light.svg' },
-];
-export const THEME_IDS = THEMES.map(theme => theme.id);
-
 /**
  * Echo's languages. `course` languages have lessons and cards; Polish is B1 state-exam practice.
  * `example` is the placeholder shown when a learner adds a card.

@@ -16,14 +16,13 @@ import Amber from './amber/Amber.jsx';
 import Auth from './Auth.jsx';
 import AppHeader from './AppHeader.jsx';
 import DeleteAccount from './DeleteAccount.jsx';
-import { BRANDS, useBrand } from './brand.jsx';
+import { BRAND } from './brand.jsx';
 import TeacherWorkspace from './teacher/TeacherWorkspace.jsx';
 import { ErrorBoundary, ErrorState, Loading, Notice, Segmented, Tabs, useDraft } from './ui/index.jsx';
 import { BAND_LABELS } from './constants.js';
 import { ECHO_LANGUAGES, PRODUCT_IDS, languageName, productName } from './app/config.js';
 import { SESSION_EXPIRED, gql, request } from './app/http.js';
 import { KEYS, read, readChoice, session, write } from './app/storage.js';
-import { applyTheme, readTheme } from './app/theme.jsx';
 import { formatDate } from './api.js';
 import { CARD_FIELDS, ECHO_HOME_FIELDS } from './echoQueries.js';
 import './style.css';
@@ -77,7 +76,6 @@ function App() {
   const [product, setProduct] = useState(readProduct);
   const [polishMode, setPolishMode] = useState(readPolishMode);
   useEffect(() => { write(KEYS.echoLanguage, polishMode ? 'pl' : 'course'); }, [polishMode]);
-  const [brand] = useBrand();
   useEffect(() => { write(KEYS.product, product); }, [product]);
   const [cards, setCards] = useState([]);
   const [warmUp, setWarmUp] = useState(false);
@@ -323,7 +321,7 @@ function App() {
     {product === 'echo' && <>
     {!home && (homeError ? <ErrorState title="Echo didn’t load" error={homeError} onRetry={loadHome} /> : <Loading label="Loading your Echo workspace…" />)}
     {home && tab !== 'profile' && <EchoLanguageBar value={polishMode ? 'pl' : home.onboarded ? home.profile.languageCode : languageCode} onChange={pickEchoLanguage} />}
-    {polishMode && tab !== 'profile' && <PolishExam examinerName={brand === 'nibble' ? 'Nibble' : 'The examiner'} />}
+    {polishMode && tab !== 'profile' && <PolishExam />}
 
     {home && !polishMode && !home.onboarded && <section className="onboarding panel">
       <p className="eyebrow">ECHO · YOUR LANGUAGE START</p>
@@ -449,9 +447,9 @@ function App() {
     </ErrorBoundary>
     {product === 'echo' && home && (tab === 'profile' || (!home.onboarded && !polishMode)) && <DeleteAccount email={user.email} onDeleted={logout} />}
     <AskDeepwater />
-    <footer>{productName(product)} by {BRANDS[brand].name} · {BRANDS[brand].tagline}</footer>
+    <footer>{productName(product)} by {BRAND.name} · {BRAND.tagline}</footer>
   </main>;
 }
 
-applyTheme(readTheme());
+document.title = `${BRAND.name} · Learn the language, find the job`;
 createRoot(document.getElementById('root')).render(<App />);
