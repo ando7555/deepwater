@@ -1,42 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { KEYS, read, write } from './app/storage.js';
-
 /**
- * The parent brand shown around the products. Deepwater stays as the backup brand; Nibble is the
- * proposed new name, with our own mouse mascot. The choice is per browser and changes only the
- * name, mark and tagline, never the products or the account.
+ * The parent brand around every product. One brand, one look: the deep-blue Deepwater theme.
+ * (The Nibble name and mascot, and the amber and light themes, were removed on 2026-11-16 at the owner's request.)
  */
-export const BRANDS = {
-  deepwater: { id: 'deepwater', name: 'Deepwater', tagline: 'Go deeper.' },
-  nibble: { id: 'nibble', name: 'Nibble', tagline: 'A little every day.' },
-};
-
-const EVENT = 'deepwater-brand';
-
-export function readBrand() {
-  const stored = read(KEYS.brand);
-  return BRANDS[stored] ? stored : 'deepwater';
-}
-
-export function useBrand() {
-  const [brand, setBrand] = useState(readBrand);
-  useEffect(() => {
-    write(KEYS.brand, brand);
-    document.documentElement.dataset.brand = brand;
-    document.title = `${BRANDS[brand].name} · Learn the language, find the job`;
-    window.dispatchEvent(new CustomEvent(EVENT, { detail: brand }));
-  }, [brand]);
-  useEffect(() => {
-    const sync = event => setBrand(event.detail);
-    window.addEventListener(EVENT, sync);
-    return () => window.removeEventListener(EVENT, sync);
-  }, []);
-  return [brand, setBrand];
-}
-
-export function BrandSwitch() {
-  const [brand, setBrand] = useBrand();
-  return <div className="brand-switch" role="group" aria-label="Brand">
-    {Object.values(BRANDS).map(option => <button key={option.id} type="button" aria-pressed={brand === option.id} onClick={() => setBrand(option.id)}>{option.name}</button>)}
-  </div>;
-}
+export const BRAND = { name: 'Deepwater', tagline: 'Go deeper.', mark: '/brand/mark.svg' };

@@ -60,13 +60,8 @@ Rules that keep screens consistent:
 `npm test` runs every `*.test.mjs` under `src/`, including `ui/ui.test.mjs`, which renders the components with `react-dom/server`.
 `.jsx` files are compiled on the fly by `test/jsx-loader.mjs` with the JSX transform that ships in Vite, so no test packages are needed.
 
-## Worked example: the teacher's review queue
+## Teacher review screen (removed)
 
-`frontend/src/teacher/` shows the intended split:
-
-- `contentKinds.js`: plain data and functions (no React) that name the kind of a lesson, covered by `contentKinds.test.mjs` (`npm test`).
-- `TeacherWorkspace.jsx`: the review queue with `Segmented` filters, `Pill` labels and `EmptyState`; it calls back to `main.jsx`, which owns the API calls and banners.
-
-The in-browser lesson builder was removed on 2026-11-08 (the owner found it too hard to use); lessons arrive as drafts from the course import and the teacher only approves them.
+The teacher's "Review & publish" screen was removed on 2026-11-17 at the owner's request. Lessons still have a review status in the backend (`publishEchoLesson`, `unpublishEchoLesson` in GraphQL), so drafts can be published through the API.
 
 To add a new screen, write its model file first, test it, then compose the screen from the components above.
