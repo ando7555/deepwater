@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 /* Deepwater brand tokens. Echo uses the blue "water" accents; Amber keeps the warm set for its own app. */
 :root{
@@ -15,6 +15,7 @@
   --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;--space-6:32px;--space-7:48px;
   --ease:cubic-bezier(.2,.7,.2,1);--dur-fast:.15s;--dur:.24s;
   /* The Deepwater ribbon: deep blue through sea green to amber, as in the brand artwork. */
+  --font-display:'Space Grotesk',system-ui,sans-serif;--font-text:'DM Sans',system-ui,sans-serif;
   --ribbon:linear-gradient(90deg,#1e6fe0 0%,#5ad0ff 28%,#5fe0c0 46%,#f6c98a 68%,#e27552 86%,#a8442a 100%);
   --on-accent:#ffffff;--danger:#e2675a;--danger-ink:#b3392d;--amber-ink:#1a0d08;
   --shadow:0 20px 60px #01050f80;
@@ -163,30 +164,8 @@ small{color:var(--text-3);font-size:var(--fs-xs);line-height:1.5}
 .empty-course{min-height:320px;display:flex;flex-direction:column;justify-content:center;padding:20px}
 .empty-course h2{max-width:600px;font-size:clamp(26px,4vw,38px)}
 .empty-course p{max-width:650px}
-
-/* Teacher workspace */
-.teacher{margin-top:24px;padding:26px}
-.teacher-views{margin-top:20px;padding-top:18px;border-top:1px solid var(--line-soft)}
-.teacher-views .learn-tabs{margin:0 0 20px}
-.teacher-content form{display:grid;gap:12px;align-content:start}
-.teacher-content form textarea{min-height:110px}
-.teacher-content h3{margin:4px 0 10px}
-.teacher-content form small{max-width:500px}
 .lesson-picker{margin-bottom:18px}
-.teacher-exercise{display:grid;gap:4px;margin:6px 0;padding:12px;border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:var(--deep)}
-.teacher-exercise>b{color:var(--text);font-size:var(--fs-sm)}
-.teacher details summary{cursor:pointer;color:var(--accent)}
-.queue-filters{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:0 0 6px}
-.queue-filters>button{margin-left:auto}
-.queue-item{display:grid;gap:8px;padding:16px 0;border-bottom:1px solid var(--line-soft)}
-.queue-item-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
-.queue-item-head b{color:var(--text);font-size:var(--fs-lg)}
-.queue-meta{display:block;font-size:var(--fs-xs);color:var(--text-3);margin-top:3px}
-.queue-item>p{margin:0}
-.queue-detail{display:grid;gap:8px;padding:10px 0 4px}
-.queue-detail p{margin:0}.queue-detail p b{color:var(--text)}
-.queue-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-.queue-actions button:not(.link){padding:9px 14px}
+
 
 /* Lesson builder */
 .lesson-builder{display:grid;gap:22px}
@@ -216,8 +195,6 @@ small{color:var(--text-3);font-size:var(--fs-xs);line-height:1.5}
 .kind-card:hover,.kind-card:focus-visible{border-color:var(--accent);transform:translateY(-1px)}
 .kind-card b{color:var(--text);font-size:var(--fs-lg)}
 .kind-card span{font-size:var(--fs-sm);line-height:1.45}
-.queue-pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.teacher-content>.link{justify-self:start;margin-bottom:4px}
 @media(max-width:860px){.exercise-editor-tools{margin-left:0}.option-row{grid-template-columns:auto 20px 1fr;row-gap:4px}.option-row>button{grid-column:2/-1;justify-self:start}}
 
 /* Music and podcast lessons */
@@ -824,3 +801,11 @@ body:has(.auth-shell){overflow-x:hidden}
 .echo-languages.echo-modes button{padding:6px 14px;font-size:var(--fs-sm)}
 /* Language flags in the Echo language bar (SVG files, so they also show on Windows, which has no emoji flags). */
 .echo-languages .flag{width:22px;height:16px;border-radius:3px;object-fit:cover;align-self:center;box-shadow:0 0 0 1px #ffffff26}
+
+/* Type from the published teaser (owner, 2026-11-17: "this font is really cool"): Space Grotesk for headings
+   and every label, button and tab, at a calm medium weight; DM Sans stays for running text. */
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:500;letter-spacing:-.025em}
+h1{letter-spacing:-.035em}
+.eyebrow,.exercise-heading{font-family:var(--font-display);font-weight:500;letter-spacing:.2em}
+button,.pill,.learn-tabs button,.segmented button,.echo-languages button,.ui-menu summary{font-family:var(--font-display);font-weight:500;letter-spacing:.01em}
+.pill{border:1px solid var(--line);background:#0d1f3dcc;color:var(--amber);letter-spacing:.08em;text-transform:uppercase}

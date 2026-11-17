@@ -17,7 +17,6 @@ import Auth from './Auth.jsx';
 import AppHeader from './AppHeader.jsx';
 import DeleteAccount from './DeleteAccount.jsx';
 import { BRAND } from './brand.jsx';
-import TeacherWorkspace from './teacher/TeacherWorkspace.jsx';
 import { ErrorBoundary, ErrorState, Loading, Notice, Segmented, Tabs, useDraft } from './ui/index.jsx';
 import { BAND_LABELS } from './constants.js';
 import { ECHO_LANGUAGES, EXAM_IDS, PRODUCT_IDS, languageName, languageOfExam, productName } from './app/config.js';
@@ -77,7 +76,6 @@ function App() {
   const [signedOutMessage, setSignedOutMessage] = useState('');
   const [verifyMessage, setVerifyMessage] = useState('');
   const [busy, setBusy] = useState(false);
-  const [teacherLessons, setTeacherLessons] = useState([]);
   const [selectedLessonId, setSelectedLessonId] = useState('');
   const [audioFilter, setAudioFilter] = useState('ALL');
   const [bandFilter, setBandFilter] = useState('ALL');
@@ -218,30 +216,6 @@ function App() {
       setHome(data.startEcho); clearGoal(); setNotice(`${languageName(languageCode)} is selected. Your starting route uses your self-described experience; this is not a formal level test.`);
     } catch (startError) { setError(startError.message); }
     finally { setBusy(false); }
-  }
-
-  async function loadTeacherLessons() {
-    const data = await gql(`query { teacherLessons { id languageCode title level topic objective explanation sourceReference skillKey reviewStatus version revisionOf exercises { position taskType prompt expectedAnswer acceptedAnswers feedbackCorrect feedbackIncorrect options { key text } } audio { mediaType sourceTitle creator sourceUrl playbackUrl editorialBand topicTags speechRate vocabularyDensity idiomDensity pronunciationLoad topicFamiliarity beforeListeningPrompt gistPrompt focusPrompt transcriptAllowed transcriptText rightsBasis linkAllowed playbackAllowed rightsReference rightsExpiresAt } } }`);
-    setTeacherLessons(data.teacherLessons);
-  }
-
-  async function publishDraft(id) {
-    setError(''); setNotice('');
-    try {
-      const data = await gql(`mutation($id: ID!) { publishEchoLesson(lessonId: $id) { title reviewStatus } }`, { id });
-      setNotice(`You approved and published “${data.publishEchoLesson.title}”.`);
-      await loadTeacherLessons(); await loadHome();
-    } catch (publishError) { setError(publishError.message); }
-  }
-
-  async function unpublishLesson(item) {
-    if (!window.confirm('Learners will stop seeing this lesson immediately. Their progress is kept.')) return;
-    setError(''); setNotice('');
-    try {
-      const data = await gql(`mutation($id: ID!) { unpublishEchoLesson(lessonId: $id) { title reviewStatus } }`, { id: item.id });
-      setNotice(`“${data.unpublishEchoLesson.title}” is unpublished. Learners no longer see it.`);
-      await loadTeacherLessons(); await loadHome();
-    } catch (unpublishError) { setError(unpublishError.message); }
   }
 
   /** The Echo language bar: Polish opens the B1 exam practice; Danish and German open the course. */
@@ -468,8 +442,6 @@ function App() {
           <div className="method-note"><b>How Echo adapts</b><p>Your chosen experience level sets a guided start. Correct and missed answers update a simple practice estimate and a 1 / 3 / 7 / 14-day review interval. Your free-writing example is saved without automatic grading.</p></div>
         </aside>
       </div>}
-      {user.role === 'TEACHER' && <TeacherWorkspace lessons={teacherLessons} busy={busy} onPublish={publishDraft} onUnpublish={unpublishLesson}
-        onOpen={async () => { try { await loadTeacherLessons(); } catch (loadError) { setError(loadError.message); } }} />}
     </>}
     </>}
     {product === 'harbor' && <Harbor />}
