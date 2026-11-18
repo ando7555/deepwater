@@ -33,7 +33,18 @@ record ExamLanguage(String code, String name, Pattern letters, double letterShar
             "word order (inversion after an opening adverb and the place of ikke), verb tenses, noun gender and definite forms, "
                     + "and adjective endings");
 
-    private static final Map<String, ExamLanguage> BY_CODE = Map.of(POLISH.code(), POLISH, DANISH.code(), DANISH);
+    static final ExamLanguage GERMAN = new ExamLanguage("de", "German", Pattern.compile("[äöüß]"), 0.10,
+            Set.of("weil", "denn", "deshalb", "darum", "deswegen", "aber", "obwohl", "wenn", "als", "dass", "damit", "trotzdem",
+                    "außerdem", "zuerst", "dann", "danach", "schließlich", "sondern", "jedoch", "nachdem", "während", "bevor", "ob",
+                    "sowohl", "einerseits", "andererseits"),
+            Set.of("nicht", "ich", "und", "ist", "das", "der", "ein", "eine", "mit", "auf", "für", "sich", "auch", "sehr", "mein", "meine",
+                    "wir", "habe", "bin", "wird", "dass", "oder", "aber", "nach", "bei", "von", "zur", "gerne", "möchte", "kann", "keine",
+                    "schon", "noch", "ihnen", "mich", "mir", "dich"),
+            "weil, deshalb, aber, obwohl, wenn, dass",
+            "case endings (nominative, accusative, dative), verb position (verb second, and the verb at the end of a "
+                    + "subordinate clause), separable verbs, and adjective endings");
+
+    private static final Map<String, ExamLanguage> BY_CODE = Map.of(POLISH.code(), POLISH, DANISH.code(), DANISH, GERMAN.code(), GERMAN);
 
     /** The language for a code such as "pl" or "da". */
     static ExamLanguage of(String code) {

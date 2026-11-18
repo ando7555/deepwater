@@ -5,7 +5,7 @@
 
 export const PRODUCTS = [
   { id: 'echo', name: 'Echo', hint: 'Languages', tag: 'Danish, German or Polish',
-    line: 'Short lessons that explain the pattern, reviews just before you would forget, and Danish PD3 and Polish B1 exam practice with an examiner that says if you look ready.' },
+    line: 'Short lessons that explain the pattern, reviews just before you would forget, and Danish PD3, German B1 and Polish B1 exam practice with an examiner that says if you look ready.' },
   { id: 'harbor', name: 'Harbor', hint: 'Jobs', tag: 'Find a job in Denmark',
     line: 'Upload your CV, see matched jobs in Denmark and the Nordics, with visa and language filters.' },
   { id: 'amber', name: 'Amber', hint: 'Connections', tag: 'Meet people, by choice',
@@ -25,11 +25,11 @@ export function productName(id) {
 
 /**
  * Echo's languages. `course` languages have lessons and cards; `exam` is exam practice with an examiner
- * (Danish has both; Polish is B1 exam practice only). `example` is the placeholder shown when a learner adds a card.
+ * (Danish and German have both; Polish is B1 exam practice only). `example` is the placeholder shown when a learner adds a card.
  */
 export const ECHO_LANGUAGES = [
   { code: 'da', name: 'Danish', course: true, example: 'en kat', exam: { id: 'danish-pd3', label: 'PD3 exam practice' } },
-  { code: 'de', name: 'German', course: true, example: 'die Katze' },
+  { code: 'de', name: 'German', course: true, example: 'die Katze', exam: { id: 'german-b1', label: 'B1 exam practice' } },
   { code: 'pl', name: 'Polish', hint: 'B1 exam', course: false, exam: { id: 'polish-b1', label: 'B1 exam practice' } },
 ];
 export const EXAM_IDS = ECHO_LANGUAGES.filter(language => language.exam).map(language => language.exam.id);

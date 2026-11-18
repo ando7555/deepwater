@@ -35,9 +35,13 @@ const LID_POINTS = [[-LID.halfWidth, 0, 0], [0, 0, -LID.halfDepth], [LID.halfWid
   .map(([x, , z]) => [x, LID.y + CENTRE, z]);
 const SHAPES = LAYERS.map(layer => ({ ...layer, dots: layerDots(layer), rim: layerRim(layer) }));
 
-function readColors() {
-  const style = getComputedStyle(document.documentElement);
-  const value = name => style.getPropertyValue(name).trim();
+// The brand colours, used whenever a CSS variable is missing (stylesheet not applied yet, or a
+// browser that returns an empty value). A canvas given an empty colour keeps drawing in black.
+const FALLBACK = { '--accent': '#5ad0ff', '--accent-2': '#1e7bf0', '--accent-deep': '#0a3a9c', '--abyss': '#060f22', '--line': '#21406f' };
+
+export function readColors(element = document.documentElement) {
+  const style = getComputedStyle(element);
+  const value = name => style.getPropertyValue(name).trim() || FALLBACK[name];
   return { lid: value('--accent'), mid: value('--accent-2'), deep: value('--accent-deep'), node: value('--accent'),
     ring: value('--abyss'), dim: value('--line') };
 }
@@ -54,9 +58,14 @@ export default function DeepwaterMark3D({ size = 280, depth = 1, label = 'Deepwa
     const canvas = canvasRef.current, context = canvas.getContext('2d');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const lit = 1 + Math.round(Math.max(0, Math.min(1, depth)) * 4);
-    let colors = readColors(), frame = 0, last = performance.now();
-    const themeWatch = new MutationObserver(() => { colors = readColors(); });
-    themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    let colors = readColors(canvas), frame = 0, last = performance.now();
+    const refresh = () => { colors = readColors(canvas); };
+    // Read again once styles and fonts have settled, in case the first read came too early.
+    const settle = setTimeout(refresh, 300);
+    window.addEventListener('load', refresh);
+    document.fonts?.ready.then(refresh);
+    const themeWatch = new MutationObserver(refresh);
+    themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
 
     function draw(now) {
       const state = view.current, dpr = window.devicePixelRatio || 1;
@@ -124,7 +133,7 @@ export default function DeepwaterMark3D({ size = 280, depth = 1, label = 'Deepwa
       frame = requestAnimationFrame(draw);
     }
     frame = requestAnimationFrame(draw);
-    return () => { cancelAnimationFrame(frame); themeWatch.disconnect(); };
+    return () => { cancelAnimationFrame(frame); clearTimeout(settle); window.removeEventListener('load', refresh); themeWatch.disconnect(); };
   }, [size, depth]);
 
   function pointerDown(event) {

@@ -1,0 +1,78 @@
+{
+  "id": "german-b1",
+  "title": "German B1 practice exam",
+  "notice": "Practice items written for Deepwater in the shape of the German B1 certificate exams such as the Goethe-Zertifikat B1: four modules, reading, listening, writing and speaking (telc Deutsch B1 is similar). They are not official exam tasks, and the result is an estimate, not an official grade. B1 is the German level asked for naturalisation in Germany; check what your authority or employer accepts. The official exam and its rules: goethe.de.",
+  "language": "de",
+  "level": "B1",
+  "examName": "the Goethe-Zertifikat B1 (a German B1 certificate exam)",
+  "shortName": "B1",
+  "question": "Are you ready for the German B1 certificate?",
+  "parts": [
+    {
+      "id": "reading",
+      "name": "Lesen",
+      "english": "Reading",
+      "kind": "CHOICE",
+      "instructions": "Lesen Sie die Texte und wählen Sie die richtige Antwort.",
+      "passages": [
+        {"id": "p1", "title": "Stellenanzeige: Verkäufer/in im Bio-Supermarkt", "text": "Wir suchen ab sofort eine freundliche Verkäuferin oder einen freundlichen Verkäufer für unseren Bio-Supermarkt in Leipzig. Zu Ihren Aufgaben gehören die Beratung der Kunden, die Arbeit an der Kasse und das Auffüllen der Regale. Sie sprechen gut Deutsch. Erfahrung im Verkauf ist von Vorteil, aber keine Bedingung. Wir bieten eine Teilzeitstelle mit 25 Stunden pro Woche, einen Rabatt von 20 Prozent auf alle Produkte und ein nettes Team. Bitte schicken Sie Ihre Bewerbung bis zum 15. Dezember per E-Mail."},
+        {"id": "p2", "title": "Neu in der Stadt: Warum der Verein hilft", "text": "Wer neu in eine deutsche Stadt zieht, hat es oft schwer, Freunde zu finden. Viele Menschen sind höflich, aber zurückhaltend, und im Büro spricht man vor allem über die Arbeit. Ein guter Weg in die Gemeinschaft ist deshalb ein Verein, vom Fußballclub bis zum Chor. »Im Laufverein habe ich in drei Monaten mehr Deutsch gelernt als im Kurs«, erzählt Ahmed, der vor einem Jahr nach Köln gekommen ist. Nach dem Training gehen die Mitglieder oft zusammen etwas trinken, und dabei wird natürlich Deutsch gesprochen. Viele Vereine sind günstig: Der Mitgliedsbeitrag liegt oft nur bei wenigen Euro im Monat. Experten raten, nicht zu lange zu warten. Wer früh Kontakte knüpft, fühlt sich schneller zu Hause und findet manchmal sogar über die Vereinskollegen eine neue Arbeitsstelle."}
+      ],
+      "items": [
+        {"id": "r1", "passage": "p1", "prompt": "Was gehört zu den Aufgaben?", "options": ["Die Kunden beraten und an der Kasse arbeiten", "Die Ware mit dem Auto ausliefern", "Die Buchhaltung machen"], "answer": 0},
+        {"id": "r2", "passage": "p1", "prompt": "Was ist für die Stelle keine Bedingung?", "options": ["Gute Deutschkenntnisse", "Erfahrung im Verkauf", "Freundlichkeit"], "answer": 1},
+        {"id": "r3", "passage": "p1", "prompt": "Was bietet der Supermarkt?", "options": ["Eine Vollzeitstelle", "Einen Firmenwagen", "Einen Rabatt auf alle Produkte"], "answer": 2},
+        {"id": "r4", "passage": "p2", "prompt": "Warum ist es für Neue oft schwer, Freunde zu finden?", "options": ["Weil es kaum Vereine gibt", "Weil viele Menschen höflich, aber zurückhaltend sind", "Weil alle nur Englisch sprechen"], "answer": 1},
+        {"id": "r5", "passage": "p2", "prompt": "Was sagt Ahmed über den Laufverein?", "options": ["Er hat dort viel Deutsch gelernt", "Das Training ist zu teuer", "Er hat dort keine Freunde gefunden"], "answer": 0},
+        {"id": "r6", "passage": "p2", "prompt": "Was kostet ein Verein oft?", "options": ["Mehr als hundert Euro im Monat", "Nichts, er ist immer kostenlos", "Nur wenige Euro im Monat"], "answer": 2},
+        {"id": "r7", "passage": "p2", "prompt": "Was raten Experten?", "options": ["Früh Kontakte zu knüpfen", "Zuerst perfekt Deutsch zu lernen", "Nur mit Kollegen zu sprechen"], "answer": 0}
+      ]
+    },
+    {
+      "id": "listening",
+      "name": "Hören",
+      "english": "Listening",
+      "kind": "CHOICE",
+      "instructions": "Hören Sie die Texte und wählen Sie die richtige Antwort. Each recording can be played twice.",
+      "items": [
+        {"id": "l1", "audio": "Liebe Fahrgäste, wegen einer Signalstörung fährt die S-Bahn Linie drei heute nur bis zum Hauptbahnhof. Bitte nutzen Sie ab dort die Busse des Ersatzverkehrs. Wir bitten um Ihr Verständnis.",
+         "prompt": "Was sollen die Fahrgäste ab dem Hauptbahnhof tun?", "options": ["Auf die nächste S-Bahn warten", "Mit dem Ersatzbus weiterfahren", "Ein Taxi nehmen"], "answer": 1},
+        {"id": "l2", "audio": "Hallo, hier ist Frau Becker von der Firma Klein Logistik. Vielen Dank für Ihre Bewerbung. Wir möchten Sie gern zu einem Vorstellungsgespräch einladen, und zwar am Dienstag um zehn Uhr. Bitte bringen Sie Ihre Zeugnisse mit und rufen Sie uns kurz zurück, ob der Termin passt.",
+         "prompt": "Was soll die Person zum Gespräch mitbringen?", "options": ["Ihre Zeugnisse", "Einen Lebenslauf auf Englisch", "Ein Foto"], "answer": 0},
+        {"id": "l3", "audio": "In vielen deutschen Städten fehlen Fachkräfte in der Pflege. Einige Krankenhäuser bieten deshalb Pflegekräften aus dem Ausland einen kostenlosen Deutschkurs und Hilfe bei der Wohnungssuche an.",
+         "prompt": "Was bieten einige Krankenhäuser an?", "options": ["Einen höheren Lohn im ersten Jahr", "Einen kostenlosen Deutschkurs und Hilfe bei der Wohnungssuche", "Eine kürzere Arbeitszeit"], "answer": 1},
+        {"id": "l4", "audio": "Kommst du heute Abend mit ins Kino? Ich würde gern, aber ich muss noch für meine Prüfung lernen. Wie wäre es mit Samstag? Samstag geht gut, dann kaufe ich die Karten online.",
+         "prompt": "Wann gehen die beiden ins Kino?", "options": ["Heute Abend", "Am Freitag", "Am Samstag"], "answer": 2},
+        {"id": "l5", "audio": "Ich finde Homeoffice eigentlich praktisch, weil ich keine Zeit im Stau verliere. Aber mir fehlen die Gespräche mit den Kollegen, deshalb arbeite ich lieber zwei Tage pro Woche im Büro.",
+         "prompt": "Was sagt die Person über das Homeoffice?", "options": ["Sie arbeitet nur noch zu Hause", "Sie findet es praktisch, möchte aber auch ins Büro gehen", "Sie mag es nicht, weil es zu laut ist"], "answer": 1}
+      ]
+    },
+    {
+      "id": "writing",
+      "name": "Schreiben",
+      "english": "Writing",
+      "kind": "WRITING",
+      "instructions": "Schreiben Sie die Texte auf Deutsch. The word ranges are practice targets for this mock exam.",
+      "items": [
+        {"id": "w1", "prompt": "Sie sind vor kurzem in eine neue Wohnung umgezogen. Schreiben Sie einer Freundin oder einem Freund eine E-Mail: Beschreiben Sie die neue Wohnung, begründen Sie, warum Sie umgezogen sind, und laden Sie sie oder ihn zu einer Einweihungsparty ein.",
+         "minWords": 70, "maxWords": 100, "topicWords": ["wohnung", "umgezogen", "umzug", "party", "einlad"]},
+        {"id": "w2", "prompt": "Sie haben im Radio eine Diskussion zum Thema »Sollten Kinder schon in der Grundschule ein Handy haben?« gehört. Schreiben Sie Ihre Meinung in einem Online-Forum.",
+         "minWords": 70, "maxWords": 100, "topicWords": ["handy", "kinder", "schule", "meinung", "finde"]},
+        {"id": "w3", "prompt": "Ihre Kursleiterin, Frau Wagner, hat Sie zu einem Treffen am Freitag eingeladen. Sie können nicht kommen. Schreiben Sie Frau Wagner eine kurze Nachricht: Entschuldigen Sie sich höflich und erklären Sie, warum Sie nicht kommen können.",
+         "minWords": 35, "maxWords": 60, "topicWords": ["leider", "freitag", "entschuldig", "kommen", "wagner"]}
+      ]
+    },
+    {
+      "id": "speaking",
+      "name": "Sprechen",
+      "english": "Speaking",
+      "kind": "SPEAKING",
+      "instructions": "Antworten Sie laut (your browser writes down what you say) oder schreiben Sie Ihre Antwort. In the real exam you speak with a partner; here you say your part. Only the words are checked, not your pronunciation.",
+      "items": [
+        {"id": "s1", "prompt": "Ein Kollege aus Ihrem Deutschkurs hat bald Geburtstag. Planen Sie eine Überraschung: Schlagen Sie vor, wann und wo die Feier sein soll, was Sie schenken und wer was mitbringt.", "minWords": 60, "maxWords": 150, "topicWords": ["geburtstag", "geschenk", "vorschlag", "feier", "schlage"]},
+        {"id": "s2", "prompt": "Präsentieren Sie das Thema »Online einkaufen oder im Geschäft?«: Erzählen Sie von Ihren Erfahrungen, wie es in Ihrem Heimatland ist, nennen Sie Vor- und Nachteile und sagen Sie Ihre Meinung.", "minWords": 80, "maxWords": 200, "topicWords": ["online", "geschäft", "einkaufen", "vorteil", "nachteil", "meinung"]},
+        {"id": "s3", "prompt": "Ihre Partnerin hat über das Thema »Sollte man im Urlaub für die Arbeit erreichbar sein?« gesprochen. Geben Sie eine kurze Rückmeldung zu ihrer Präsentation und stellen Sie ihr eine Frage dazu.", "minWords": 30, "maxWords": 100, "topicWords": ["präsentation", "urlaub", "frage", "interessant", "erreichbar"]}
+      ]
+    }
+  ]
+}

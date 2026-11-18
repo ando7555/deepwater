@@ -14,7 +14,7 @@ says it is off. The MCP tools work either way: they never call a model.
  Deepwater web app     │  POST /api/v1/assistant/runs ──► AssistantService ──► AssistantModel (port)        │
  "Ask Deepwater"   ───►│        (SSE, AG-UI events)          │   loop ≤ 6 steps     └─► ClaudeAssistantModel   │
                        │                                     ▼                                                │
-                       │                         DeepwaterTools (one registry, 8 tools)                       │
+                       │                         DeepwaterTools (one registry, 9 tools)                       │
                        │             Echo · Harbor · Polish B1 · own Amber profile, all as the caller          │
                        └──────────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -44,6 +44,7 @@ says it is off. The MCP tools work either way: they never call a model.
 | `harbor_applications` | read | the application tracker |
 | `polish_b1_results` | read | practice exam attempts |
 | `danish_pd3_results` | read | Danish PD3 practice exam attempts |
+| `german_b1_results` | read | German B1 practice exam attempts |
 | `amber_my_profile` | read | the caller's own Amber profile only |
 
 Left out on purpose: other Amber members (suggestions, invitations, messages). Sending other people's dating data

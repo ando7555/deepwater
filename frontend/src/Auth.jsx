@@ -6,7 +6,10 @@ import { COMING_SOON, PRODUCTS } from './app/config.js';
 import { API, request } from './app/http.js';
 import { Notice } from './ui/index.jsx';
 
-/** The welcome page: what Deepwater offers on the left, create account or sign in on the right. */
+/**
+ * The welcome page: the headline and what Deepwater offers on the left, create account or sign in on the right.
+ * On a phone the form comes right after the headline, so nobody scrolls past every product card to sign up.
+ */
 export default function Auth({ onLogin, message, onChooseProduct }) {
   const [mode, setMode] = useState('register');
   const [name, setName] = useState('');
@@ -47,23 +50,11 @@ export default function Auth({ onLogin, message, onChooseProduct }) {
   return <main className="auth-shell">
     <header className="auth-header"><Brand /></header>
     <div className="auth-grid">
-    <section className="pitch">
-      <DeepwaterMark3D size={260} label="Deepwater mark in 3D. Drag to turn it." />
+    <section className="pitch pitch-head" aria-labelledby="welcome-title">
+      <DeepwaterMark3D size={200} label="Deepwater mark in 3D. Drag to turn it." />
       <p className="eyebrow">Learn the language. Find the job. Make it home.</p>
-      <h1>Learn the language.<br /><span>Land the job.</span></h1>
-      <p className="pitch-lead">Learn Danish, German or Polish, practise for the Polish B1 exam, and find a job in Denmark and the Nordics. One account opens all of it.</p>
-      <div className="welcome-products" role="list" aria-label="What you can do here">
-        {PRODUCTS.map(item => <button key={item.id} type="button" role="listitem" className="welcome-product"
-          onClick={() => { onChooseProduct(item.id); document.getElementById('access-title')?.scrollIntoView({ behavior: 'smooth' }); }}>
-          <b>{item.name}</b><span className="pill">{item.tag}</span><p>{item.line}</p></button>)}
-        {COMING_SOON.map(item => <div key={item.id} role="listitem" className="welcome-product soon"><b>{item.name}</b><span className="pill muted">{item.tag}</span><p>{item.line}</p></div>)}
-      </div>
-      <p className="eyebrow welcome-why">Why Echo is different</p>
-      <ul className="pitch-points">
-        <li><b>Understand, don’t memorise</b><span>Every lesson explains why a sentence is built the way it is.</span></li>
-        <li><b>Built around your memory</b><span>Type phrases from memory, hear them read aloud, and see each one come back just before you’d forget it.</span></li>
-        <li><b>No streak guilt</b><span>Miss a day and your reviews simply move. A slip steps back one level, never to zero.</span></li>
-      </ul>
+      <h1 id="welcome-title">Learn the language.<br /><span>Land the job.</span></h1>
+      <p className="pitch-lead">Learn Danish, German or Polish, practise for the Danish PD3, German B1 and Polish B1 exams, and find a job in Denmark and the Nordics. One account opens all of it.</p>
     </section>
     <section className="access panel" aria-labelledby="access-title">
     <h2 id="access-title">{mode === 'register' ? `Create your ${BRAND.name} account` : 'Welcome back'}</h2>
@@ -81,6 +72,20 @@ export default function Auth({ onLogin, message, onChooseProduct }) {
     <a href={`${API}/api/v1/auth/google`} className="google-btn">Continue with Google</a>
     <button className="link" onClick={() => { setError(''); setMode(mode === 'register' ? 'login' : 'register'); }}>{mode === 'register' ? 'Already have an account? Sign in' : 'Create an account'}</button>
   </section>
+    <section className="pitch pitch-more" aria-label="Products">
+      <div className="welcome-products" role="list" aria-label="What you can do here">
+        {PRODUCTS.map(item => <button key={item.id} type="button" role="listitem" className="welcome-product"
+          onClick={() => { onChooseProduct(item.id); document.getElementById('access-title')?.scrollIntoView({ behavior: 'smooth' }); }}>
+          <b>{item.name}</b><span className="pill">{item.tag}</span><p>{item.line}</p></button>)}
+        {COMING_SOON.map(item => <div key={item.id} role="listitem" className="welcome-product soon"><b>{item.name}</b><span className="pill muted">{item.tag}</span><p>{item.line}</p></div>)}
+      </div>
+      <p className="eyebrow welcome-why">Why Echo is different</p>
+      <ul className="pitch-points">
+        <li><b>Understand, don’t memorise</b><span>Every lesson explains why a sentence is built the way it is.</span></li>
+        <li><b>Built around your memory</b><span>Type phrases from memory, hear them read aloud, and see each one come back just before you’d forget it.</span></li>
+        <li><b>No streak guilt</b><span>Miss a day and your reviews simply move. A slip steps back one level, never to zero.</span></li>
+      </ul>
+    </section>
     </div>
     <footer>{BRAND.name} · {BRAND.tagline}</footer>
     <div className="auth-ribbon" aria-hidden="true" />

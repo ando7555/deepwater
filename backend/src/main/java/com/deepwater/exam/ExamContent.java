@@ -13,7 +13,8 @@ import tools.jackson.databind.ObjectMapper;
 
 /**
  * The practice exams, each read once from {@code exam/<id>.json}: Polish B1 (five parts, in the shape
- * of the Polish state certificate exam) and Danish PD3 (four parts, in the shape of Prøve i Dansk 3).
+ * of the Polish state certificate exam), Danish PD3 (four parts, in the shape of Prøve i Dansk 3) and
+ * German B1 (four modules, in the shape of the Goethe-Zertifikat B1).
  * The items are Deepwater's own practice items, not official tasks.
  */
 @Component
@@ -21,10 +22,11 @@ public class ExamContent {
     public static final String CHOICE = "CHOICE";
     public static final String POLISH_B1 = "polish-b1";
     public static final String DANISH_PD3 = "danish-pd3";
+    public static final String GERMAN_B1 = "german-b1";
     private final Map<String, Exam> exams = new LinkedHashMap<>();
 
     public ExamContent(ObjectMapper json) {
-        for (String id : List.of(POLISH_B1, DANISH_PD3)) {
+        for (String id : List.of(POLISH_B1, DANISH_PD3, GERMAN_B1)) {
             try (InputStream in = ExamContent.class.getResourceAsStream("/exam/" + id + ".json")) {
                 if (in == null) throw new IllegalStateException("exam/" + id + ".json is missing");
                 Exam exam = json.readValue(in, Exam.class);

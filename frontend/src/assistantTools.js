@@ -9,6 +9,7 @@ export const TOOL_LABELS = {
   harbor_applications: 'Opening your application tracker',
   polish_b1_results: 'Reading your Polish B1 results',
   danish_pd3_results: 'Reading your Danish PD3 results',
+  german_b1_results: 'Reading your German B1 results',
   amber_my_profile: 'Looking at your own Amber profile',
 };
 
