@@ -63,8 +63,8 @@ public class CompanyLogoService {
     public record Logo(byte[] bytes, String contentType, Instant checkedAt) {
         @Override
         public boolean equals(Object other) {
-            return other instanceof Logo that && java.util.Arrays.equals(bytes, that.bytes)
-                    && java.util.Objects.equals(contentType, that.contentType) && java.util.Objects.equals(checkedAt, that.checkedAt);
+            return other instanceof Logo(byte[] otherBytes, String otherType, Instant otherChecked) && java.util.Arrays.equals(bytes, otherBytes)
+                    && java.util.Objects.equals(contentType, otherType) && java.util.Objects.equals(checkedAt, otherChecked);
         }
 
         @Override

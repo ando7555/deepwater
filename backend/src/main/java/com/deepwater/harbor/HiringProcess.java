@@ -13,7 +13,9 @@ import java.util.Locale;
 public record HiringProcess(List<Step> steps, int interviews) {
     public record Step(String name, String detail, boolean interview) {}
 
-    private static final List<String> PROCESS_FIRST = List.of("interview", "recruitment", "recruiting", "hiring", "selection", "application");
+    private static final String INTERVIEW = "interview";
+    private static final String PROCESS_WORD = " process";
+    private static final List<String> PROCESS_FIRST = List.of(INTERVIEW, "recruitment", "recruiting", "hiring", "selection", "application");
     private static final List<String> PROCESS_SECOND = List.of("process", "journey", "steps", "stages");
     private static final List<String> LEADING_WORDS = List.of("the", "our", "about", "what", "is", "what's", "how", "does");
     private static final List<String> OTHER_HEADINGS = List.of("how we hire", "what to expect", "what happens next", "our process",
@@ -22,12 +24,12 @@ public record HiringProcess(List<Step> steps, int interviews) {
             "der auswahlprozess", "so geht's weiter", "so gehts weiter");
     private static final List<String> PROSE_TRIGGERS = List.of("includes", "include", "consists of", "consist of", "involves", "involve",
             "looks like this", "is as follows");
-    private static final List<String> STEP_WORDS = List.of("interview", "call", "chat", "screen", "test", "assignment", "case",
+    private static final List<String> STEP_WORDS = List.of(INTERVIEW, "call", "chat", "screen", "test", "assignment", "case",
             "challenge", "assessment", "presentation", "meeting", "conversation", "offer", "reference", "task", "onsite", "on-site",
             "panel", "final", "technical", "culture", "coffee", "fika", "deep dive", "deep-dive", "hiring manager", "recruiter", "talent",
             "home test", "take-home", "pair", "coding", "demo", "pitch", "working session", "samtale", "gespräch", "intervju",
             "kennenlernen", "vorstellung", "opgave", "aufgabe", "referenzen", "tilbud", "angebot", "erbjudande");
-    private static final List<String> INTERVIEW_WORDS = List.of("interview", "call", "chat", "screen", "meeting", "conversation", "panel",
+    private static final List<String> INTERVIEW_WORDS = List.of(INTERVIEW, "call", "chat", "screen", "meeting", "conversation", "panel",
             "onsite", "on-site", "coffee", "fika", "deep dive", "deep-dive", "pair", "samtale", "gespräch", "intervju", "kennenlernen",
             "vorstellung");
     private static final List<String> NOT_INTERVIEW_WORDS = List.of("offer", "reference", "tilbud", "angebot", "erbjudande", "referenzen");
@@ -42,7 +44,7 @@ public record HiringProcess(List<Step> steps, int interviews) {
     /** The steps the posting lists for its hiring process, or null when it does not name at least two. */
     public static HiringProcess read(String text) {
         if (text == null || text.isBlank()) return null;
-        String clean = text.replace(' ', ' ').replace(' ', ' ');
+        String clean = text.replace('\u00a0', ' ').replace('\u202f', ' ');
         List<String> lines = clean.lines().map(String::strip).filter(line -> !line.isEmpty()).toList();
         for (int i = 0; i < lines.size(); i++) {
             HiringProcess found = underHeading(lines, i);
@@ -74,8 +76,9 @@ public record HiringProcess(List<Step> steps, int interviews) {
     private static HiringProcess fromProse(String text) {
         String lower = text.toLowerCase(Locale.ROOT);
         for (String first : PROCESS_FIRST) {
-            for (int at = lower.indexOf(first + " process"); at >= 0; at = lower.indexOf(first + " process", at + 1)) {
-                HiringProcess listed = proseAfter(text, lower, at + first.length() + " process".length());
+            String phrase = first + PROCESS_WORD;
+            for (int at = lower.indexOf(phrase); at >= 0; at = lower.indexOf(phrase, at + 1)) {
+                HiringProcess listed = proseAfter(text, lower, at + phrase.length());
                 if (listed != null) return listed;
             }
         }
@@ -88,15 +91,18 @@ public record HiringProcess(List<Step> steps, int interviews) {
         String sentence = lower.substring(from, end);
         for (String trigger : PROSE_TRIGGERS) {
             int at = sentence.indexOf(trigger);
-            if (at < 0 || at > 40) continue;
-            String rest = text.substring(from + at + trigger.length(), end).strip();
-            if (rest.startsWith(":")) rest = rest.substring(1);
-            if (rest.length() < 10) continue;
-            String joined = rest.replace(" and then ", ",").replace(" followed by ", ",").replace(" and ", ",").replace(';', ',');
-            HiringProcess listed = fromParts(joined.split(","));
+            HiringProcess listed = at >= 0 && at <= 40 ? listAfter(text.substring(from + at + trigger.length(), end)) : null;
             if (listed != null) return listed;
         }
         return null;
+    }
+
+    private static HiringProcess listAfter(String clause) {
+        String rest = clause.strip();
+        if (rest.startsWith(":")) rest = rest.substring(1);
+        if (rest.length() < 10) return null;
+        String joined = rest.replace(" and then ", ",").replace(" followed by ", ",").replace(" and ", ",").replace(';', ',');
+        return fromParts(joined.split(","));
     }
 
     private static HiringProcess arrows(String line) {

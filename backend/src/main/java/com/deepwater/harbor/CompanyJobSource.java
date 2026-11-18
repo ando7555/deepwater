@@ -151,7 +151,7 @@ public class CompanyJobSource {
             node.path("departments").forEach(d -> tags.add(d.path("name").asString("")));
             String description = ArbeitnowJobSource.plainText(unescape(node.path(CONTENT).asString("")));
             add(jobs, company, new Posting("gh-" + node.path("id").asString(""), node.path(TITLE).asString(""), country, location,
-                    location.toLowerCase(Locale.ROOT).contains("remote"), description, tags, node.path("absolute_url").asString(""),
+                    location.toLowerCase(Locale.ROOT).contains(REMOTE), description, tags, node.path("absolute_url").asString(""),
                     instant(node.path("first_published").asString(node.path("updated_at").asString("")))));
         }
         return jobs;
