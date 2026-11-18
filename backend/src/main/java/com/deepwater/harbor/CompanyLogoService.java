@@ -52,13 +52,29 @@ public class CompanyLogoService {
             if (response.statusCode() != 200 || !type.startsWith("image/") || response.body().length == 0 || response.body().length > 200_000)
                 return new Logo(null, null, Instant.now());
             return new Logo(response.body(), type, Instant.now());
-        } catch (InterruptedException ex) {
+        } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
             return new Logo(null, null, Instant.now());
-        } catch (Exception ex) {
+        } catch (java.io.IOException | RuntimeException _) {
             return new Logo(null, null, Instant.now());
         }
     }
 
-    public record Logo(byte[] bytes, String contentType, Instant checkedAt) {}
+    public record Logo(byte[] bytes, String contentType, Instant checkedAt) {
+        @Override
+        public boolean equals(Object other) {
+            return other instanceof Logo that && java.util.Arrays.equals(bytes, that.bytes)
+                    && java.util.Objects.equals(contentType, that.contentType) && java.util.Objects.equals(checkedAt, that.checkedAt);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * java.util.Objects.hash(contentType, checkedAt) + java.util.Arrays.hashCode(bytes);
+        }
+
+        @Override
+        public String toString() {
+            return "Logo[" + (bytes == null ? 0 : bytes.length) + " bytes, " + contentType + ", " + checkedAt + "]";
+        }
+    }
 }
