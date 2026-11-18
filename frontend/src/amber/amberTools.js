@@ -51,3 +51,24 @@ export function initial(name) {
 export function isShared(interest, shared = []) {
   return shared.some(item => item.toLowerCase() === interest.toLowerCase());
 }
+
+/** Warm gradient pairs for the profile cover. Amber has no photos, so each person gets a steady colour of their own. */
+export const COVERS = [
+  ['#f6c98a', '#e27552'], ['#e27552', '#a8442a'], ['#f2b38a', '#c45a6a'],
+  ['#e9a46b', '#8a3f2c'], ['#f6d7a7', '#d0805a'], ['#d9876b', '#6e2f3a'],
+];
+
+/** The same name always gets the same cover, so a person looks the same in Discover, Invitations and chat. */
+export function coverFor(name) {
+  const text = (name ?? '').trim().toLowerCase();
+  let hash = 0;
+  for (const char of text) hash = (hash * 31 + char.codePointAt(0)) >>> 0;
+  return COVERS[hash % COVERS.length];
+}
+
+/** "2 of 5" for the horizontal card row, from the scroll position. */
+export function railPosition(scrollLeft, cardWidth, count) {
+  if (!count) return { index: 0, label: '' };
+  const index = cardWidth > 0 ? Math.min(count - 1, Math.max(0, Math.round(scrollLeft / cardWidth))) : 0;
+  return { index, label: `${index + 1} of ${count}` };
+}

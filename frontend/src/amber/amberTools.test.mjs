@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { addInterest, profileProblems, intentWords, initial, isShared, MAX_INTERESTS } from './amberTools.js';
+import { addInterest, profileProblems, intentWords, initial, isShared, coverFor, railPosition, COVERS, MAX_INTERESTS } from './amberTools.js';
 
 test('interests are trimmed, deduplicated and limited', () => {
   assert.deepEqual(addInterest([], '  Board   games ').list, ['Board games']);
@@ -23,4 +23,17 @@ test('small display helpers', () => {
   assert.equal(intentWords(['FRIENDS', 'DATING']), 'Dating, New friends');
   assert.equal(initial(' mia'), 'M');
   assert.equal(isShared('Hiking', ['hiking']), true);
+});
+
+test('a person keeps the same cover colours everywhere', () => {
+  assert.deepEqual(coverFor('Mia'), coverFor(' mia '));
+  assert.ok(COVERS.includes(coverFor('Lukas')));
+  assert.ok(COVERS.includes(coverFor('')));
+});
+
+test('the card row says which card is in view', () => {
+  assert.deepEqual(railPosition(0, 300, 4), { index: 0, label: '1 of 4' });
+  assert.deepEqual(railPosition(610, 300, 4), { index: 2, label: '3 of 4' });
+  assert.deepEqual(railPosition(9999, 300, 4), { index: 3, label: '4 of 4' });
+  assert.deepEqual(railPosition(0, 0, 0), { index: 0, label: '' });
 });

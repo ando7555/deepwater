@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { restClient } from '../app/http.js';
 import { Button, Choice, EmptyState, ErrorState, Field, Loading, FormGrid, Notice, Panel, Pill, ProblemList, SectionHeading, Tabs } from '../ui/index.jsx';
-import { INTENTS, REPORT_REASONS, addInterest, initial, intentWords, isShared, profileProblems } from './amberTools.js';
+import { INTENTS, REPORT_REASONS, addInterest, coverFor, initial, intentWords, isShared, profileProblems, railPosition } from './amberTools.js';
 
 // Amber: connection by choice. Suggestions explain themselves, and a conversation opens only when both say yes.
 
@@ -31,7 +31,7 @@ export default function Amber() {
   return <div className="amber-app">
     <section className="welcome amber-welcome">
       <p className="eyebrow">AMBER · CONNECTION, BY CHOICE</p>
-      <h1>Hi {profile.displayName}. <span className="amber-accent">Nothing opens until you both say yes.</span></h1>
+      <h1 className="amber-hello">Hi {profile.displayName}. <span className="amber-accent">Nothing opens until you both say yes.</span></h1>
     </section>
     <Tabs label="Amber sections" value={view} onChange={setView} items={[
       { id: 'discover', label: 'Discover' },
@@ -177,8 +177,6 @@ function Discover({ profile, goToProfile }) {
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const [reporting, setReporting] = useState(null);
-  const [current, setCurrent] = useState(0);
-  const trackRef = useRef(null);
 
   const load = useCallback(() => {
     amber('/suggestions').then(next => { setList(next); setPaused(''); })
@@ -203,32 +201,14 @@ function Discover({ profile, goToProfile }) {
   if (paused) return <EmptyState title="Suggestions are paused" action={<Button variant="quiet" onClick={goToProfile}>Open my profile</Button>}>{paused}</EmptyState>;
   if (!list) return error ? <ErrorState title="Suggestions didn’t load" error={error} onRetry={() => { setError(''); load(); }} /> : <Loading label="Finding people…" />;
 
-  const scroll = direction => {
-    const track = trackRef.current;
-    if (!track) return;
-    const card = track.querySelector('.amber-person-card');
-    track.scrollBy({ left: direction * ((card?.offsetWidth || 320) + 16), behavior: 'smooth' });
-  };
-  const onScroll = () => {
-    const track = trackRef.current;
-    const card = track?.querySelector('.amber-person-card');
-    if (card) setCurrent(Math.min(list.length - 1, Math.round(track.scrollLeft / (card.offsetWidth + 16))));
-  };
-
-  return <div className="amber-discover">
+  return <div className="amber-stack">
     {notice && <Notice tone="good">{notice}</Notice>}
     {error && <Notice tone="error">{error}</Notice>}
     {list.length === 0 && <EmptyState title="No suggestions right now">Amber only suggests people who are looking for the same kind of connection as you. Adding interests or changing what you are looking for can widen it.</EmptyState>}
-    {list.length > 0 && <div className="amber-carousel-bar">
-      <span className="amber-note">{list.length === 1 ? '1 person' : `${current + 1} of ${list.length} people`} · swipe or use the arrows</span>
-      <div className="amber-row">
-        <button type="button" className="amber-arrow" aria-label="Previous person" disabled={current === 0} onClick={() => scroll(-1)}>‹</button>
-        <button type="button" className="amber-arrow" aria-label="Next person" disabled={current >= list.length - 1} onClick={() => scroll(1)}>›</button>
-      </div>
-    </div>}
-    <div className="amber-carousel" ref={trackRef} onScroll={onScroll} role="list" aria-label="Suggested people">
-    {list.map(item => <Panel as="article" role="listitem" key={item.person.memberId} className="amber-card amber-person-card">
-      <PersonHeader person={item.person} />
+    {list.length > 0 && <Rail label="Suggested people" count={list.length}>
+    {list.map(item => <Panel as="article" key={item.person.memberId} className="amber-card amber-person-card" role="listitem">
+      <Cover person={item.person} />
+      <div className="amber-card-body">
       <div className="harbor-chips">
         {item.person.interests.map(interest => <span key={interest} className={`amber-chip${isShared(interest, item.sharedInterests) ? ' match' : ''}`}>{interest}</span>)}
       </div>
@@ -244,14 +224,81 @@ function Discover({ profile, goToProfile }) {
       </div>
       <p className="amber-note">Passing does not lower anyone's visibility, and {item.person.displayName} is never told. <button type="button" className="link" onClick={() => setReporting(item.person)}>Block or report</button></p>
       {reporting?.memberId === item.person.memberId && <SafetySheet person={item.person} onClose={done => { setReporting(null); if (done) setList(current => current.filter(other => other.person.memberId !== item.person.memberId)); }} />}
+      </div>
     </Panel>)}
-    </div>
+    </Rail>}
   </div>;
+}
+
+/**
+ * A horizontal row of cards: swipe on a phone, arrows or the keyboard on a computer.
+ * Cards snap into place, and the counter says which one is in view.
+ */
+function Rail({ label, count, children }) {
+  const rail = useRef(null);
+  const [position, setPosition] = useState(railPosition(0, 0, count));
+  const [overflows, setOverflows] = useState(false);
+  const step = () => {
+    const card = rail.current?.firstElementChild;
+    if (!card) return 0;
+    const gap = parseFloat(getComputedStyle(rail.current).columnGap) || 0;
+    return card.getBoundingClientRect().width + gap;
+  };
+  const measure = useCallback(() => {
+    const el = rail.current;
+    if (!el) return;
+    setPosition(railPosition(el.scrollLeft, step(), count));
+    setOverflows(el.scrollWidth > el.clientWidth + 1);
+  }, [count]);
+  useEffect(() => {
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [measure]);
+  const move = direction => rail.current?.scrollBy({ left: direction * step(), behavior: 'smooth' });
+  const keys = event => {
+    if (event.key === 'ArrowRight') { event.preventDefault(); move(1); }
+    if (event.key === 'ArrowLeft') { event.preventDefault(); move(-1); }
+  };
+  return <div className="amber-rail-wrap">
+    <div className="amber-rail-bar">
+      <span className="amber-rail-count" aria-live="polite">{overflows ? position.label : `${count} ${count === 1 ? 'person' : 'people'}`}</span>
+      {overflows && <div className="amber-rail-arrows">
+        <button type="button" className="amber-arrow" aria-label="Previous" disabled={position.index === 0} onClick={() => move(-1)}><Chevron left /></button>
+        <button type="button" className="amber-arrow" aria-label="Next" disabled={position.index >= count - 1} onClick={() => move(1)}><Chevron /></button>
+      </div>}
+    </div>
+    <div className="amber-rail" ref={rail} role="list" aria-label={label} tabIndex={0} onScroll={measure} onKeyDown={keys}>{children}</div>
+  </div>;
+}
+
+function Chevron({ left }) {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={left ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'} />
+  </svg>;
+}
+
+/** The top of a profile card: a warm colour band with the person's initial, name and age. */
+function Cover({ person }) {
+  const [from, to] = coverFor(person.displayName);
+  return <div className="amber-cover" style={{ '--cover-a': from, '--cover-b': to }}>
+    <span className="amber-cover-initial" aria-hidden="true">{initial(person.displayName)}</span>
+    <div className="amber-cover-text">
+      <h3>{person.displayName}, {person.age}</h3>
+      <p>{person.area} · {intentWords(person.intents)}</p>
+    </div>
+    {person.learning && <span className="amber-cover-tag">Learning {person.learning}</span>}
+  </div>;
+}
+
+function Avatar({ name }) {
+  const [from, to] = coverFor(name);
+  return <span className="amber-avatar" aria-hidden="true" style={{ '--cover-a': from, '--cover-b': to }}>{initial(name)}</span>;
 }
 
 function PersonHeader({ person }) {
   return <div className="amber-person">
-    <span className="amber-avatar" aria-hidden="true">{initial(person.displayName)}</span>
+    <Avatar name={person.displayName} />
     <div>
       <h3>{person.displayName}, {person.age}</h3>
       <p>{person.area} · {intentWords(person.intents)}{person.learning ? ` · Learning ${person.learning}` : ''}</p>
@@ -286,15 +333,19 @@ function Invitations({ onChanged, openConversations }) {
     {error && <Notice tone="error">{error}</Notice>}
     <SectionHeading level={2} title="Invited you" lead="Nothing opens until you accept. Declining is private." />
     {data.incoming.length === 0 && <EmptyState title="No invitations waiting" />}
-    {data.incoming.map(invitation => <Panel as="article" key={invitation.id} className="amber-card">
-      <PersonHeader person={invitation.person} />
+    {data.incoming.length > 0 && <Rail label="Invitations to you" count={data.incoming.length}>
+    {data.incoming.map(invitation => <Panel as="article" key={invitation.id} className="amber-card amber-person-card" role="listitem">
+      <Cover person={invitation.person} />
+      <div className="amber-card-body">
       {invitation.person.about && <p className="amber-about">{invitation.person.about}</p>}
       {invitation.reasons.length > 0 && <div className="amber-why"><b>What you share</b><ul>{invitation.reasons.map(r => <li key={r}>{r}</li>)}</ul></div>}
       <div className="amber-actions two">
         <Button variant="quiet" onClick={() => act(invitation, 'decline')}>Decline</Button>
         <Button onClick={() => act(invitation, 'accept')}>Accept</Button>
       </div>
+      </div>
     </Panel>)}
+    </Rail>}
     <SectionHeading level={2} title="You invited" />
     {data.outgoing.length === 0 && <EmptyState title="No invitations sent" />}
     {data.outgoing.map(invitation => <Panel as="article" key={invitation.id} className="amber-card amber-sent">
