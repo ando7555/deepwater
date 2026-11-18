@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-/* Deepwater brand tokens. Echo uses the blue "water" accents; Amber keeps the warm set for its own app. */
+/* Deepwater brand tokens: one blue "water" set for every product (Echo, Harbor, Amber). */
 :root{
   --abyss:#060f22;--deep:#0a1a36;--surface:#0d1f3d;--surface-2:#112849;--surface-3:#163259;
   --line:#21406f;--line-soft:#19335a;
@@ -645,17 +645,9 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
 .echo-languages button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 0 0 0 1px var(--accent)}
 
 /* Amber: same typefaces and shapes as Echo; only the colours change (warm ember, coral and gold). */
-.amber-app{
-  --abyss:#140b09;--deep:#1d110d;--surface:#26170f;--surface-2:#311d14;--surface-3:#3d2418;
-  --line:#5a3326;--line-soft:#432719;--line-hover:#7a4634;
-  --text:#fff2dc;--text-2:#e2c9b4;--text-3:#b08f7b;
-  --accent:#f6c98a;--accent-2:#e27552;--accent-deep:#a8442a;--accent-ink:#1a0d08;
-  --panel-a:#2a1913f0;--panel-b:#1c110df0;--surface-glass:#26170f99;
-  --accent-soft:#e275522a;--accent-text:#ffd9a3;--accent-ring:#f6c98a22;--accent-shadow:#e2755233;--accent-shadow-strong:#e2755255;
-  display:grid;gap:22px;color:var(--text);background:radial-gradient(ellipse 80% 40% at 50% 0%,#3a1c12 0%,transparent 70%),var(--abyss);
-  border:1px solid var(--line-soft);border-radius:var(--radius-lg);padding:clamp(16px,3vw,32px)
-}
-.amber-app .welcome{margin:0}
+/* Amber uses the same Deepwater colours, frame and left edge as Echo and Harbor. */
+.amber-app{display:grid;gap:var(--space-5);color:var(--text)}
+.amber-app .welcome{margin:var(--space-6) 0 0}
 .amber-accent{background:linear-gradient(100deg,var(--accent-2),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
 .amber-principles{list-style:none;padding:0;margin:18px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
 .amber-principles li{display:grid;gap:4px;padding:16px;border:1px solid var(--line-soft);border-radius:var(--radius);background:var(--surface-glass)}
@@ -673,13 +665,13 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
 .amber-toggle span{display:grid;gap:3px}.amber-toggle b{color:var(--text)}.amber-toggle small{font-weight:400}
 .amber-toggle input{appearance:none;-webkit-appearance:none;width:44px;height:25px;border-radius:var(--radius);background:var(--line);position:relative;cursor:pointer;flex:0 0 auto;padding:0;border:0;transition:background .15s ease}
 .amber-toggle input::after{content:'';position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;background:var(--text-3);transition:left .15s ease}
-.amber-toggle input:checked{background:var(--accent-2)}.amber-toggle input:checked::after{left:22px;background:#fff2dc}
+.amber-toggle input:checked{background:var(--accent-2)}.amber-toggle input:checked::after{left:22px;background:#fff}
 .amber-toggle.disabled{opacity:.6;cursor:not-allowed}
 .amber-leave{display:grid;gap:10px;padding-top:6px;border-top:1px solid var(--line-soft)}
 .amber-leave p{margin:0}
 .amber-person{display:flex;gap:14px;align-items:center}
 .amber-person h3{margin:0;font-size:var(--fs-xl)}.amber-person p{margin:2px 0 0;font-size:var(--fs-md)}
-.amber-avatar{width:56px;height:56px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font:700 var(--fs-xl) 'Space Grotesk',sans-serif;color:#140b09;background:linear-gradient(140deg,var(--cover-a,#f6c98a),var(--cover-b,#e27552));box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--line)}
+.amber-avatar{width:56px;height:56px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font:700 var(--fs-xl) 'Space Grotesk',sans-serif;color:#fff;background:linear-gradient(140deg,var(--cover-a,#5ad0ff),var(--cover-b,#1e7bf0));box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--line)}
 .amber-chip{font-size:var(--fs-sm);padding:5px 11px;border-radius:var(--radius-pill);background:var(--surface-2);color:var(--text-2);border:1px solid var(--line)}
 .amber-chip.match{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text);font-weight:600}
 .amber-about{margin:0}
@@ -698,7 +690,7 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
 .amber-messages{display:grid;gap:8px;max-height:420px;overflow-y:auto;padding:12px;border:1px solid var(--line-soft);border-radius:var(--radius);background:var(--deep)}
 .amber-bubble{max-width:80%;margin:0;padding:9px 13px;border-radius:var(--radius);font-size:var(--fs-base);line-height:1.45;overflow-wrap:anywhere;white-space:pre-wrap}
 .amber-bubble.them{background:var(--surface-2);color:var(--text);border-bottom-left-radius:4px;justify-self:start}
-.amber-bubble.me{background:var(--accent-2);color:var(--amber-ink);border-bottom-right-radius:4px;justify-self:end}
+.amber-bubble.me{background:var(--accent-2);color:var(--on-accent);border-bottom-right-radius:4px;justify-self:end}
 .amber-compose{display:flex;gap:8px}.amber-compose input{flex:1;min-width:0}
 .amber-sheet{display:grid;gap:12px;padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
 .amber-sheet h3,.amber-sheet p{margin:0}
@@ -840,7 +832,7 @@ button,.pill,.learn-tabs button,.segmented button,.echo-languages button,.ui-men
 
 /* Amber, nicer level: profile cards sit side by side in a row that scrolls sideways and snaps.
    Phone: swipe, the next card peeks in. Computer: arrows or the arrow keys. */
-.amber-app .welcome h1.amber-hello{font-size:clamp(1.6rem,3.4vw,2.5rem);line-height:1.12;max-width:22ch}
+.amber-app .welcome h1.amber-hello{font-size:clamp(32px,4.4vw,46px);margin:10px 0;line-height:1.1;max-width:24ch}
 .amber-rail-wrap{display:grid;gap:12px;min-width:0}
 .amber-rail-bar{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .amber-rail-count{font:600 var(--fs-sm) var(--font-display,'Space Grotesk',sans-serif);letter-spacing:.06em;color:var(--text-3)}
@@ -850,7 +842,7 @@ button,.pill,.learn-tabs button,.segmented button,.echo-languages button,.ui-men
 .amber-arrow:disabled{opacity:.35}
 .amber-arrow svg{width:18px;height:18px}
 .amber-rail{display:grid;grid-auto-flow:column;grid-auto-columns:min(340px,86%);gap:16px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;
-  scroll-padding-inline:2px;padding:2px 2px 14px;scrollbar-width:thin;scrollbar-color:var(--line) transparent;border-radius:var(--radius-lg)}
+  padding:2px 0 14px;scrollbar-width:thin;scrollbar-color:var(--line) transparent;border-radius:var(--radius-lg)}
 .amber-rail:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
 .amber-rail>*{scroll-snap-align:start}
 .amber-person-card{padding:0;gap:0;overflow:hidden;align-content:start;border-color:var(--line);
@@ -859,12 +851,12 @@ button,.pill,.learn-tabs button,.segmented button,.echo-languages button,.ui-men
 .amber-card-body{display:grid;gap:14px;padding:16px 18px 18px;align-content:start}
 .amber-cover{position:relative;min-height:190px;display:flex;align-items:flex-end;padding:18px;
   background:radial-gradient(circle at 78% 18%,#ffffff40 0,transparent 42%),linear-gradient(150deg,var(--cover-a),var(--cover-b))}
-.amber-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,#140b09c7 100%);pointer-events:none}
-.amber-cover-initial{position:absolute;right:14px;top:-18px;font:700 9.5rem/1 var(--font-display,'Space Grotesk',sans-serif);color:#ffffff38;letter-spacing:-.04em;user-select:none}
+.amber-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,#060f22d9 100%);pointer-events:none}
+.amber-cover-initial{position:absolute;right:14px;top:-18px;font:700 9.5rem/1 var(--font-display,'Space Grotesk',sans-serif);color:#ffffff2e;letter-spacing:-.04em;user-select:none}
 .amber-cover-text{position:relative;z-index:1}
-.amber-cover-text h3{margin:0;color:#fff7ea;font-size:var(--fs-2xl,1.6rem);letter-spacing:-.01em}
-.amber-cover-text p{margin:4px 0 0;color:#fff1dfdd;font-size:var(--fs-md)}
-.amber-cover-tag{position:absolute;z-index:1;left:18px;top:16px;font-size:var(--fs-xs,.75rem);font-weight:700;padding:5px 10px;border-radius:var(--radius-pill);background:#140b0999;color:#fff2dc;backdrop-filter:blur(6px)}
+.amber-cover-text h3{margin:0;color:#fff;font-size:var(--fs-2xl);letter-spacing:-.01em}
+.amber-cover-text p{margin:4px 0 0;color:#eaf6ffdd;font-size:var(--fs-md)}
+.amber-cover-tag{position:absolute;z-index:1;left:18px;top:16px;font-size:var(--fs-xs,.75rem);font-weight:700;padding:5px 10px;border-radius:var(--radius-pill);background:#060f2299;color:#fff;backdrop-filter:blur(6px)}
 .amber-person-card .harbor-chips{margin:0}
 .amber-person-card .amber-about{color:var(--text);line-height:1.5}
 .amber-person-card .amber-why{border-left:0;border-radius:var(--radius);border:1px solid var(--line-soft);background:var(--surface-2)}
@@ -875,6 +867,6 @@ button,.pill,.learn-tabs button,.segmented button,.echo-languages button,.ui-men
 .amber-thread{width:100%}
 .amber-messages{background:linear-gradient(180deg,var(--deep),var(--abyss));gap:10px;padding:16px}
 .amber-bubble{box-shadow:0 1px 0 #0000002e}
-.amber-bubble.me{background:linear-gradient(140deg,var(--accent),var(--accent-2))}
+.amber-bubble.me{background:linear-gradient(140deg,var(--accent-2),var(--accent-deep))}
 @media(prefers-reduced-motion:reduce){.amber-person-card{transition:none}}
 @media(max-width:600px){.amber-cover{min-height:170px}.amber-cover-initial{font-size:8rem}}
