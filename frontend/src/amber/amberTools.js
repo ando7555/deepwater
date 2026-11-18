@@ -52,10 +52,11 @@ export function isShared(interest, shared = []) {
   return shared.some(item => item.toLowerCase() === interest.toLowerCase());
 }
 
-/** Warm gradient pairs for the profile cover. Amber has no photos, so each person gets a steady colour of their own. */
+/** Deepwater blue gradient pairs for the profile cover (the logo's blues and sea green). Amber has no photos,
+ *  so each person gets a steady colour of their own. */
 export const COVERS = [
-  ['#f6c98a', '#e27552'], ['#e27552', '#a8442a'], ['#f2b38a', '#c45a6a'],
-  ['#e9a46b', '#8a3f2c'], ['#f6d7a7', '#d0805a'], ['#d9876b', '#6e2f3a'],
+  ['#5ad0ff', '#1e7bf0'], ['#1e7bf0', '#0a3a9c'], ['#5fe0c0', '#1e6fe0'],
+  ['#3fb6f0', '#163259'], ['#7ad8ff', '#2d5590'], ['#2aa7c9', '#0a1a36'],
 ];
 
 /** The same name always gets the same cover, so a person looks the same in Discover, Invitations and chat. */
