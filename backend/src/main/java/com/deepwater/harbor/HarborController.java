@@ -37,9 +37,16 @@ public class HarborController {
     private final ApplicationService applications;
     private final ArbeitnowJobSource arbeitnow;
     private final JobCatalogService catalog;
+    private final CompanyRegistry companies;
+    private final CompanyJobSource companyJobs;
+    private final CompanyLogoService logos;
 
     public HarborController(PlatformService platform, TalentProfileService profiles, JobSearchService search,
-                            ApplicationService applications, ArbeitnowJobSource arbeitnow, JobCatalogService catalog) {
+                            ApplicationService applications, ArbeitnowJobSource arbeitnow, JobCatalogService catalog,
+                            CompanyRegistry companies, CompanyJobSource companyJobs, CompanyLogoService logos) {
+        this.companies = companies;
+        this.companyJobs = companyJobs;
+        this.logos = logos;
         this.platform = platform;
         this.profiles = profiles;
         this.search = search;
@@ -89,9 +96,9 @@ public class HarborController {
                                        @RequestParam(required = false) String remote, @RequestParam(required = false) String visa,
                                        @RequestParam(required = false) Integer minScore, @RequestParam(required = false) String source,
                                        @RequestParam(required = false) Integer max, @RequestParam(required = false) String category,
-                                       @RequestParam(required = false) String language) {
+                                       @RequestParam(required = false) String language, @RequestParam(required = false) String company) {
         return search.search(platform.requireAccount(auth),
-                new JobSearchService.Filters(q, country, remote, visa, minScore, source, max, category, language));
+                new JobSearchService.Filters(q, country, remote, visa, minScore, source, max, category, language, company));
     }
 
     /** Where the postings come from, and the work-permit guide for the Nordic countries and Switzerland. */
@@ -103,15 +110,49 @@ public class HarborController {
         result.put("liveJobs", catalog.count(ArbeitnowJobSource.SOURCE));
         result.put("liveEnabled", arbeitnow.enabled());
         result.put("lastRefreshedAt", arbeitnow.lastRefresh());
+        result.put("companyJobs", catalog.count(CompanyJobSource.SOURCE));
+        result.put("companyBoardsEnabled", companyJobs.enabled());
+        result.put("companyBoardsRefreshing", companyJobs.running());
+        result.put("companyBoardsRefreshedAt", companyJobs.lastRefresh());
         result.put("countries", Countries.NAMES);
         result.put("permitGuides", List.copyOf(WorkPermitRules.guides().values()));
         return result;
     }
 
+    /** Refreshes Arbeitnow now (when it is on) and starts a background refresh of the company job boards. */
     @PostMapping("/jobs/refresh")
     ArbeitnowJobSource.Refresh refresh(@RequestHeader(value = "Authorization", required = false) String auth) {
         platform.requireAccount(auth);
-        return arbeitnow.refresh();
+        if (!companyJobs.enabled()) return arbeitnow.refresh();
+        String companyNote = companyJobs.requestRefresh();
+        if (!arbeitnow.enabled()) return new ArbeitnowJobSource.Refresh(companyJobs.enabled(), 0, companyNote, companyJobs.lastRefresh());
+        ArbeitnowJobSource.Refresh live = arbeitnow.refresh();
+        return new ArbeitnowJobSource.Refresh(true, live.updated(), live.message() + " " + companyNote, live.lastRefreshedAt());
+    }
+
+    /** The employers Harbor follows, with how many of their postings it holds and whether their board is connected. */
+    @GetMapping("/companies")
+    List<CompanyView> companies(@RequestHeader(value = "Authorization", required = false) String auth) {
+        platform.requireAccount(auth);
+        Map<String, Integer> counts = catalog.countsByCompany();
+        return companies.all().stream().map(c -> {
+            CompanyJobSource.CompanyStatus status = companyJobs.status(c.id());
+            return new CompanyView(c.id(), c.name(), c.home(), Countries.name(c.home()), c.careersUrl(), c.connected(),
+                    c.connected() ? c.board().type() : null, counts.getOrDefault(c.id(), 0), status == null ? null : status.problem());
+        }).toList();
+    }
+
+    /**
+     * A company's logo. Public, because an image tag cannot send the session header; it only ever serves
+     * the logos of the companies listed in companies.json.
+     */
+    @GetMapping("/companies/{id}/logo")
+    ResponseEntity<byte[]> logo(@PathVariable String id) {
+        CompanyLogoService.Logo logo = logos.logo(id);
+        if (logo == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok().contentType(org.springframework.http.MediaType.parseMediaType(logo.contentType()))
+                .cacheControl(org.springframework.http.CacheControl.maxAge(java.time.Duration.ofDays(7)).cachePublic())
+                .header("X-Content-Type-Options", "nosniff").body(logo.bytes());
     }
 
     @GetMapping("/applications")
@@ -148,5 +189,7 @@ public class HarborController {
     }
 
     record PastedCv(String text) {}
+    record CompanyView(String id, String name, String home, String homeName, String careersUrl, boolean connected, String board,
+                       int jobs, String problem) {}
     record TrackRequest(String status, String note) {}
 }

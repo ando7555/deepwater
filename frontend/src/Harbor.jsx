@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { restClient } from './app/http.js';
+import { API, restClient } from './app/http.js';
 import { ErrorState, Loading, Notice, Tabs } from './ui/index.jsx';
 
 // Harbor: a talent profile from your CV, matched jobs with visa filters, and your own application tracker.
@@ -23,6 +23,19 @@ const LANGUAGE_BADGE = {
   PLUS: ['accent', language => `${language || 'Local language'} is a plus`],
   ENGLISH_OK: ['good', () => 'English is enough'],
 };
+const SOURCE_BADGE = { SAMPLE: ['sample', 'Sample posting'], ARBEITNOW: ['muted', 'Arbeitnow'], COMPANY: ['good', 'Real posting'] };
+
+const logoUrl = companyId => `${API}/api/v1/harbor/companies/${encodeURIComponent(companyId)}/logo`;
+const initials = name => (name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0].toUpperCase()).join('');
+
+/** The company's own logo, or its initials when there is none. */
+function CompanyLogo({ companyId, name, small }) {
+  const [failed, setFailed] = useState(!companyId);
+  return <span className={`harbor-logo${small ? ' small' : ''}`} aria-hidden="true">
+    {failed ? <span>{initials(name)}</span> : <img src={logoUrl(companyId)} alt="" loading="lazy" onError={() => setFailed(true)} />}
+  </span>;
+}
+
 const PERMIT_BADGE = {
   NOT_NEEDED: ['good', 'No work permit needed'], NEEDED: ['warn', 'You need a work permit'], CHECK: ['muted', 'Check permit rules'],
 };
@@ -31,6 +44,7 @@ export default function Harbor() {
   const [view, setView] = useState('jobs');
   const [profile, setProfile] = useState(null);
   const [sources, setSources] = useState(null);
+  const [companies, setCompanies] = useState([]);
   const [error, setError] = useState('');
 
   const [loadError, setLoadError] = useState(null);
@@ -41,6 +55,7 @@ export default function Harbor() {
       setProfile(p); setSources(s);
       if (!p.skills.length) setView('profile');
     }).catch(setLoadError);
+    harbor('/companies').then(setCompanies).catch(() => setCompanies([]));
   }
   useEffect(load, []);
 
@@ -57,7 +72,7 @@ export default function Harbor() {
     ]} />
     {error && <Notice tone="error" onDismiss={() => setError('')}>{error}</Notice>}
     {view === 'profile' && <ProfileView profile={profile} sources={sources} onSaved={next => { setProfile(next); setError(''); }} onDone={() => setView('jobs')} />}
-    {view === 'jobs' && <JobsView profile={profile} sources={sources} onSources={setSources} goToProfile={() => setView('profile')} />}
+    {view === 'jobs' && <JobsView profile={profile} sources={sources} companies={companies} onSources={setSources} goToProfile={() => setView('profile')} />}
     {view === 'applications' && <ApplicationsView />}
   </div>;
 }
@@ -148,8 +163,8 @@ function ProfileView({ profile, sources, onSaved, onDone }) {
   </div>;
 }
 
-function JobsView({ profile, sources, onSources, goToProfile }) {
-  const [filters, setFilters] = useState({ q: '', country: 'ANY', visa: profile.citizenship === 'OTHER' ? 'OPEN_TO_ME' : 'ANY', remote: 'ANY', minScore: '', source: 'ALL', category: 'ANY', language: 'ANY' });
+function JobsView({ profile, sources, companies, onSources, goToProfile }) {
+  const [filters, setFilters] = useState({ q: '', country: 'ANY', visa: profile.citizenship === 'OTHER' ? 'OPEN_TO_ME' : 'ANY', remote: 'ANY', minScore: '', source: 'ALL', category: 'ANY', language: 'ANY', company: 'ANY' });
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [refreshNote, setRefreshNote] = useState('');
@@ -181,13 +196,19 @@ function JobsView({ profile, sources, onSources, goToProfile }) {
     : profile.targetCountries.filter(c => FOCUS_COUNTRIES.includes(c));
   const guides = sources.permitGuides.filter(g => (guideCountries.length ? guideCountries : FOCUS_COUNTRIES).includes(g.code));
 
+  const realJobs = (sources.companyJobs || 0) + (sources.liveEnabled ? sources.liveJobs : 0);
+  const connected = companies.filter(c => c.connected).length;
   return <div className="harbor-jobs">
     <div className="harbor-source-note" role="note">
       <b>Where these jobs come from</b>
-      <span>{sources.sampleJobs} sample postings written for this demo (no real employer behind them){sources.liveEnabled ? `, plus ${sources.liveJobs} live postings from the public Arbeitnow job board` : '. Live postings are turned off on this server'}. </span>
-      {sources.liveEnabled && <button type="button" className="link" onClick={refresh}>Refresh live postings</button>}
+      {realJobs > 0
+        ? <span>{sources.companyJobs} real postings taken straight from the careers sites of {connected} employers, refreshed every six hours{sources.liveEnabled && sources.liveJobs ? `, plus ${sources.liveJobs} from the public Arbeitnow job board` : ''}. Apply on the employer’s own page. </span>
+        : <span>{sources.companyBoardsRefreshing ? 'Harbor is fetching real postings from employers’ careers sites right now. ' : ''}Until they arrive you see {sources.sampleJobs} sample postings written for this demo (no real employer behind them). </span>}
+      {(sources.companyBoardsEnabled || sources.liveEnabled) && <button type="button" className="link" onClick={refresh}>Refresh postings</button>}
       {refreshNote && <small>{refreshNote}</small>}
     </div>
+    {companies.length > 0 && <CompanyStrip companies={companies} counts={result?.jobsByCompany} selected={filters.company} onSelect={id => set('company', filters.company === id ? 'ANY' : id)} />}
+    {filters.company !== 'ANY' && <p className="harbor-hint">Showing {companies.find(c => c.id === filters.company)?.name || 'one employer'} only. <button type="button" className="link" onClick={() => set('company', 'ANY')}>Show every employer</button></p>}
     {profile.skills.length === 0 && <p className="banner notice">Your profile has no skills yet, so every match score is low. <button className="link" onClick={goToProfile}>Upload your CV</button></p>}
 
     <form className="panel harbor-filters" onSubmit={e => e.preventDefault()} aria-label="Job filters">
@@ -230,31 +251,84 @@ function JobsView({ profile, sources, onSources, goToProfile }) {
 
 function Badge({ kind, children }) { return <span className={`harbor-badge ${kind}`}>{children}</span>; }
 
+/** The employers Harbor follows, side by side: tap one to see only its jobs. */
+function CompanyStrip({ companies, counts, selected, onSelect }) {
+  const sorted = [...companies].sort((a, b) => Number(b.connected) - Number(a.connected) || (counts?.[b.id] || 0) - (counts?.[a.id] || 0));
+  return <section className="harbor-companies" aria-label="Employers">
+    <div className="harbor-companies-head">
+      <h3>Employers in Harbor</h3>
+      <small>{companies.filter(c => c.connected).length} with live postings · {companies.filter(c => !c.connected).length} with a careers link only</small>
+    </div>
+    <div className="harbor-company-strip">
+      {sorted.map(company => company.connected
+        ? <button type="button" key={company.id} className="harbor-company" aria-pressed={selected === company.id} onClick={() => onSelect(company.id)}>
+            <CompanyLogo companyId={company.id} name={company.name} small />
+            <b>{company.name}</b>
+            <small>{counts ? `${counts[company.id] || 0} open roles` : `${company.jobs} roles`} · {company.homeName}</small>
+          </button>
+        : <div key={company.id} className="harbor-company">
+            <CompanyLogo companyId={company.id} name={company.name} small />
+            <b>{company.name}</b>
+            <small>No public job feed yet</small>
+            <a href={company.careersUrl} target="_blank" rel="noreferrer">Careers page ↗</a>
+          </div>)}
+    </div>
+  </section>;
+}
+
+/** The hiring steps, only as the posting itself describes them. */
+function HiringSteps({ process, company }) {
+  if (!process) return <div className="harbor-process unknown">
+    <p><b>Hiring process:</b> {company} does not describe its interview steps in this posting. Ask the recruiter in your first call how many rounds there are.</p>
+  </div>;
+  const others = process.steps.length - process.interviews;
+  return <div className="harbor-process">
+    <div className="harbor-process-head">
+      <b>Hiring process</b>
+      <Badge kind="accent">{process.steps.length} steps</Badge>
+      <Badge kind="good">{process.interviews} {process.interviews === 1 ? 'interview or call' : 'interviews or calls'}</Badge>
+      {others > 0 && <Badge kind="muted">{others} {others === 1 ? 'task or other step' : 'tasks or other steps'}</Badge>}
+      <small>as written in the posting</small>
+    </div>
+    <ol>{process.steps.map((step, index) => <li key={index} className={step.interview ? 'interview' : ''}><span>{step.name}{step.detail && <small>{step.detail}</small>}</span></li>)}</ol>
+  </div>;
+}
+
+function postedLabel(postedAt) {
+  if (!postedAt) return '';
+  const days = Math.floor((Date.now() - new Date(postedAt).getTime()) / 86400000);
+  return days <= 0 ? 'Posted today' : days === 1 ? 'Posted yesterday' : days < 60 ? `Posted ${days} days ago` : `Posted ${new Date(postedAt).toLocaleDateString()}`;
+}
+
 function JobCard({ item, onTrack }) {
   const { job, match, applicationStatus } = item;
   const [visaKind, visaLabel] = VISA_BADGE[job.visaSignal] || VISA_BADGE.UNKNOWN;
   const [permitKind, permitLabel] = PERMIT_BADGE[match.workPermit] || PERMIT_BADGE.CHECK;
   const sample = job.source === 'SAMPLE';
+  const [sourceKind, sourceLabel] = SOURCE_BADGE[job.source] || SOURCE_BADGE.ARBEITNOW;
   return <article className="panel harbor-job">
     <div className="harbor-job-head">
-      <div className="harbor-score" style={{ '--score': match.score }} aria-label={`Match ${match.score} percent`}><b>{match.score}%</b><small>match</small></div>
+      <CompanyLogo companyId={job.companyId} name={job.company} />
       <div className="harbor-job-title">
         <h3>{job.title}</h3>
-        <p>{job.company} · {job.location || job.countryName || 'Location not given'}{job.remote ? ' · Remote' : ''}</p>
+        <p>{job.company} · {job.location || job.countryName || 'Location not given'}{job.countryName && job.location && !job.location.includes(job.countryName) ? `, ${job.countryName}` : ''}{job.remote ? ' · Remote' : ''}</p>
+        {job.postedAt && <small className="harbor-posted">{postedLabel(job.postedAt)}</small>}
         <div className="harbor-badges">
-          {sample ? <Badge kind="sample">Sample posting</Badge> : <Badge kind="muted">Arbeitnow</Badge>}
+          <Badge kind={sourceKind}>{sourceLabel}</Badge>
           <Badge kind={visaKind}>{visaLabel}</Badge>
           <Badge kind={permitKind}>{permitLabel}</Badge>
           {LANGUAGE_BADGE[job.languageNeed] && <Badge kind={LANGUAGE_BADGE[job.languageNeed][0]}>{LANGUAGE_BADGE[job.languageNeed][1](job.localLanguage)}</Badge>}
           {applicationStatus && <Badge kind="accent">{STATUS_LABELS[applicationStatus]}</Badge>}
         </div>
       </div>
+      <div className="harbor-score" style={{ '--score': match.score }} aria-label={`Match ${match.score} percent`}><b>{match.score}%</b><small>match</small></div>
     </div>
+    {!sample && <HiringSteps process={job.hiringProcess} company={job.company} />}
     <ul className="harbor-reasons">{match.reasons.map(reason => <li key={reason}>{reason}</li>)}</ul>
     {job.languageNeed !== 'ENGLISH_OK' && ['Danish', 'German'].includes(job.localLanguage) && <p className="harbor-hint">{job.localLanguage} {job.languageNeed === 'REQUIRED' ? 'is required here' : 'helps here'}: practise it in Echo, a few minutes a day.</p>}
     <details><summary>Read the posting</summary><p className="harbor-description">{job.description}</p>{job.tags.length > 0 && <small>Tags: {job.tags.join(', ')}</small>}</details>
     <div className="harbor-actions">
-      {job.url && <a className="harbor-apply" href={job.url} target="_blank" rel="noreferrer" onClick={() => { if (!applicationStatus) onTrack(job, 'SAVED'); }}>Apply on the original posting ↗</a>}
+      {job.url && <a className="harbor-apply" href={job.url} target="_blank" rel="noreferrer" onClick={() => { if (!applicationStatus) onTrack(job, 'SAVED'); }}>{job.source === 'COMPANY' ? `Apply on ${job.company}’s site ↗` : 'Apply on the original posting ↗'}</a>}
       {!applicationStatus && <button type="button" className="secondary" onClick={() => onTrack(job, 'SAVED')}>Save</button>}
       {applicationStatus !== 'APPLIED' && <button type="button" className={job.url ? 'secondary' : ''} onClick={() => onTrack(job, 'APPLIED')}>{sample ? 'Mark as applied' : 'I have applied'}</button>}
     </div>

@@ -870,3 +870,31 @@ button,.pill,.learn-tabs button,.segmented button,.echo-languages button,.ui-men
 .amber-bubble.me{background:linear-gradient(140deg,var(--accent-2),var(--accent-deep))}
 @media(prefers-reduced-motion:reduce){.amber-person-card{transition:none}}
 @media(max-width:600px){.amber-cover{min-height:170px}.amber-cover-initial{font-size:8rem}}
+
+/* Harbor: company logos, employer strip and hiring process. */
+.harbor-logo{width:48px;height:48px;flex:0 0 auto;border-radius:12px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}
+.harbor-logo img{width:34px;height:34px;object-fit:contain}
+.harbor-logo span{font:700 var(--fs-md) 'Space Grotesk',sans-serif;color:#1d2433}
+.harbor-logo.small{width:36px;height:36px;border-radius:10px}.harbor-logo.small img{width:24px;height:24px}
+.harbor-companies{display:grid;gap:10px;min-width:0}
+.harbor-companies-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.harbor-companies-head h3{margin:0;font-size:var(--fs-lg)}
+.harbor-company-strip{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,170px);gap:10px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 2px 10px}
+.harbor-company{scroll-snap-align:start;display:grid;gap:6px;justify-items:start;text-align:left;padding:12px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);color:var(--text);box-shadow:none;min-height:44px}
+.harbor-company[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.harbor-company b{font-size:var(--fs-md);line-height:1.25}
+.harbor-company small{color:var(--text-3);font-size:var(--fs-xs)}
+.harbor-company a{font-size:var(--fs-xs)}
+.harbor-process{display:grid;gap:8px;padding:12px 14px;border-radius:var(--radius);border:1px solid var(--line-soft);background:var(--surface-2)}
+.harbor-process-head{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.harbor-process-head b{color:var(--text)}
+.harbor-process ol{margin:0;padding:0;list-style:none;display:grid;gap:6px;counter-reset:step}
+.harbor-process li{counter-increment:step;display:grid;grid-template-columns:26px 1fr;gap:8px;align-items:start;font-size:var(--fs-md)}
+.harbor-process li::before{content:counter(step);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:var(--fs-xs);font-weight:700;background:var(--accent-soft);color:var(--accent-text);border:1px solid var(--line)}
+.harbor-process li.interview::before{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.harbor-process li small{display:block;color:var(--text-3)}
+.harbor-process.unknown{background:transparent;border-style:dashed}
+.harbor-process.unknown p{margin:0;font-size:var(--fs-sm);color:var(--text-2)}
+.harbor-job-title{flex:1;min-width:0}
+.harbor-posted{display:block;margin-top:2px;color:var(--text-3);font-size:var(--fs-xs)}
+@media(max-width:600px){.harbor-job-head{flex-direction:row;flex-wrap:wrap;justify-content:space-between}.harbor-job-head .harbor-score{flex:0 0 56px;height:56px;order:1}.harbor-job-head .harbor-job-title{flex-basis:100%;order:2}}

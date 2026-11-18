@@ -54,7 +54,25 @@ Thresholds are proposals the owner can change.
 
 ## Where job data comes from
 
-* **Sample postings (always on):** 18 postings in `backend/src/main/resources/harbor/sample-jobs.json`, written for the demo.
+* **Employers' own job boards (on by default, owner ask 2026-11-18):** `backend/src/main/resources/harbor/companies.json`
+  lists the employers Harbor follows. Each one names the public job board behind its careers site: Greenhouse, Lever,
+  Ashby, SmartRecruiters or Workday. These publish the jobs a company lists on its own careers page as JSON, without a key,
+  and every posting links back to the employer's own page to apply. `CompanyJobSource` keeps roles in DK, SE, NO, FI, IS,
+  DE, CH, AT and NL only, at most 60 per employer (30 for Workday/SmartRecruiters, which need one request per posting),
+  refreshes a minute after start and every six hours, and drops postings a board no longer lists (unless someone tracks them).
+  Turn off with `HARBOR_COMPANY_JOBS_ENABLED=false`. Verified 2026-11-18 from the cloud environment: 912 real postings from
+  30 employers. Employers with **no public feed** (Arla Foods, Danske Bank, Netcompany, Deloitte, Uber, QuantumBlack) are
+  listed with their logo and a careers-page link, and no postings; their careers-page links for Danske Bank, Netcompany and
+  Deloitte were not opened from here and should be checked.
+  * **Logos:** `GET /api/v1/harbor/companies/{id}/logo` (public, only ids in companies.json) serves the icon each company
+    publishes for its own site, fetched once through Google's site-icon service and cached in memory. Browsers load it
+    from Deepwater, never from Google. No logo is redrawn; when there is none the screen shows the initials.
+  * **Hiring process:** `HiringProcess.read` lists the steps only when the posting itself describes them (a heading such
+    as "Our interview process" followed by steps, an arrow chain "Recruiter Screen → Hiring Manager → Live Coding", or a
+    sentence "The recruitment process will include ..."). It counts interviews and calls separately from tasks and offers.
+    Nothing is guessed: on 2026-11-18 only 17 of 912 postings described their steps (Pleo, Too Good To Go, Wolt, Lovable,
+    Mentimeter, trivago); every other posting says the employer has not published it.
+* **Sample postings (shown only while there are no real ones):** 18 postings in `backend/src/main/resources/harbor/sample-jobs.json`, written for the demo.
   The companies are invented and labelled "(sample)"; there is no employer behind them.
 * **Arbeitnow (off by default):** the public, key-free Arbeitnow job board API (mostly Germany/EU).
   Turn on with `HARBOR_ARBEITNOW_ENABLED=true`. Refreshes at most every 10 minutes, 3 pages.
@@ -70,7 +88,8 @@ NAV (Norway, public token), EURES (no open API found yet). Scraping LinkedIn/Ind
 
 `GET/PUT /api/v1/harbor/profile`, `POST /api/v1/harbor/cv` (multipart `file`), `POST /api/v1/harbor/cv/text`,
 `DELETE /api/v1/harbor/cv`, `GET /api/v1/harbor/jobs?q&country&remote&visa&minScore&source&max`,
-`GET /api/v1/harbor/sources`, `POST /api/v1/harbor/jobs/refresh`,
+`GET /api/v1/harbor/sources`, `POST /api/v1/harbor/jobs/refresh`, `GET /api/v1/harbor/companies`,
+`GET /api/v1/harbor/companies/{id}/logo` (public), `company` filter on `/jobs`,
 `GET /api/v1/harbor/applications`, `PUT|DELETE /api/v1/harbor/applications/{jobId}`.
 
 ## Decisions taken in this MVP (proposals until the owner confirms)
