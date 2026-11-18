@@ -661,7 +661,8 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
 .amber-principles li{display:grid;gap:4px;padding:16px;border:1px solid var(--line-soft);border-radius:var(--radius);background:var(--surface-glass)}
 .amber-principles b{color:var(--text)}.amber-principles span{font-size:var(--fs-md);color:var(--text-2);line-height:1.5}
 .amber-card{display:grid;gap:14px;padding:clamp(16px,3vw,26px)}
-.amber-stack{display:grid;gap:16px;max-width:760px}
+.amber-stack{display:grid;gap:16px;min-width:0}
+.amber-sent,.amber-thread{max-width:760px}
 .amber-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .amber-row.spread{justify-content:space-between}
 .amber-intents{display:flex;flex-wrap:wrap;gap:8px}
@@ -678,7 +679,7 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
 .amber-leave p{margin:0}
 .amber-person{display:flex;gap:14px;align-items:center}
 .amber-person h3{margin:0;font-size:var(--fs-xl)}.amber-person p{margin:2px 0 0;font-size:var(--fs-md)}
-.amber-avatar{width:56px;height:56px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font:700 var(--fs-xl) 'Space Grotesk',sans-serif;color:#140b09;background:linear-gradient(140deg,#f6c98a,#e27552)}
+.amber-avatar{width:56px;height:56px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font:700 var(--fs-xl) 'Space Grotesk',sans-serif;color:#140b09;background:linear-gradient(140deg,var(--cover-a,#f6c98a),var(--cover-b,#e27552));box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--line)}
 .amber-chip{font-size:var(--fs-sm);padding:5px 11px;border-radius:var(--radius-pill);background:var(--surface-2);color:var(--text-2);border:1px solid var(--line)}
 .amber-chip.match{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text);font-weight:600}
 .amber-about{margin:0}
@@ -836,3 +837,44 @@ button,.pill,.learn-tabs button,.segmented button,.echo-languages button,.ui-men
 .ask-launcher{bottom:calc(20px + env(safe-area-inset-bottom))}
 @media(max-width:520px){.ask-launcher{bottom:calc(16px + env(safe-area-inset-bottom))}}
 .exam-hero{margin-bottom:var(--space-3)}
+
+/* Amber, nicer level: profile cards sit side by side in a row that scrolls sideways and snaps.
+   Phone: swipe, the next card peeks in. Computer: arrows or the arrow keys. */
+.amber-app .welcome h1.amber-hello{font-size:clamp(1.6rem,3.4vw,2.5rem);line-height:1.12;max-width:22ch}
+.amber-rail-wrap{display:grid;gap:12px;min-width:0}
+.amber-rail-bar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.amber-rail-count{font:600 var(--fs-sm) var(--font-display,'Space Grotesk',sans-serif);letter-spacing:.06em;color:var(--text-3)}
+.amber-rail-arrows{display:flex;gap:8px}
+.amber-arrow{width:44px;height:44px;padding:0;border-radius:50%;display:grid;place-items:center;background:var(--surface);color:var(--text);border:1px solid var(--line);box-shadow:none}
+.amber-arrow:hover:not(:disabled){transform:none;filter:none;border-color:var(--accent);box-shadow:none}
+.amber-arrow:disabled{opacity:.35}
+.amber-arrow svg{width:18px;height:18px}
+.amber-rail{display:grid;grid-auto-flow:column;grid-auto-columns:min(340px,86%);gap:16px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;
+  scroll-padding-inline:2px;padding:2px 2px 14px;scrollbar-width:thin;scrollbar-color:var(--line) transparent;border-radius:var(--radius-lg)}
+.amber-rail:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.amber-rail>*{scroll-snap-align:start}
+.amber-person-card{padding:0;gap:0;overflow:hidden;align-content:start;border-color:var(--line);
+  transition:border-color .2s ease,transform .2s ease}
+.amber-person-card:hover{border-color:var(--line-hover)}
+.amber-card-body{display:grid;gap:14px;padding:16px 18px 18px;align-content:start}
+.amber-cover{position:relative;min-height:190px;display:flex;align-items:flex-end;padding:18px;
+  background:radial-gradient(circle at 78% 18%,#ffffff40 0,transparent 42%),linear-gradient(150deg,var(--cover-a),var(--cover-b))}
+.amber-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,#140b09c7 100%);pointer-events:none}
+.amber-cover-initial{position:absolute;right:14px;top:-18px;font:700 9.5rem/1 var(--font-display,'Space Grotesk',sans-serif);color:#ffffff38;letter-spacing:-.04em;user-select:none}
+.amber-cover-text{position:relative;z-index:1}
+.amber-cover-text h3{margin:0;color:#fff7ea;font-size:var(--fs-2xl,1.6rem);letter-spacing:-.01em}
+.amber-cover-text p{margin:4px 0 0;color:#fff1dfdd;font-size:var(--fs-md)}
+.amber-cover-tag{position:absolute;z-index:1;left:18px;top:16px;font-size:var(--fs-xs,.75rem);font-weight:700;padding:5px 10px;border-radius:var(--radius-pill);background:#140b0999;color:#fff2dc;backdrop-filter:blur(6px)}
+.amber-person-card .harbor-chips{margin:0}
+.amber-person-card .amber-about{color:var(--text);line-height:1.5}
+.amber-person-card .amber-why{border-left:0;border-radius:var(--radius);border:1px solid var(--line-soft);background:var(--surface-2)}
+.amber-person-card .amber-actions{grid-template-columns:1fr 1fr;gap:8px}
+.amber-person-card .amber-actions button:last-child{grid-column:1/-1}
+.amber-person-card .amber-actions.two{grid-template-columns:1fr 1.4fr}
+.amber-person-card .amber-actions.two button:last-child{grid-column:auto}
+.amber-thread{width:100%}
+.amber-messages{background:linear-gradient(180deg,var(--deep),var(--abyss));gap:10px;padding:16px}
+.amber-bubble{box-shadow:0 1px 0 #0000002e}
+.amber-bubble.me{background:linear-gradient(140deg,var(--accent),var(--accent-2))}
+@media(prefers-reduced-motion:reduce){.amber-person-card{transition:none}}
+@media(max-width:600px){.amber-cover{min-height:170px}.amber-cover-initial{font-size:8rem}}
