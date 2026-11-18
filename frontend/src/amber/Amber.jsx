@@ -177,6 +177,8 @@ function Discover({ profile, goToProfile }) {
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const [reporting, setReporting] = useState(null);
+  const [current, setCurrent] = useState(0);
+  const trackRef = useRef(null);
 
   const load = useCallback(() => {
     amber('/suggestions').then(next => { setList(next); setPaused(''); })
@@ -201,11 +203,31 @@ function Discover({ profile, goToProfile }) {
   if (paused) return <EmptyState title="Suggestions are paused" action={<Button variant="quiet" onClick={goToProfile}>Open my profile</Button>}>{paused}</EmptyState>;
   if (!list) return error ? <ErrorState title="Suggestions didn’t load" error={error} onRetry={() => { setError(''); load(); }} /> : <Loading label="Finding people…" />;
 
-  return <div className="amber-stack">
+  const scroll = direction => {
+    const track = trackRef.current;
+    if (!track) return;
+    const card = track.querySelector('.amber-person-card');
+    track.scrollBy({ left: direction * ((card?.offsetWidth || 320) + 16), behavior: 'smooth' });
+  };
+  const onScroll = () => {
+    const track = trackRef.current;
+    const card = track?.querySelector('.amber-person-card');
+    if (card) setCurrent(Math.min(list.length - 1, Math.round(track.scrollLeft / (card.offsetWidth + 16))));
+  };
+
+  return <div className="amber-discover">
     {notice && <Notice tone="good">{notice}</Notice>}
     {error && <Notice tone="error">{error}</Notice>}
     {list.length === 0 && <EmptyState title="No suggestions right now">Amber only suggests people who are looking for the same kind of connection as you. Adding interests or changing what you are looking for can widen it.</EmptyState>}
-    {list.map(item => <Panel as="article" key={item.person.memberId} className="amber-card amber-person-card">
+    {list.length > 0 && <div className="amber-carousel-bar">
+      <span className="amber-note">{list.length === 1 ? '1 person' : `${current + 1} of ${list.length} people`} · swipe or use the arrows</span>
+      <div className="amber-row">
+        <button type="button" className="amber-arrow" aria-label="Previous person" disabled={current === 0} onClick={() => scroll(-1)}>‹</button>
+        <button type="button" className="amber-arrow" aria-label="Next person" disabled={current >= list.length - 1} onClick={() => scroll(1)}>›</button>
+      </div>
+    </div>}
+    <div className="amber-carousel" ref={trackRef} onScroll={onScroll} role="list" aria-label="Suggested people">
+    {list.map(item => <Panel as="article" role="listitem" key={item.person.memberId} className="amber-card amber-person-card">
       <PersonHeader person={item.person} />
       <div className="harbor-chips">
         {item.person.interests.map(interest => <span key={interest} className={`amber-chip${isShared(interest, item.sharedInterests) ? ' match' : ''}`}>{interest}</span>)}
@@ -223,6 +245,7 @@ function Discover({ profile, goToProfile }) {
       <p className="amber-note">Passing does not lower anyone's visibility, and {item.person.displayName} is never told. <button type="button" className="link" onClick={() => setReporting(item.person)}>Block or report</button></p>
       {reporting?.memberId === item.person.memberId && <SafetySheet person={item.person} onClose={done => { setReporting(null); if (done) setList(current => current.filter(other => other.person.memberId !== item.person.memberId)); }} />}
     </Panel>)}
+    </div>
   </div>;
 }
 

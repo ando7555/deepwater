@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.io.ClassPathResource;
@@ -17,7 +18,7 @@ import tools.jackson.databind.ObjectMapper;
 @Service
 public class JobCatalogService implements ApplicationRunner {
     /** Searches look at the newest postings only; enough for the MVP, and it keeps a search fast without an index. */
-    static final int SEARCH_WINDOW = 1000;
+    static final int SEARCH_WINDOW = 3000;
 
     private final JdbcTemplate db;
     private final ObjectMapper json;
@@ -43,14 +44,14 @@ public class JobCatalogService implements ApplicationRunner {
         String tags = String.join(",", (job.tags() == null ? List.<String>of() : job.tags()).stream()
                 .map(tag -> tag.replace(",", " ").strip()).filter(tag -> !tag.isEmpty()).toList());
         int updated = db.update("update harbor_jobs set source=?,title=?,company=?,country_code=?,location=?,remote=?,visa_signal=?," +
-                        "description=?,tags=?,url=?,posted_at=?,fetched_at=current_timestamp where id=?",
+                        "description=?,tags=?,url=?,posted_at=?,company_id=?,fetched_at=current_timestamp where id=?",
                 job.source(), cut(job.title(), 300), cut(job.company(), 200), job.countryCode(), cut(job.location(), 200), job.remote(),
-                job.visaSignal(), cut(job.description(), 20000), cut(tags, 1000), cut(job.url(), 1500), posted, job.id());
+                job.visaSignal(), cut(job.description(), 20000), cut(tags, 1000), cut(job.url(), 1500), posted, job.companyId(), job.id());
         if (updated == 0)
-            db.update("insert into harbor_jobs(id,source,title,company,country_code,location,remote,visa_signal,description,tags,url,posted_at) " +
-                            "values(?,?,?,?,?,?,?,?,?,?,?,?)",
+            db.update("insert into harbor_jobs(id,source,title,company,country_code,location,remote,visa_signal,description,tags,url,posted_at,company_id) " +
+                            "values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     job.id(), job.source(), cut(job.title(), 300), cut(job.company(), 200), job.countryCode(), cut(job.location(), 200),
-                    job.remote(), job.visaSignal(), cut(job.description(), 20000), cut(tags, 1000), cut(job.url(), 1500), posted);
+                    job.remote(), job.visaSignal(), cut(job.description(), 20000), cut(tags, 1000), cut(job.url(), 1500), posted, job.companyId());
     }
 
     public List<Job> recent() {
@@ -59,6 +60,31 @@ public class JobCatalogService implements ApplicationRunner {
 
     public Job find(String id) {
         return db.query("select * from harbor_jobs where id=?", JobCatalogService::row, id).stream().findFirst().orElse(null);
+    }
+
+    /**
+     * Drops an employer's postings that its board no longer lists. A posting someone tracks in their
+     * applications stays, so their tracker never loses a row.
+     */
+    @Transactional
+    public void removeOthers(String companyId, List<String> keepIds) {
+        String keep = keepIds.isEmpty() ? "" : " and id not in (" + String.join(",", java.util.Collections.nCopies(keepIds.size(), "?")) + ")";
+        List<Object> args = new java.util.ArrayList<>();
+        args.add(companyId);
+        args.addAll(keepIds);
+        db.update("delete from harbor_jobs where company_id=?" + keep + " and id not in (select job_id from harbor_applications)", args.toArray());
+    }
+
+    public int countForCompany(String companyId) {
+        Integer count = db.queryForObject("select count(*) from harbor_jobs where company_id=?", Integer.class, companyId);
+        return count == null ? 0 : count;
+    }
+
+    public Map<String, Integer> countsByCompany() {
+        Map<String, Integer> counts = new java.util.HashMap<>();
+        db.query("select company_id, count(*) n from harbor_jobs where company_id is not null group by company_id",
+                rs -> { counts.put(rs.getString("company_id"), rs.getInt("n")); });
+        return counts;
     }
 
     public int count(String source) {
@@ -72,7 +98,7 @@ public class JobCatalogService implements ApplicationRunner {
         return new Job(rs.getString("id"), rs.getString("source"), rs.getString("title"), rs.getString("company"),
                 rs.getString("country_code"), rs.getString("location"), rs.getBoolean("remote"), rs.getString("visa_signal"),
                 rs.getString("description"), tags == null || tags.isBlank() ? List.of() : Arrays.asList(tags.split(",")),
-                rs.getString("url"), posted == null ? null : posted.toInstant());
+                rs.getString("url"), posted == null ? null : posted.toInstant(), rs.getString("company_id"));
     }
 
     private static String cut(String value, int max) {

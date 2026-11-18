@@ -1,0 +1,42 @@
+[
+  {"id": "jysk", "name": "JYSK", "domain": "jysk.com", "home": "DK", "careersUrl": "https://jobs.smartrecruiters.com/JYSK", "board": {"type": "SMARTRECRUITERS", "id": "JYSK"}},
+  {"id": "arla", "name": "Arla Foods", "domain": "arla.com", "home": "DK", "careersUrl": "https://careers.arla.com/viewalljobs/", "board": {"type": "NONE"}},
+  {"id": "lego", "name": "LEGO Group", "domain": "lego.com", "home": "DK", "careersUrl": "https://lego.wd103.myworkdayjobs.com/LEGO_External", "board": {"type": "WORKDAY", "host": "lego.wd103.myworkdayjobs.com", "id": "lego", "site": "LEGO_External"}},
+  {"id": "danske-bank", "name": "Danske Bank", "domain": "danskebank.com", "home": "DK", "careersUrl": "https://danskebank.com/careers", "board": {"type": "NONE"}},
+  {"id": "netcompany", "name": "Netcompany", "domain": "netcompany.com", "home": "DK", "careersUrl": "https://www.netcompany.com", "board": {"type": "NONE"}},
+  {"id": "deloitte", "name": "Deloitte", "domain": "deloitte.com", "home": "DK", "careersUrl": "https://www.deloitte.com/dk/en/careers.html", "board": {"type": "NONE"}},
+  {"id": "uber", "name": "Uber", "domain": "uber.com", "home": "DK", "careersUrl": "https://www.uber.com/careers/list/", "board": {"type": "NONE"}},
+  {"id": "quantumblack", "name": "QuantumBlack, AI by McKinsey", "domain": "quantumblack.com", "home": "DK", "careersUrl": "https://www.mckinsey.com/careers/search-jobs", "board": {"type": "NONE"}},
+  {"id": "accenture", "name": "Accenture", "domain": "accenture.com", "home": "DK", "careersUrl": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers", "board": {"type": "WORKDAY", "host": "accenture.wd103.myworkdayjobs.com", "id": "accenture", "site": "AccentureCareers"}},
+  {"id": "databricks", "name": "Databricks", "domain": "databricks.com", "home": "DK", "careersUrl": "https://www.databricks.com/company/careers", "board": {"type": "GREENHOUSE", "id": "databricks"}},
+  {"id": "trustpilot", "name": "Trustpilot", "domain": "trustpilot.com", "home": "DK", "careersUrl": "https://corporate.trustpilot.com/careers", "board": {"type": "GREENHOUSE", "id": "trustpilot"}},
+  {"id": "pleo", "name": "Pleo", "domain": "pleo.io", "home": "DK", "careersUrl": "https://jobs.ashbyhq.com/pleo", "board": {"type": "ASHBY", "id": "pleo"}},
+  {"id": "too-good-to-go", "name": "Too Good To Go", "domain": "toogoodtogo.com", "home": "DK", "careersUrl": "https://jobs.ashbyhq.com/toogoodtogo", "board": {"type": "ASHBY", "id": "toogoodtogo"}},
+  {"id": "veo", "name": "Veo", "domain": "veo.co", "home": "DK", "careersUrl": "https://jobs.lever.co/veo", "board": {"type": "LEVER", "id": "veo"}},
+  {"id": "wolt", "name": "Wolt", "domain": "wolt.com", "home": "FI", "careersUrl": "https://careers.wolt.com", "board": {"type": "GREENHOUSE", "id": "wolt"}},
+
+  {"id": "spotify", "name": "Spotify", "domain": "spotify.com", "home": "SE", "careersUrl": "https://www.lifeatspotify.com/jobs", "board": {"type": "LEVER", "id": "spotify"}},
+  {"id": "legora", "name": "Legora", "domain": "legora.com", "home": "SE", "careersUrl": "https://jobs.ashbyhq.com/legora", "board": {"type": "ASHBY", "id": "legora"}},
+  {"id": "lovable", "name": "Lovable", "domain": "lovable.dev", "home": "SE", "careersUrl": "https://jobs.ashbyhq.com/lovable", "board": {"type": "ASHBY", "id": "lovable"}},
+  {"id": "trustly", "name": "Trustly", "domain": "trustly.com", "home": "SE", "careersUrl": "https://jobs.ashbyhq.com/trustly", "board": {"type": "ASHBY", "id": "trustly"}},
+  {"id": "truecaller", "name": "Truecaller", "domain": "truecaller.com", "home": "SE", "careersUrl": "https://job-boards.greenhouse.io/truecaller", "board": {"type": "GREENHOUSE", "id": "truecaller"}},
+  {"id": "mentimeter", "name": "Mentimeter", "domain": "mentimeter.com", "home": "SE", "careersUrl": "https://job-boards.greenhouse.io/mentimeter", "board": {"type": "GREENHOUSE", "id": "mentimeter"}},
+  {"id": "netlight", "name": "Netlight", "domain": "netlight.com", "home": "SE", "careersUrl": "https://jobs.lever.co/netlight", "board": {"type": "LEVER", "id": "netlight"}},
+
+  {"id": "equinor", "name": "Equinor", "domain": "equinor.com", "home": "NO", "careersUrl": "https://equinor.wd3.myworkdayjobs.com/EQNR", "board": {"type": "WORKDAY", "host": "equinor.wd3.myworkdayjobs.com", "id": "equinor", "site": "EQNR"}},
+  {"id": "cognite", "name": "Cognite", "domain": "cognite.com", "home": "NO", "careersUrl": "https://job-boards.greenhouse.io/cognite", "board": {"type": "GREENHOUSE", "id": "cognite"}},
+
+  {"id": "celonis", "name": "Celonis", "domain": "celonis.com", "home": "DE", "careersUrl": "https://job-boards.greenhouse.io/celonis", "board": {"type": "GREENHOUSE", "id": "celonis"}},
+  {"id": "n26", "name": "N26", "domain": "n26.com", "home": "DE", "careersUrl": "https://job-boards.greenhouse.io/n26", "board": {"type": "GREENHOUSE", "id": "n26"}},
+  {"id": "hellofresh", "name": "HelloFresh", "domain": "hellofresh.com", "home": "DE", "careersUrl": "https://job-boards.greenhouse.io/hellofresh", "board": {"type": "GREENHOUSE", "id": "hellofresh"}},
+  {"id": "helsing", "name": "Helsing", "domain": "helsing.ai", "home": "DE", "careersUrl": "https://job-boards.greenhouse.io/helsing", "board": {"type": "GREENHOUSE", "id": "helsing"}},
+  {"id": "trivago", "name": "trivago", "domain": "trivago.com", "home": "DE", "careersUrl": "https://job-boards.greenhouse.io/trivago", "board": {"type": "GREENHOUSE", "id": "trivago"}},
+  {"id": "delivery-hero", "name": "Delivery Hero", "domain": "deliveryhero.com", "home": "DE", "careersUrl": "https://jobs.smartrecruiters.com/DeliveryHero", "board": {"type": "SMARTRECRUITERS", "id": "DeliveryHero"}},
+  {"id": "bosch", "name": "Bosch", "domain": "bosch.com", "home": "DE", "careersUrl": "https://jobs.smartrecruiters.com/BoschGroup", "board": {"type": "SMARTRECRUITERS", "id": "BoschGroup"}},
+  {"id": "enpal", "name": "Enpal", "domain": "enpal.de", "home": "DE", "careersUrl": "https://jobs.ashbyhq.com/enpal", "board": {"type": "ASHBY", "id": "enpal"}},
+
+  {"id": "on", "name": "On", "domain": "on.com", "home": "CH", "careersUrl": "https://job-boards.greenhouse.io/onrunning", "board": {"type": "GREENHOUSE", "id": "onrunning"}},
+  {"id": "proton", "name": "Proton", "domain": "proton.me", "home": "CH", "careersUrl": "https://job-boards.greenhouse.io/proton", "board": {"type": "GREENHOUSE", "id": "proton"}},
+  {"id": "sonar", "name": "Sonar", "domain": "sonarsource.com", "home": "CH", "careersUrl": "https://jobs.lever.co/sonarsource", "board": {"type": "LEVER", "id": "sonarsource"}},
+  {"id": "getyourguide", "name": "GetYourGuide", "domain": "getyourguide.com", "home": "CH", "careersUrl": "https://jobs.ashbyhq.com/getyourguide", "board": {"type": "ASHBY", "id": "getyourguide"}}
+]

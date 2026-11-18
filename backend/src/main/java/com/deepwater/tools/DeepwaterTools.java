@@ -195,6 +195,7 @@ public class DeepwaterTools {
             job.put("location", j.location());
             job.put("remote", j.remote());
             job.put("url", j.url());
+            if (j.hiringProcess() != null) job.put("hiringProcess", j.hiringProcess());
             job.put("summary", j.description() == null || j.description().length() <= DESCRIPTION_CHARS
                     ? j.description() : j.description().substring(0, DESCRIPTION_CHARS) + "…");
             job.put("score", m.match().score());

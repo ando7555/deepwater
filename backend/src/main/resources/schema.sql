@@ -213,6 +213,9 @@ create table if not exists harbor_jobs (
   fetched_at timestamp with time zone not null default current_timestamp
 );
 create index if not exists harbor_jobs_country on harbor_jobs(country_code);
+-- The employer in harbor/companies.json when the posting came from that company's own job board.
+alter table harbor_jobs add column if not exists company_id varchar(60);
+create index if not exists harbor_jobs_company on harbor_jobs(company_id);
 create table if not exists harbor_applications (
   id varchar(36) primary key,
   account_id varchar(36) not null references accounts(id),
