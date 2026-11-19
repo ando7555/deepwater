@@ -13,6 +13,8 @@ import Harbor from './Harbor.jsx';
 import AskDeepwater, { openAskDeepwater } from './AskDeepwater.jsx';
 import ExamPractice from './ExamPractice.jsx';
 import Amber from './amber/Amber.jsx';
+import Workspace from './workspace/Workspace.jsx';
+import { restClient } from './app/http.js';
 import Auth from './Auth.jsx';
 import AppHeader from './AppHeader.jsx';
 import DeleteAccount from './DeleteAccount.jsx';
@@ -86,6 +88,9 @@ function App() {
   const [audioResults, setAudioResults] = useState({});
   const [tab, setTab] = useState('today');
   const [product, setProduct] = useState(readProduct);
+  // The owner's AI workspace opens from the account menu; the entry exists only for the owner account.
+  const [workspaceOpen, setWorkspaceOpen] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
   const [examId, setExamId] = useState(readExamMode);
   useEffect(() => { write(KEYS.echoLanguage, examId || 'course'); }, [examId]);
   useEffect(() => { write(KEYS.product, product); }, [product]);
@@ -107,8 +112,13 @@ function App() {
 
   /** Switching product starts clean: a banner from Echo does not follow you into Harbor. */
   function chooseProduct(next) {
-    setError(''); setNotice(''); setProduct(next);
+    setError(''); setNotice(''); setWorkspaceOpen(false); setProduct(next);
   }
+
+  useEffect(() => {
+    if (!user) { setIsOwner(false); setWorkspaceOpen(false); return; }
+    restClient('/api/v1/workspace')('/access').then(access => setIsOwner(Boolean(access?.owner))).catch(() => setIsOwner(false));
+  }, [user]);
 
   // The confirmation email links here with ?verify_email=<token>.
   useEffect(() => {
@@ -310,16 +320,18 @@ function App() {
   const echoLanguage = languageOfExam(examId) || ECHO_LANGUAGES.find(option => option.code === courseCode) || ECHO_LANGUAGES[0];
 
   return <main className="app-shell">
-    <AppHeader product={product} onProduct={chooseProduct} productLabel={productName(product)} user={user}
+    <AppHeader product={product} onProduct={chooseProduct} productLabel={workspaceOpen ? 'AI workspace' : productName(product)} user={user}
       profileOpen={product === 'echo' && tab === 'profile'} onSignOut={logout}
       onProfile={() => { chooseProduct('echo'); setExamId(null); setReviewing(false); setWarmUp(false); setTab('profile'); }}
-      accountExtras={<button type="button" className="ask-header" onClick={openAskDeepwater}><span aria-hidden="true">✦</span> Ask AI</button>} />
+      accountExtras={<button type="button" className="ask-header" onClick={openAskDeepwater}><span aria-hidden="true">✦</span> Ask AI</button>}
+      onWorkspace={isOwner ? () => setWorkspaceOpen(true) : null} workspaceOpen={workspaceOpen} />
 
     {error && <Notice tone="error" onDismiss={() => setError('')}>{error}</Notice>}
     {notice && <Notice tone="good" onDismiss={() => setNotice('')}>{notice}</Notice>}
     {verifyMessage && <Notice tone="good" onDismiss={() => setVerifyMessage('')}>{verifyMessage}</Notice>}
     {user.emailVerified === 'false' && <Notice>Please confirm your email: we sent a link to {user.email}. <button className="link" onClick={resendVerification}>Send a new link</button></Notice>}
-    <ErrorBoundary name={productName(product)} resetKey={product}>
+    {workspaceOpen && <ErrorBoundary name="AI workspace" resetKey="workspace"><Workspace onClose={() => setWorkspaceOpen(false)} /></ErrorBoundary>}
+    {!workspaceOpen && <ErrorBoundary name={productName(product)} resetKey={product}>
     {product === 'echo' && <>
     {!home && (homeError ? <ErrorState title="Echo didn’t load" error={homeError} onRetry={loadHome} /> : <Loading label="Loading your Echo workspace…" />)}
     {home && tab !== 'profile' && <EchoLanguageBar value={echoLanguage.code} onChange={pickEchoLanguage} />}
@@ -446,8 +458,8 @@ function App() {
     </>}
     {product === 'harbor' && <Harbor />}
     {product === 'amber' && <Amber />}
-    </ErrorBoundary>
-    {product === 'echo' && home && (tab === 'profile' || (!home.onboarded && !examId)) && <DeleteAccount email={user.email} onDeleted={logout} />}
+    </ErrorBoundary>}
+    {!workspaceOpen && product === 'echo' && home && (tab === 'profile' || (!home.onboarded && !examId)) && <DeleteAccount email={user.email} onDeleted={logout} />}
     <AskDeepwater />
     <footer>{productName(product)} by {BRAND.name} · {BRAND.tagline}</footer>
   </main>;

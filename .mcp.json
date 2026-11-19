@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "deepwater": {
+      "type": "http",
+      "url": "https://backend-production-c912.up.railway.app/mcp",
+      "headers": {
+        "Authorization": "Bearer ${DEEPWATER_TOKEN}"
+      }
+    }
+  }
+}

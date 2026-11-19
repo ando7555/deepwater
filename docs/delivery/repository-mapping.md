@@ -36,10 +36,21 @@ isolation uses its own `jdbc:h2:mem:` URL and must not publish lessons into the 
 
 ## Current state the method must respect
 
-- Inbound adapters today: GraphQL (`DeepwaterGraphQlController`) and REST for auth
-  (`AuthController`). No MCP, no AG-UI. Do not add one without a consumer.
-- No AI provider dependency in the code. The architecture docs plan an AI provider port with a
-  deterministic fallback; Amber user data is never sent to a model.
+- Inbound adapters today: GraphQL (`DeepwaterGraphQlController`), REST per product
+  (`/api/v1/...`), MCP (`/mcp`, tools in `com.deepwater.tools.DeepwaterTools`) and AG-UI-named SSE events
+  for Ask Deepwater (`/api/v1/assistant/runs`). Do not add another protocol without a consumer.
+- AI calls sit behind ports (`AssistantModel`, `WritingAssessor`) with a deterministic or "off" fallback;
+  Amber members' data is never sent to a model.
 - Kafka is declared in `backend/build.gradle` but unused; not required for the MVP.
 - The `backend` packages are not yet split into domain / application / adapter. Apply the
   brownfield strategy one use case at a time when an issue touches it; no big-bang refactor.
+
+## AI workspace
+
+- The owner's board of tasks for the five AI roles lives in the app (`com.deepwater.workspace`, account menu >
+  AI workspace) and is reached from Claude Code through the MCP tools `workspace_tasks`,
+  `workspace_propose_task`, `workspace_start_task` and `workspace_submit_evidence` (see `.mcp.json`).
+- The roles are agents in `deepwater-developer/agents/` and data in
+  `backend/src/main/resources/workspace/roles.json`; `AgentRolesInStepTest` keeps the two in step.
+- An agent works only on an APPROVED task assigned to its role, calls `workspace_start_task` before changing
+  code and `workspace_submit_evidence` when the pull request is open. It never approves, merges or deploys.

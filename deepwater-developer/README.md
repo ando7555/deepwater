@@ -291,6 +291,22 @@ background, stops at the plan only if a question blocks it, and reports at the e
 small, well-described ticket. For anything with judgement in it, the step-by-step command is the
 better choice.
 
+## 4a. Your AI team: five role agents and the workspace board
+
+The plugin also brings five agents, each with a written contract (what it does, what it never does, what it hands
+back, which tools it may use): `product-manager`, `ai-architect`, `ml-engineer`, `reliability-engineer` and
+`algorithm-developer`. Ask for one by name in Claude Code: *"use the ai-architect agent to review this design"*.
+
+None of them can approve work. When your project's MCP server offers the workspace tools (`workspace_tasks`,
+`workspace_propose_task`, `workspace_start_task`, `workspace_submit_evidence`), the agents read your task board,
+propose new tasks, start the approved task assigned to their role, and hand it back with the pull request link and
+the real test lines. You approve and accept on the board. In the Deepwater repository the board is in the app
+(account menu > AI workspace) and `.mcp.json` connects it once `DEEPWATER_TOKEN` is set; the steps are on the
+board's "Connect Claude Code" tab.
+
+Why it works this way: the agents do the typing, you keep the decisions. Every approval is bound to the exact
+task text, so if a task changes after you approved it, it comes back to you.
+
 ## 5. What a session looks like
 
 So you know the rhythm before you start:
