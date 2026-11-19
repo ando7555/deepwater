@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { FOCUS_COUNTRIES, NORDICS_AND_SWISS, countryOptions, defaultVisaFilter, resultCountText, visibleCompanies } from './harborFilters.js';
 import { API, restClient } from './app/http.js';
 import { ErrorState, Loading, Notice, Tabs } from './ui/index.jsx';
 
@@ -6,7 +7,6 @@ import { ErrorState, Loading, Notice, Tabs } from './ui/index.jsx';
 
 const harbor = restClient('/api/v1/harbor');
 
-const FOCUS_COUNTRIES = ['DK', 'SE', 'NO', 'CH'];
 const STATUS_LABELS = { SAVED: 'Saved', APPLIED: 'Applied', INTERVIEW: 'Interview', OFFER: 'Offer', REJECTED: 'Rejected', WITHDRAWN: 'Withdrawn' };
 const CITIZENSHIP = [
   ['UNKNOWN', 'Prefer not to say'], ['EU_EEA', 'EU / EEA citizen'], ['SWISS', 'Swiss citizen'], ['OTHER', 'Another citizenship (outside EU/EEA and Switzerland)'],
@@ -164,8 +164,9 @@ function ProfileView({ profile, sources, onSaved, onDone }) {
 }
 
 function JobsView({ profile, sources, companies, onSources, goToProfile }) {
-  const [filters, setFilters] = useState({ q: '', country: 'ANY', visa: profile.citizenship === 'OTHER' ? 'OPEN_TO_ME' : 'ANY', remote: 'ANY', minScore: '', source: 'ALL', category: 'ANY', language: 'ANY', company: 'ANY' });
+  const [filters, setFilters] = useState({ q: '', country: 'ANY', visa: defaultVisaFilter(profile.citizenship), remote: 'ANY', minScore: '', source: 'ALL', category: 'ANY', language: 'ANY', company: 'ANY' });
   const [result, setResult] = useState(null);
+  const [more, setMore] = useState({ jobs: [], busy: false });
   const [error, setError] = useState('');
   const [refreshNote, setRefreshNote] = useState('');
   const set = (key, value) => setFilters(current => ({ ...current, [key]: value }));
@@ -177,7 +178,16 @@ function JobsView({ profile, sources, companies, onSources, goToProfile }) {
   }, [filters]);
 
   async function load() {
-    try { setResult(await harbor(`/jobs${query ? `?${query}` : ''}`)); setError(''); } catch (e) { setError(e.message); }
+    try { setResult(await harbor(`/jobs${query ? `?${query}` : ''}`)); setMore({ jobs: [], busy: false }); setError(''); } catch (e) { setError(e.message); }
+  }
+
+  async function showMore() {
+    const offset = result.jobs.length + more.jobs.length;
+    setMore(current => ({ ...current, busy: true }));
+    try {
+      const page = await harbor(`/jobs?${query ? `${query}&` : ''}offset=${offset}`);
+      setMore(current => ({ jobs: [...current.jobs, ...page.jobs], busy: false }));
+    } catch (e) { setMore(current => ({ ...current, busy: false })); setError(e.message); }
   }
   useEffect(() => { const timer = setTimeout(load, 200); return () => clearTimeout(timer); }, [query]);
 
@@ -192,10 +202,14 @@ function JobsView({ profile, sources, companies, onSources, goToProfile }) {
     } catch (e) { setError(e.message); }
   }
 
-  const guideCountries = filters.country === 'DK,SE,NO,CH' ? FOCUS_COUNTRIES : FOCUS_COUNTRIES.includes(filters.country) ? [filters.country]
+  const guideCountries = filters.country === NORDICS_AND_SWISS ? FOCUS_COUNTRIES : FOCUS_COUNTRIES.includes(filters.country) ? [filters.country]
     : profile.targetCountries.filter(c => FOCUS_COUNTRIES.includes(c));
   const guides = sources.permitGuides.filter(g => (guideCountries.length ? guideCountries : FOCUS_COUNTRIES).includes(g.code));
 
+  const jobs = result ? [...result.jobs, ...more.jobs] : [];
+  const matched = result?.matchedJobs ?? result?.jobs.length ?? 0;
+  const countryName = code => sources.countries[code] || code;
+  const chosenCountry = filters.country === 'ANY' ? '' : filters.country.split(',').map(countryName).join(', ');
   const realJobs = (sources.companyJobs || 0) + (sources.liveEnabled ? sources.liveJobs : 0);
   const connected = companies.filter(c => c.connected).length;
   return <div className="harbor-jobs">
@@ -207,15 +221,15 @@ function JobsView({ profile, sources, companies, onSources, goToProfile }) {
       {(sources.companyBoardsEnabled || sources.liveEnabled) && <button type="button" className="link" onClick={refresh}>Refresh postings</button>}
       {refreshNote && <small>{refreshNote}</small>}
     </div>
-    {companies.length > 0 && <CompanyStrip companies={companies} counts={result?.jobsByCompany} selected={filters.company} onSelect={id => set('company', filters.company === id ? 'ANY' : id)} />}
+    {companies.length > 0 && <CompanyStrip companies={visibleCompanies(companies, result?.jobsByCompany, filters.country)} country={chosenCountry} counts={result?.jobsByCompany} selected={filters.company} onSelect={id => set('company', filters.company === id ? 'ANY' : id)} />}
     {filters.company !== 'ANY' && <p className="harbor-hint">Showing {companies.find(c => c.id === filters.company)?.name || 'one employer'} only. <button type="button" className="link" onClick={() => set('company', 'ANY')}>Show every employer</button></p>}
     {profile.skills.length === 0 && <p className="banner notice">Your profile has no skills yet, so every match score is low. <button className="link" onClick={goToProfile}>Upload your CV</button></p>}
 
     <form className="panel harbor-filters" onSubmit={e => e.preventDefault()} aria-label="Job filters">
       <label>Keyword<input value={filters.q} onChange={e => set('q', e.target.value)} placeholder="java, kafka, fintech…" /></label>
       <label>Country<select value={filters.country} onChange={e => set('country', e.target.value)}>
-        <option value="ANY">Any country</option><option value="DK,SE,NO,CH">Nordics + Switzerland</option>
-        {Object.entries(sources.countries).filter(([code]) => result?.jobsByCountry?.[code]).map(([code, name]) => <option key={code} value={code}>{name} ({result.jobsByCountry[code]})</option>)}
+        {countryOptions({ names: sources.countries, jobsByCountry: result?.jobsByCountry, targetCountries: profile.targetCountries, selected: filters.country })
+          .map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
       </select></label>
       <label>Visa and work permit<select value={filters.visa} onChange={e => set('visa', e.target.value)}>{VISA_FILTERS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>
       <label>Remote<select value={filters.remote} onChange={e => set('remote', e.target.value)}><option value="ANY">On-site or remote</option><option value="REMOTE">Remote only</option><option value="ONSITE">On-site only</option></select></label>
@@ -224,7 +238,7 @@ function JobsView({ profile, sources, companies, onSources, goToProfile }) {
       <label>Local language<select value={filters.language} onChange={e => set('language', e.target.value)}><option value="ANY">Any</option><option value="NO_LOCAL_REQUIRED">Hide jobs that require it</option></select></label>
     </form>
     {result?.categoryLabels && <div className="harbor-categories" role="group" aria-label="Job family">
-      <button type="button" aria-pressed={filters.category === 'ANY'} onClick={() => set('category', 'ANY')}>All jobs ({result.totalJobs})</button>
+      <button type="button" aria-pressed={filters.category === 'ANY'} onClick={() => set('category', 'ANY')}>All jobs ({Object.values(result.jobsByCategory || {}).reduce((a, b) => a + b, 0)})</button>
       {Object.entries(result.categoryLabels).filter(([code]) => result.jobsByCategory?.[code]).map(([code, label]) =>
         <button type="button" key={code} aria-pressed={filters.category === code} onClick={() => set('category', code)}>{label} ({result.jobsByCategory[code]})</button>)}
     </div>}
@@ -234,9 +248,16 @@ function JobsView({ profile, sources, companies, onSources, goToProfile }) {
     <div className="harbor-results-grid">
       <section aria-label="Matched jobs" className="harbor-results">
         {!result && !error && <Loading label="Finding jobs that fit you…" />}
-        {result && <p className="harbor-count" role="status">{result.jobs.length} of {result.totalJobs} postings match your filters, best fit first.</p>}
-        {result?.jobs.map(item => <JobCard key={item.job.id} item={item} onTrack={track} />)}
-        {result && !result.jobs.length && <div className="panel harbor-card"><h3>No postings match these filters.</h3><p>Try “Any” for visa, or widen the country.</p></div>}
+        {result && <p className="harbor-count" role="status">{resultCountText({ shown: jobs.length, matched, total: result.totalJobs })}</p>}
+        {jobs.map(item => <JobCard key={item.job.id} item={item} onTrack={track} />)}
+        {result && jobs.length < matched && <button type="button" className="secondary harbor-more" disabled={more.busy} onClick={showMore}>
+          {more.busy ? 'Loading…' : `Show ${Math.min(100, matched - jobs.length)} more`}</button>}
+        {result && !matched && <div className="panel harbor-card">
+          <h3>No postings match these filters{chosenCountry ? ` in ${chosenCountry}` : ''}.</h3>
+          {filters.visa !== 'ANY'
+            ? <p>The visa filter may be hiding them: most employers do not say in the posting whether they sponsor a work permit, so ask the recruiter. <button type="button" className="link" onClick={() => set('visa', 'ANY')}>Show postings whatever they say about visas</button></p>
+            : <p>Try another keyword, or widen the country.</p>}
+        </div>}
       </section>
       <aside className="panel harbor-card harbor-guides" aria-label="Work permit guide">
         <p className="eyebrow">WORK PERMITS</p>
@@ -252,11 +273,11 @@ function JobsView({ profile, sources, companies, onSources, goToProfile }) {
 function Badge({ kind, children }) { return <span className={`harbor-badge ${kind}`}>{children}</span>; }
 
 /** The employers Harbor follows, side by side: tap one to see only its jobs. */
-function CompanyStrip({ companies, counts, selected, onSelect }) {
+function CompanyStrip({ companies, country, counts, selected, onSelect }) {
   const sorted = [...companies].sort((a, b) => Number(b.connected) - Number(a.connected) || (counts?.[b.id] || 0) - (counts?.[a.id] || 0));
   return <section className="harbor-companies" aria-label="Employers">
     <div className="harbor-companies-head">
-      <h3>Employers in Harbor</h3>
+      <h3>{country ? `Employers with jobs in ${country}` : 'Employers in Harbor'}</h3>
       <small>{companies.filter(c => c.connected).length} with live postings · {companies.filter(c => !c.connected).length} with a careers link only</small>
     </div>
     <div className="harbor-company-strip">

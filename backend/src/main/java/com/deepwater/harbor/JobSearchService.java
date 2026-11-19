@@ -25,6 +25,15 @@ public class JobSearchService {
     }
 
     public SearchResult search(String accountId, Filters filters) {
+        return search(accountId, filters, 0);
+    }
+
+    /**
+     * Ranks and filters the postings, then returns one page of them starting at {@code offset}.
+     * The counts per country, job family and employer each apply every other filter, so a country shows
+     * how many postings you would really see after picking it with the visa, keyword and other choices you made.
+     */
+    public SearchResult search(String accountId, Filters filters, int offset) {
         TalentProfile profile = profiles.profile(accountId);
         Map<String, String> statuses = applications.statusesByJob(accountId);
         List<JobMatch> all = catalog.recent().stream()
@@ -34,18 +43,26 @@ public class JobSearchService {
         boolean realJobs = all.stream().anyMatch(m -> !SAMPLE.equals(m.job().source()));
         if (realJobs && !SAMPLE.equals(filters.source()))
             all = all.stream().filter(m -> !SAMPLE.equals(m.job().source())).toList();
-        List<JobMatch> shown = all.stream().filter(match -> filters.accepts(match))
+        List<JobMatch> matching = all.stream().filter(filters::accepts)
                 .sorted(Comparator.comparingInt((JobMatch m) -> m.match().score()).reversed().thenComparing(m -> m.job().title()))
-                .limit(filters.limit())
+                .toList();
+        int from = Math.clamp(offset, 0, matching.size());
+        List<JobMatch> shown = matching.stream().skip(from).limit(filters.limit())
                 .map(m -> new JobMatch(m.job().withHiringProcess(), m.match(), m.applicationStatus()))
                 .toList();
-        Map<String, Long> countries = all.stream().filter(m -> m.job().countryCode() != null)
-                .collect(Collectors.groupingBy(m -> m.job().countryCode(), java.util.TreeMap::new, Collectors.counting()));
-        Map<String, Long> categories = all.stream()
-                .collect(Collectors.groupingBy(m -> m.job().category(), java.util.TreeMap::new, Collectors.counting()));
-        Map<String, Long> companies = all.stream().filter(m -> m.job().companyId() != null)
-                .collect(Collectors.groupingBy(m -> m.job().companyId(), java.util.TreeMap::new, Collectors.counting()));
-        return new SearchResult(shown, all.size(), countries, categories, JobCategories.orderedLabels(), profile.skills().isEmpty(), companies);
+        // Every country Harbor has postings for stays in the list, at 0 when the other filters hide all of them.
+        Map<String, Long> countries = new java.util.TreeMap<>();
+        all.stream().map(m -> m.job().countryCode()).filter(java.util.Objects::nonNull).forEach(code -> countries.put(code, 0L));
+        countries.putAll(countBy(all, filters.withCountry(null), m -> m.job().countryCode()));
+        Map<String, Long> categories = countBy(all, filters.withCategory(null), m -> m.job().category());
+        Map<String, Long> companies = countBy(all, filters.withCompany(null), m -> m.job().companyId());
+        return new SearchResult(shown, all.size(), countries, categories, JobCategories.orderedLabels(), profile.skills().isEmpty(),
+                companies, matching.size(), from);
+    }
+
+    private static Map<String, Long> countBy(List<JobMatch> jobs, Filters filters, java.util.function.Function<JobMatch, String> key) {
+        return jobs.stream().filter(filters::accepts).filter(m -> key.apply(m) != null)
+                .collect(Collectors.groupingBy(key, java.util.TreeMap::new, Collectors.counting()));
     }
 
     static JobView view(Job job) {
@@ -71,6 +88,12 @@ public class JobSearchService {
                        String category, String language) {
             this(q, country, remote, visa, minScore, source, max, category, language, null);
         }
+
+        Filters withCountry(String value) { return new Filters(q, value, remote, visa, minScore, source, max, category, language, company); }
+
+        Filters withCategory(String value) { return new Filters(q, country, remote, visa, minScore, source, max, value, language, company); }
+
+        Filters withCompany(String value) { return new Filters(q, country, remote, visa, minScore, source, max, category, language, value); }
 
         boolean accepts(JobMatch m) {
             JobView job = m.job();
@@ -139,6 +162,11 @@ public class JobSearchService {
 
     public record JobMatch(JobView job, JobMatcher.Match match, String applicationStatus) {}
 
+    /**
+     * totalJobs counts every posting Harbor holds; matchedJobs those that pass the filters; jobs is one page of them from offset.
+     * jobsByCountry, jobsByCategory and jobsByCompany each count with every filter except their own.
+     */
     public record SearchResult(List<JobMatch> jobs, int totalJobs, Map<String, Long> jobsByCountry, Map<String, Long> jobsByCategory,
-                               Map<String, String> categoryLabels, boolean profileIsEmpty, Map<String, Long> jobsByCompany) {}
+                               Map<String, String> categoryLabels, boolean profileIsEmpty, Map<String, Long> jobsByCompany,
+                               int matchedJobs, int offset) {}
 }

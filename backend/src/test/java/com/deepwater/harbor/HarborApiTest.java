@@ -23,6 +23,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.LinkedMultiValueMap;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
@@ -67,6 +69,39 @@ class HarborApiTest {
                 .doesNotContain("sample-dk-01", "sample-dk-04");
         assertThat(get("/api/v1/harbor/jobs?language=NO_LOCAL_REQUIRED", token)).contains("sample-dk-01")
                 .doesNotContain("sample-dk-04", "sample-ch-02", "sample-de-02");
+    }
+
+    @Test
+    void countryCountsFollowTheOtherFiltersAndKeepEveryCountryInTheList() {
+        String token = register();
+        send(HttpMethod.PUT, "/api/v1/harbor/profile", token, Map.of("skills", List.of("Java"), "citizenship", "OTHER"));
+        JsonNode any = json(get("/api/v1/harbor/jobs?country=DK", token));
+        long denmark = any.path("jobsByCountry").path("DK").asLong();
+        assertThat(denmark).isPositive();
+        assertThat(any.path("matchedJobs").asInt()).isEqualTo(denmark).isEqualTo(any.path("jobs").size());
+        // The country counts ignore the country filter itself, so other countries stay pickable.
+        assertThat(any.path("jobsByCountry").path("SE").asLong()).isPositive();
+
+        // With a visa filter, Denmark's count is what the person would really see, and Denmark stays in the list.
+        JsonNode open = json(get("/api/v1/harbor/jobs?visa=SPONSORED", token));
+        assertThat(open.path("jobsByCountry").has("DK")).isTrue();
+        assertThat(open.path("jobsByCountry").path("DK").asLong()).isLessThan(denmark);
+        long sponsoredInDenmark = open.path("jobsByCountry").path("DK").asLong();
+        assertThat(json(get("/api/v1/harbor/jobs?visa=SPONSORED&country=DK", token)).path("matchedJobs").asLong()).isEqualTo(sponsoredInDenmark);
+    }
+
+    @Test
+    void jobsComeInPagesWithTheFullMatchCount() {
+        String token = register();
+        JsonNode first = json(get("/api/v1/harbor/jobs?max=5", token));
+        int matched = first.path("matchedJobs").asInt();
+        assertThat(matched).isGreaterThan(5);
+        assertThat(first.path("jobs").size()).isEqualTo(5);
+        JsonNode second = json(get("/api/v1/harbor/jobs?max=5&offset=5", token));
+        assertThat(second.path("offset").asInt()).isEqualTo(5);
+        assertThat(second.path("jobs").get(0).path("job").path("id").asString())
+                .isNotEqualTo(first.path("jobs").get(0).path("job").path("id").asString());
+        assertThat(json(get("/api/v1/harbor/jobs?offset=" + (matched + 10), token)).path("jobs").size()).isZero();
     }
 
     @Test
@@ -150,6 +185,10 @@ class HarborApiTest {
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         return http.exchange("/api/v1/harbor/cv", HttpMethod.POST, new HttpEntity<>(parts, headers), String.class);
+    }
+
+    private static JsonNode json(String body) {
+        return new ObjectMapper().readTree(body);
     }
 
     private String get(String path, String token) {
