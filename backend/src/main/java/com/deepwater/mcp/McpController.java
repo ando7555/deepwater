@@ -70,7 +70,7 @@ class McpController {
         return ResponseEntity.ok(switch (method) {
             case "initialize" -> result(id, initialize(params));
             case "ping" -> result(id, Map.of());
-            case "tools/list" -> result(id, Map.of("tools", tools.list()));
+            case "tools/list" -> result(id, Map.of("tools", tools.listFor(account)));
             case "tools/call" -> callTool(id, account, params);
             default -> error(id, -32601, "Unknown method: " + method);
         });

@@ -78,7 +78,7 @@ public class AssistantService {
         Map<String, Object> out = new java.util.LinkedHashMap<>();
         out.put("enabled", model.enabled());
         out.put("model", model.description());
-        out.put("tools", tools == null ? List.of() : tools.all().stream().map(t -> Map.of("name", t.name(), "title", t.title())).toList());
+        out.put("tools", tools == null ? List.of() : tools.forAssistant().stream().map(t -> Map.of("name", t.name(), "title", t.title())).toList());
         out.put("suggestions", settings.suggestions());
         out.put("maxMessageChars", settings.maxMessageChars());
         return out;
@@ -104,15 +104,30 @@ public class AssistantService {
         if (model.enabled()) takeRunSlot(accountId);
     }
 
+    /**
+     * Who the model is and which tools it gets for one run. Ask Deepwater uses the default (the system prompt file and
+     * every member tool); the AI workspace voice room passes one role's contract and that role's tools.
+     */
+    public record Profile(String systemPrompt, List<DeepwaterTools.Tool> tools) {}
+
+    private Profile defaultProfile() {
+        return new Profile(systemPrompt, tools == null ? List.of() : tools.forAssistant());
+    }
+
     /** Runs the conversation and reports each event to {@code emit}. Never throws: failures become RUN_ERROR. */
     public void run(String accountId, String threadId, List<ChatMessage> messages, Consumer<Map<String, Object>> emit) {
+        run(accountId, threadId, messages, defaultProfile(), emit);
+    }
+
+    /** The same orchestration with another system prompt and tool set. */
+    public void run(String accountId, String threadId, List<ChatMessage> messages, Profile profile, Consumer<Map<String, Object>> emit) {
         String runId = UUID.randomUUID().toString();
         emit.accept(event("RUN_STARTED", "threadId", threadId, "runId", runId));
         try {
             if (!model.enabled()) {
                 say(emit, OFF_MESSAGE);
             } else {
-                loop(accountId, messages, emit);
+                loop(accountId, messages, profile, emit);
             }
             emit.accept(event("RUN_FINISHED", "threadId", threadId, "runId", runId));
         } catch (RuntimeException ex) {
@@ -121,17 +136,17 @@ public class AssistantService {
         }
     }
 
-    private void loop(String accountId, List<ChatMessage> messages, Consumer<Map<String, Object>> emit) {
-        List<ToolSpec> specs = tools.all().stream()
+    private void loop(String accountId, List<ChatMessage> messages, Profile profile, Consumer<Map<String, Object>> emit) {
+        List<ToolSpec> specs = profile.tools().stream()
                 .map(t -> new ToolSpec(t.name(), t.description(), t.inputSchema())).toList();
         List<Entry> transcript = new ArrayList<>(messages.stream()
                 .map(m -> "user".equals(m.role()) ? (Entry) new UserText(m.content()) : new AssistantText(m.content())).toList());
         for (int stepNo = 1; stepNo <= settings.maxSteps(); stepNo++) {
-            Step step = model.next(new Conversation(systemPrompt, specs, List.copyOf(transcript)));
+            Step step = model.next(new Conversation(profile.systemPrompt(), specs, List.copyOf(transcript)));
             transcript.add(new ModelStep(step));
             if (finished(step, emit)) return;
             List<ToolResult> results = new ArrayList<>();
-            for (ToolCall call : step.toolCalls()) results.add(runTool(accountId, call, emit));
+            for (ToolCall call : step.toolCalls()) results.add(runTool(accountId, call, profile, emit));
             transcript.add(new ToolResults(results));
         }
         say(emit, "I stopped after " + settings.maxSteps() + " steps without a final answer. Try asking a narrower question.");
@@ -149,12 +164,15 @@ public class AssistantService {
         return true;
     }
 
-    private ToolResult runTool(String accountId, ToolCall call, Consumer<Map<String, Object>> emit) {
+    private ToolResult runTool(String accountId, ToolCall call, Profile profile, Consumer<Map<String, Object>> emit) {
         emit.accept(event("TOOL_CALL_START", TOOL_CALL_ID, call.id(), "toolCallName", call.name()));
         emit.accept(event("TOOL_CALL_ARGS", TOOL_CALL_ID, call.id(), "delta", json.writeValueAsString(call.input())));
         emit.accept(event("TOOL_CALL_END", TOOL_CALL_ID, call.id()));
         // The account comes from the session, never from the model's arguments.
-        DeepwaterTools.Outcome outcome = tools.call(accountId, call.name(), call.input());
+        // Only the tools this run offered can run; anything else the model names is an error it can read.
+        DeepwaterTools.Tool tool = profile.tools().stream().filter(t -> t.name().equals(call.name())).findFirst().orElse(null);
+        DeepwaterTools.Outcome outcome = tool == null ? new DeepwaterTools.Outcome("Unknown tool: " + call.name(), true)
+                : tools.call(accountId, tool, call.input());
         emit.accept(event("TOOL_CALL_RESULT", MESSAGE_ID, UUID.randomUUID().toString(), TOOL_CALL_ID, call.id(),
                 "role", "tool", "content", outcome.text(), "isError", outcome.error()));
         return new ToolResult(call.id(), call.name(), outcome.text(), outcome.error());

@@ -309,3 +309,32 @@ create table if not exists assistant_consents (
   shared_with varchar(60) not null,
   granted_at timestamp with time zone not null default current_timestamp
 );
+-- AI workspace (owner only): tasks the owner's AI roles propose and work on, and an append-only activity log.
+-- Status: PROPOSED -> APPROVED -> IN_PROGRESS -> IN_REVIEW -> DONE; PROPOSED -> REJECTED; IN_REVIEW -> IN_PROGRESS.
+-- approved_hash binds the owner's approval to the exact task text; an edit after approval needs a new approval.
+create table if not exists workspace_tasks (
+  id varchar(36) primary key,
+  title varchar(120) not null,
+  product varchar(20) not null,
+  role_id varchar(40) not null,
+  objective varchar(2000) not null,
+  acceptance_criteria varchar(8000) not null,
+  status varchar(12) not null,
+  proposed_by varchar(60) not null,
+  approved_hash varchar(64),
+  approved_at timestamp with time zone,
+  evidence varchar(4000),
+  version int not null default 0,
+  created_at timestamp with time zone not null default current_timestamp,
+  updated_at timestamp with time zone not null default current_timestamp
+);
+create index if not exists workspace_tasks_status on workspace_tasks(status, updated_at);
+create table if not exists workspace_events (
+  id varchar(36) primary key,
+  task_id varchar(36) not null references workspace_tasks(id),
+  actor varchar(60) not null,
+  action varchar(20) not null,
+  detail varchar(4000),
+  created_at timestamp with time zone not null default current_timestamp
+);
+create index if not exists workspace_events_task on workspace_events(task_id, created_at);

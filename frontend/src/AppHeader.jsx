@@ -23,7 +23,7 @@ export function ProductSwitch({ value, onChange }) {
  * header keeps three things: where you are, which product, and you. `children` go before the menu
  * (for example an "Ask AI" button).
  */
-export function AccountMenu({ user, profileOpen, onProfile, onSignOut, children }) {
+export function AccountMenu({ user, profileOpen, onProfile, onSignOut, onWorkspace, workspaceOpen, children }) {
   return <div className="account">
     {children}
     <Menu label={`Account and settings for ${user.name}`} className="account-menu"
@@ -36,16 +36,17 @@ export function AccountMenu({ user, profileOpen, onProfile, onSignOut, children 
         <span className="ui-menu-email">{user.email}</span>
       </MenuSection>
       <button type="button" className="ui-menu-item" data-menu-close aria-current={profileOpen ? 'page' : undefined} onClick={onProfile}>Your profile</button>
+      {onWorkspace && <button type="button" className="ui-menu-item" data-menu-close aria-current={workspaceOpen ? 'page' : undefined} onClick={onWorkspace}>AI workspace</button>}
       <button type="button" className="ui-menu-item" data-menu-close onClick={onSignOut}>Sign out</button>
     </Menu>
   </div>;
 }
 
 /** The signed-in header. */
-export default function AppHeader({ product, onProduct, productLabel, user, profileOpen, onProfile, onSignOut, accountExtras }) {
+export default function AppHeader({ product, onProduct, productLabel, user, profileOpen, onProfile, onSignOut, accountExtras, onWorkspace, workspaceOpen }) {
   return <header className="site-header">
     <Brand product={productLabel} />
     <ProductSwitch value={product} onChange={onProduct} />
-    <AccountMenu user={user} profileOpen={profileOpen} onProfile={onProfile} onSignOut={onSignOut}>{accountExtras}</AccountMenu>
+    <AccountMenu user={user} profileOpen={profileOpen} onProfile={onProfile} onSignOut={onSignOut} onWorkspace={onWorkspace} workspaceOpen={workspaceOpen}>{accountExtras}</AccountMenu>
   </header>;
 }

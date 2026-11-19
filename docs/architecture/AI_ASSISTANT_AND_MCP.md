@@ -46,6 +46,13 @@ says it is off. The MCP tools work either way: they never call a model.
 | `danish_pd3_results` | read | Danish PD3 practice exam attempts |
 | `german_b1_results` | read | German B1 practice exam attempts |
 | `amber_my_profile` | read | the caller's own Amber profile only |
+| `workspace_tasks` | read, owner only | the owner's AI workspace board (see `docs/specs/53-ai-workspace.md`) |
+| `workspace_propose_task` | write, owner only | an AI role proposes a task; it waits for the owner's approval |
+| `workspace_start_task` | write, owner only | the assigned role starts an approved task |
+| `workspace_submit_evidence` | write, owner only | the assigned role hands in work with a PR link and test lines |
+
+The four `workspace_` tools are listed over MCP only to the workspace owner and are never offered to Ask Deepwater.
+No tool approves, rejects or accepts: those are the owner's moves in the workspace screen.
 
 Left out on purpose: other Amber members (suggestions, invitations, messages). Sending other people's dating data
 to an outside AI needs their consent first. Also left out: anything destructive (delete card, leave Amber,

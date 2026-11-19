@@ -7,6 +7,7 @@ import com.deepwater.exam.ExamContent;
 import com.deepwater.exam.ExamService;
 import com.deepwater.harbor.ApplicationService;
 import com.deepwater.harbor.JobSearchService;
+import com.deepwater.workspace.WorkspaceService;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,11 +47,15 @@ public class DeepwaterTools {
     private static final Logger log = LoggerFactory.getLogger(DeepwaterTools.class);
     private final Map<String, Tool> tools = new LinkedHashMap<>();
     private final ObjectMapper json;
+    private final WorkspaceService workspace;
+    /** Workspace tools are for the owner's AI roles in Claude Code only: listed over MCP to the owner, never to the assistant. */
+    static final String WORKSPACE_PREFIX = "workspace_";
 
     DeepwaterTools(EchoService echo, EchoCardService cards, JobSearchService jobs, ApplicationService applications,
-             ExamService exams, AmberService amber, ObjectMapper json,
+             ExamService exams, AmberService amber, WorkspaceService workspace, ObjectMapper json,
              @Value("${deepwater.tools.enabled:}") String enabled) {
         this.json = json;
+        this.workspace = workspace;
         add(new Tool("echo_overview", "Echo learning overview",
                 "The person's Echo language-learning state: chosen language, goal, the suggested next step, "
                         + "answer totals, and each lesson with its mastery (0 to 1) and whether it is due for review.",
@@ -109,6 +114,7 @@ public class DeepwaterTools {
                         + "Never returns anything about other members.",
                 schema(Map.of(), List.of()), true,
                 (account, args) -> amber.profile(account)));
+        addWorkspaceTools(workspace);
         keepOnly(enabled);
     }
 
@@ -119,6 +125,69 @@ public class DeepwaterTools {
 
     public List<Map<String, Object>> list() {
         return tools.values().stream().map(Tool::descriptor).toList();
+    }
+
+    /** The MCP tools/list answer for one account: workspace tools appear only for the workspace owner. */
+    public List<Map<String, Object>> listFor(String accountId) {
+        boolean owner = workspace.isOwner(accountId);
+        return tools.values().stream().filter(t -> owner || !isWorkspace(t)).map(Tool::descriptor).toList();
+    }
+
+    /** The tools Ask Deepwater may offer the model: everything except the owner's workspace tools. */
+    public List<Tool> forAssistant() {
+        return tools.values().stream().filter(t -> !isWorkspace(t)).toList();
+    }
+
+    private static boolean isWorkspace(Tool tool) {
+        return tool.name().startsWith(WORKSPACE_PREFIX);
+    }
+
+    /**
+     * The owner's AI roles (deepwater-developer agents in Claude Code) read approved tasks, propose new ones, start
+     * their own task and hand in evidence. There is deliberately no tool to approve, reject or accept: those are the
+     * owner's moves in the workspace screen, so no AI role can approve its own work.
+     */
+    private void addWorkspaceTools(WorkspaceService workspace) {
+        var role = prop("string", "Your role id: product-manager, ai-architect, ml-engineer, reliability-engineer or algorithm-developer.");
+        add(new Tool("workspace_tasks", "AI workspace tasks",
+                "The owner's AI workspace tasks, newest first, each with status, role, objective, acceptance criteria and, "
+                        + "for approved work, the hand-off text. Filter by status: PROPOSED, APPROVED, IN_PROGRESS, IN_REVIEW, DONE, REJECTED.",
+                schema(Map.of("status", prop("string", "Only tasks with this status, for example APPROVED.")), List.of()), true,
+                (account, args) -> workspace.tasks(account, optional(args, "status"))));
+        add(new Tool("workspace_propose_task", "Propose a workspace task",
+                "Proposes a new task for the owner to approve. It does nothing until the owner approves it in the workspace.",
+                schema(Map.of("roleId", role,
+                        "title", prop("string", "Short, verb first, under 120 characters."),
+                        "product", Map.of("type", "string", "enum", List.copyOf(new java.util.TreeSet<>(WorkspaceService.PRODUCTS))),
+                        "assignTo", prop("string", "The role that should do the work. Default: yourself."),
+                        "objective", prop("string", "What the task should achieve and why."),
+                        "acceptanceCriteria", Map.of("type", "array", "items", Map.of("type", "string"),
+                                "description", "Testable criteria, Given/When/Then where possible.")),
+                        List.of("roleId", "title", "product", "objective", "acceptanceCriteria")), false,
+                (account, args) -> {
+                    String me = text(args, "roleId");
+                    String assignee = optional(args, "assignTo");
+                    return workspace.propose(account, WorkspaceService.Actor.agent(me), new WorkspaceService.TaskInput(
+                            text(args, "title"), text(args, "product"), assignee == null ? me : assignee,
+                            text(args, "objective"), strings(args, "acceptanceCriteria")));
+                }));
+        add(new Tool("workspace_start_task", "Start a workspace task",
+                "Marks an approved task of your role as in progress. Call it before changing code.",
+                schema(Map.of("roleId", role, "taskId", prop("string", "The task id.")), List.of("roleId", "taskId")), false,
+                (account, args) -> workspace.start(account, WorkspaceService.Actor.agent(text(args, "roleId")), text(args, "taskId"))));
+        add(new Tool("workspace_submit_evidence", "Hand in a workspace task for review",
+                "Sends your in-progress task to the owner for review, with evidence: the pull request link and the real test "
+                        + "result lines. Never claim tests you did not run.",
+                schema(Map.of("roleId", role, "taskId", prop("string", "The task id."),
+                        "evidence", prop("string", "Pull request link and test result lines.")), List.of("roleId", "taskId", "evidence")), false,
+                (account, args) -> workspace.submitEvidence(account, WorkspaceService.Actor.agent(text(args, "roleId")),
+                        text(args, "taskId"), text(args, "evidence"))));
+    }
+
+    private static List<String> strings(Map<String, Object> args, String name) {
+        Object value = args.get(name);
+        if (!(value instanceof List<?> list)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, name + " must be a list of strings.");
+        return list.stream().map(String::valueOf).toList();
     }
 
     public Tool find(String name) {
@@ -132,6 +201,12 @@ public class DeepwaterTools {
     public Outcome call(String accountId, String name, Map<String, Object> args) {
         Tool tool = tools.get(name);
         if (tool == null) return new Outcome("Unknown tool: " + name, true);
+        return call(accountId, tool, args);
+    }
+
+    /** Runs a given tool (for example one bound to a workspace role) with the same error handling. */
+    public Outcome call(String accountId, Tool tool, Map<String, Object> args) {
+        String name = tool.name();
         try {
             return new Outcome(json.writeValueAsString(tool.handler().apply(accountId, args == null ? Map.of() : args)), false);
         } catch (ResponseStatusException ex) {
