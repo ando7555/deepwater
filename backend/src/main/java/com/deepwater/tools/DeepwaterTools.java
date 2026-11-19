@@ -185,6 +185,7 @@ public class DeepwaterTools {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("profileHasNoSkills", result.profileIsEmpty());
         out.put("totalJobs", result.totalJobs());
+        out.put("matchedJobs", result.matchedJobs());
         out.put("jobs", result.jobs().stream().map(m -> {
             var j = m.job();
             Map<String, Object> job = new LinkedHashMap<>();

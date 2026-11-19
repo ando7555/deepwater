@@ -510,6 +510,7 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
 .harbor-results-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
 .harbor-results{display:grid;gap:14px}
 .harbor-count{margin:0;font-size:var(--fs-md)}
+.harbor-more{align-self:center;margin:8px auto 0;display:block}
 .harbor-job{padding:20px 22px;display:grid;gap:12px}
 .harbor-job-head{display:flex;gap:16px;align-items:flex-start}
 .harbor-job-title h3{margin:0 0 4px;font-size:var(--fs-xl)}.harbor-job-title p{margin:0;font-size:var(--fs-md)}
