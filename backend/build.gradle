@@ -25,3 +25,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 tasks.named('test'){useJUnitPlatform()}
+// The AI workspace's role contracts live in ai-workspace/roles.json (one place with the deepwater-developer plugin);
+// the backend reads them from the classpath at workspace/roles.json.
+tasks.named('processResources') { from('../ai-workspace/roles.json') { into 'workspace' } }

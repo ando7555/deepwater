@@ -57,6 +57,8 @@ Cons:
 
 ## Decision
 
+> Moved 2026-11-20: the plugin now lives in `ai-workspace/deepwater-developer/` (see `ai-workspace/README.md`).
+
 Add `deepwater-developer/` to the repository as one self-contained, project-independent module:
 the Claude Code plugin (skills, agent, references) and its own marketplace manifest. Nothing in
 the plugin names this repository, GitHub or Gradle; it works in any repository and reads tickets

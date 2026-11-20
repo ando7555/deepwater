@@ -181,7 +181,7 @@ function Connect() {
     <SectionHeading eyebrow="CONNECT CLAUDE CODE" title="Three steps, once per computer" lead="Claude Code is the IDE. The deepwater-developer plugin gives it the five roles and the spec-driven flow; the Deepwater MCP server lets those roles read and update this board." />
     <ol className="workspace-steps">
       <li><b>Install the plugin</b> from your clone of the repository (inside Claude Code):
-        <pre>{'/plugin marketplace add <path-to>/deepwater/deepwater-developer\n/plugin install deepwater-developer@deepwater'}</pre></li>
+        <pre>{'/plugin marketplace add <path-to>/deepwater/ai-workspace/deepwater-developer\n/plugin install deepwater-developer@deepwater'}</pre></li>
       <li><b>Put your session token in an environment variable.</b> In this browser, open the developer console and run <code>sessionStorage.getItem('deepwater-token')</code>. Set it as <code>DEEPWATER_TOKEN</code> in your terminal. Never paste it into a chat or a file in the repository. It lasts 7 days.</li>
       <li><b>Connect the MCP server.</b> Opening Claude Code in the deepwater folder is enough: its <code>.mcp.json</code> names the server and reads <code>DEEPWATER_TOKEN</code>; approve “deepwater” when asked. Anywhere else, run:<pre>{mcpCommand()}</pre><CopyButton text={mcpCommand()} label="Copy command" /></li>
     </ol>
