@@ -11,8 +11,8 @@ import tools.jackson.databind.ObjectMapper;
 
 /**
  * The owner's AI roles as contracts: what each role is for, what it does and never does, what it hands back and
- * which workspace tools it may use. Read once from {@code workspace/roles.json}. The same roles exist as Claude Code
- * agents in {@code deepwater-developer/agents/<id>.md}; a test keeps the two in step.
+ * which workspace tools it may use. Read once from {@code workspace/roles.json} (source: {@code ai-workspace/roles.json}). The same roles exist as Claude Code
+ * agents in {@code ai-workspace/deepwater-developer/agents/<id>.md}; a test keeps the two in step.
  * <p>
  * No role can approve: approving is a human step done in the workspace screen, and no tool offers it.
  */

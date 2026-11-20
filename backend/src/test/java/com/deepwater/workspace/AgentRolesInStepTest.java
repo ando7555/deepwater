@@ -15,7 +15,7 @@ class AgentRolesInStepTest {
     @Test
     void everyWorkspaceRoleHasADeepwaterDeveloperAgentWithTheSameNameAndTools() throws Exception {
         AgentRoles roles = new AgentRoles(new ObjectMapper());
-        Path agents = Path.of("..", "deepwater-developer", "agents");
+        Path agents = Path.of("..", "ai-workspace", "deepwater-developer", "agents");
         assertThat(roles.all()).hasSize(5);
         for (AgentRoles.AgentRole role : roles.all()) {
             Path file = agents.resolve(role.id() + ".md");

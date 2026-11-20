@@ -323,7 +323,9 @@ function App() {
     <AppHeader product={product} onProduct={chooseProduct} productLabel={workspaceOpen ? 'AI workspace' : productName(product)} user={user}
       profileOpen={product === 'echo' && tab === 'profile'} onSignOut={logout}
       onProfile={() => { chooseProduct('echo'); setExamId(null); setReviewing(false); setWarmUp(false); setTab('profile'); }}
-      accountExtras={<button type="button" className="ask-header" onClick={openAskDeepwater}><span aria-hidden="true">✦</span> Ask AI</button>}
+      accountExtras={<>
+        {isOwner && <button type="button" className="ask-header" aria-pressed={workspaceOpen} onClick={() => setWorkspaceOpen(true)}><span aria-hidden="true">◆</span> AI workspace</button>}
+        <button type="button" className="ask-header" onClick={openAskDeepwater}><span aria-hidden="true">✦</span> Ask AI</button></>}
       onWorkspace={isOwner ? () => setWorkspaceOpen(true) : null} workspaceOpen={workspaceOpen} />
 
     {error && <Notice tone="error" onDismiss={() => setError('')}>{error}</Notice>}

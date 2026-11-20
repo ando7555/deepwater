@@ -48,7 +48,7 @@ Do these steps in order. After each step, compare with **You should see**.
 - Mac Finder: right-click the folder, hold **Option** → **Copy "deepwater-developer" as Pathname**.
 
 *You should see:* nothing yet. The path is now in your clipboard. It looks like
-`C:\Users\anna\Downloads\deepwater\deepwater-developer` or `/Users/anna/deepwater/deepwater-developer`.
+`C:\Users\anna\Downloads\deepwater\ai-workspace\deepwater-developer` or `/Users/anna/deepwater/ai-workspace/deepwater-developer`.
 
 **3. Register the folder.** In the Claude Code box, type this, then a space, then paste the path,
 then press Enter:

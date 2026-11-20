@@ -203,7 +203,7 @@ assistant's hourly limit. Coding agents are Claude Code sessions on the owner's 
 | 1 | this plan | owner review | Claude |
 | 2 | `schema.sql`, `workspace/*` | `WorkspaceApiTest` | Claude |
 | 3 | `DeepwaterTools`, `McpController`, `AssistantService` | `McpServerTest`, `AssistantTest` | Claude |
-| 4 | `deepwater-developer/agents/*.md`, `roles.json` | `AgentRolesInStepTest` | Claude |
+| 4 | `ai-workspace/deepwater-developer/agents/*.md`, `ai-workspace/roles.json` | `AgentRolesInStepTest` | Claude |
 | 5 | `frontend/src/workspace/*`, `main.jsx`, `AppHeader.jsx` | `npm test`, `npm run build`, screenshots | Claude |
 | 6 | `.mcp.json`, docs | review | Claude |
 

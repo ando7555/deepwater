@@ -27,17 +27,13 @@ and AI fashion remain later, separately gated applications.
 - [Implementation status and known gaps](STATUS.md)
 - [Teacher workflow and coding guide](TEACHER_GUIDE.md)
 
-## Learning AI engineering and building features with Claude Code
+## AI workspace and deepwater-developer (one place)
 
-The `deepwater-developer/` folder is a Claude Code plugin with a mentor inside. It runs the course
-**Become an AI engineer** in your own project, and it turns a ticket into a feature plan, code and
-test evidence, plan first. It works with any AI provider and in any project, with GitHub or GitLab
-issues or pasted text. This repository's own settings for it are in
-[docs/delivery/repository-mapping.md](docs/delivery/repository-mapping.md).
-
-**New to it? Start with [deepwater-developer/START-HERE.md](deepwater-developer/START-HERE.md)**,
-one page in simple words. The full manual is
-[deepwater-developer/README.md](deepwater-developer/README.md).
+Everything for building Deepwater with AI lives in **[ai-workspace/](ai-workspace/README.md)**: the
+deepwater-developer Claude Code plugin (mentor, course, spec-driven commands, the five AI role agents), the role
+contracts, and how they connect to the AI workspace screen in the app and to the Deepwater MCP server.
+**Start with [ai-workspace/README.md](ai-workspace/README.md).** New to Claude Code? Read
+[ai-workspace/deepwater-developer/START-HERE.md](ai-workspace/deepwater-developer/START-HERE.md).
 
 ## Run the local proof of flow
 
