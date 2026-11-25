@@ -1,7 +1,6 @@
 package com.deepwater.assistant;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.deepwater.assistant.AssistantModel.Conversation;
 import com.deepwater.assistant.AssistantModel.ModelStep;
@@ -110,7 +109,7 @@ class OpenAiCompatibleAssistantModelTest {
                 .isEqualTo("google gemini-2.5-flash");
         assertThat(config.assistantModel("groq", "", "m", "medium", "http://x", "h", 5, "", "k", "", "").sharesDataWith())
                 .isEqualTo("Groq");
-        assertThatThrownBy(() -> config.assistantModel("gemini", "", "m", "medium", "http://x", "h", 5, "", "", "", ""))
-                .hasMessageContaining("OPENAI_COMPAT_API_KEY");
+        assertThat(config.assistantModel("gemini", "", "m", "medium", "http://x", "h", 5, "", "", "", "").enabled())
+                .as("no key: off, not a crash").isFalse();
     }
 }

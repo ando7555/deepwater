@@ -69,7 +69,11 @@ public class AssistantConfiguration {
     static final String GROQ_MODEL = "llama-3.3-70b-versatile";
 
     private static AssistantModel compatible(String url, String key, String model, String company, Duration timeout) {
-        if (key == null || key.isBlank()) throw new IllegalStateException("This AI provider needs OPENAI_COMPAT_API_KEY.");
+        if (key == null || key.isBlank()) {
+            // A missing key must not stop the whole app: the assistant says it is off until the key is added.
+            log.warn("{} is chosen but OPENAI_COMPAT_API_KEY is not set, so the assistant stays off.", company);
+            return OFF;
+        }
         return new OpenAiCompatibleAssistantModel(url, key, model, company, timeout);
     }
 
