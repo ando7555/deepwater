@@ -74,6 +74,17 @@ class WorkspaceVoiceRoomTest {
     }
 
     @Test
+    void aProviderLimitIsSaidPlainlyNotAsAServerProblem() throws Exception {
+        model.then(c -> {
+            throw org.springframework.web.client.HttpClientErrorException.create(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS,
+                    "Too Many Requests", HttpHeaders.EMPTY, new byte[0], null);
+        });
+        ResponseEntity<String> response = talk(owner(), "product-manager", "Hello");
+        assertThat(response.getStatusCode().value()).isEqualTo(429);
+        assertThat(response.getBody()).contains("free limit is used up");
+    }
+
+    @Test
     void aRoleWithoutTheToolCannotUseItAndOthersCannotEnter() throws Exception {
         model.then(c -> tools(new ToolCall("t1", "workspace_propose_task", Map.of("title", "x"))))
              .then(c -> answer("I can't propose tasks; the product manager can."));

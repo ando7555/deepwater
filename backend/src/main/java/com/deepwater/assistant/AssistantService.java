@@ -119,6 +119,9 @@ public class AssistantService {
         run(accountId, threadId, messages, defaultProfile(), emit);
     }
 
+    /** RUN_ERROR code when the AI provider refuses because a usage limit (for example a free tier) is reached. */
+    public static final String LIMIT_REACHED = "LIMIT_REACHED";
+
     /** The same orchestration with another system prompt and tool set. */
     public void run(String accountId, String threadId, List<ChatMessage> messages, Profile profile, Consumer<Map<String, Object>> emit) {
         String runId = UUID.randomUUID().toString();
@@ -130,6 +133,10 @@ public class AssistantService {
                 loop(accountId, messages, profile, emit);
             }
             emit.accept(event("RUN_FINISHED", "threadId", threadId, "runId", runId));
+        } catch (org.springframework.web.client.HttpClientErrorException.TooManyRequests ex) {
+            log.warn("Assistant run stopped: the AI provider's limit is reached ({})", ex.getStatusText());
+            emit.accept(event("RUN_ERROR", "code", LIMIT_REACHED, "message",
+                    "The AI model's free limit is used up for now. Please try again later."));
         } catch (RuntimeException ex) {
             log.warn("Assistant run failed", ex);
             emit.accept(event("RUN_ERROR", "message", "The assistant could not answer just now. Please try again."));
@@ -173,6 +180,7 @@ public class AssistantService {
         DeepwaterTools.Tool tool = profile.tools().stream().filter(t -> t.name().equals(call.name())).findFirst().orElse(null);
         DeepwaterTools.Outcome outcome = tool == null ? new DeepwaterTools.Outcome("Unknown tool: " + call.name(), true)
                 : tools.call(accountId, tool, call.input());
+        log.info("Assistant tool: {} error={}", call.name(), outcome.error());
         emit.accept(event("TOOL_CALL_RESULT", MESSAGE_ID, UUID.randomUUID().toString(), TOOL_CALL_ID, call.id(),
                 "role", "tool", "content", outcome.text(), "isError", outcome.error()));
         return new ToolResult(call.id(), call.name(), outcome.text(), outcome.error());

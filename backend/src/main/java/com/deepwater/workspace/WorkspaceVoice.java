@@ -43,16 +43,21 @@ public class WorkspaceVoice {
         assistant.validate(accountId, messages);
         StringBuilder text = new StringBuilder();
         List<String> used = new ArrayList<>();
-        String[] error = {null};
+        String[] error = {null, null};
         assistant.run(accountId, "voice-" + roleId, messages, new AssistantService.Profile(prompt(role), toolsFor(role)), event -> {
             switch (String.valueOf(event.get("type"))) {
                 case "TEXT_MESSAGE_CONTENT" -> text.append(text.isEmpty() ? "" : "\n").append(event.get("delta"));
                 case "TOOL_CALL_START" -> used.add(String.valueOf(event.get("toolCallName")));
-                case "RUN_ERROR" -> error[0] = String.valueOf(event.get("message"));
+                case "RUN_ERROR" -> {
+                    error[0] = String.valueOf(event.get("message"));
+                    error[1] = String.valueOf(event.get("code"));
+                }
                 default -> { }
             }
         });
-        if (error[0] != null) throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, error[0]);
+        if (error[0] != null)
+            throw new ResponseStatusException(AssistantService.LIMIT_REACHED.equals(error[1]) ? HttpStatus.TOO_MANY_REQUESTS
+                    : HttpStatus.BAD_GATEWAY, error[0]);
         return new Reply(role.id(), role.name(), text.toString().strip(), List.copyOf(used), assistant.enabled());
     }
 
