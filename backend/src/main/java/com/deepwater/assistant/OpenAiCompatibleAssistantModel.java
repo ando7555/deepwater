@@ -12,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Any hosted model that speaks the OpenAI-style {@code POST /chat/completions} API with tools. Many have a free
@@ -25,7 +24,6 @@ import tools.jackson.databind.ObjectMapper;
  */
 public final class OpenAiCompatibleAssistantModel implements AssistantModel {
     private static final Logger log = LoggerFactory.getLogger(OpenAiCompatibleAssistantModel.class);
-    private static final ObjectMapper JSON = new ObjectMapper();
     private static final String ROLE = "role";
     private static final String CONTENT = "content";
     private static final String FUNCTION = "function";
@@ -63,7 +61,7 @@ public final class OpenAiCompatibleAssistantModel implements AssistantModel {
         for (JsonNode call : message.path("tool_calls")) {
             JsonNode fn = call.path(FUNCTION);
             calls.add(new ToolCall(call.path("id").asString(UUID.randomUUID().toString()), fn.path("name").asString(""),
-                    arguments(fn.path("arguments"))));
+                    ToolArguments.read(fn.path("arguments"))));
         }
         String finish = choice.path("finish_reason").asString("");
         if (log.isInfoEnabled())
@@ -101,26 +99,7 @@ public final class OpenAiCompatibleAssistantModel implements AssistantModel {
         message.put(CONTENT, step.text() == null ? "" : step.text());
         if (!step.toolCalls().isEmpty())
             message.put("tool_calls", step.toolCalls().stream().map(c -> Map.of("id", c.id(), "type", FUNCTION,
-                    FUNCTION, Map.of("name", c.name(), "arguments", JSON.writeValueAsString(c.input())))).toList());
+                    FUNCTION, Map.of("name", c.name(), "arguments", ToolArguments.write(c.input())))).toList());
         return message;
-    }
-
-    private static Map<String, Object> arguments(JsonNode node) {
-        JsonNode parsed = node;
-        if (node.isString()) {
-            String text = node.asString();
-            parsed = text.isBlank() ? JSON.createObjectNode() : JSON.readTree(text);
-        }
-        Map<String, Object> args = new LinkedHashMap<>();
-        if (parsed.isObject()) parsed.properties().forEach(e -> args.put(e.getKey(), value(e.getValue())));
-        return args;
-    }
-
-    private static Object value(JsonNode v) {
-        if (v.isBoolean()) return v.asBoolean();
-        if (v.isIntegralNumber()) return v.asLong();
-        if (v.isNumber()) return v.asDouble();
-        if (v.isString()) return v.asString();
-        return v.isNull() ? null : v.toString();
     }
 }
