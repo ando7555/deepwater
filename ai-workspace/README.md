@@ -64,3 +64,8 @@ Everything else lives where its build or convention needs it, and is listed here
 The Talk tab uses the backend's assistant model: `ASSISTANT_PROVIDER=anthropic` with `ANTHROPIC_API_KEY`, or
 `ASSISTANT_PROVIDER=ollama` with `OLLAMA_BASE_URL` and `OLLAMA_MODEL` (for example Hermes on your own PC through a
 Cloudflare tunnel). Without one, it answers that the assistant is switched off.
+
+**Free option (Gemini):** set `ASSISTANT_PROVIDER=gemini` and `OPENAI_COMPAT_API_KEY=<key from Google AI Studio>`.
+The model defaults to `gemini-2.5-flash` (change with `OPENAI_COMPAT_MODEL`). On Google's free tier your prompts may be
+used by Google to improve its products. `ASSISTANT_PROVIDER=groq` works the same way with a Groq key, and
+`ASSISTANT_PROVIDER=openai-compatible` takes any OpenAI-style API (`OPENAI_COMPAT_BASE_URL`, `_MODEL`, `_COMPANY`).

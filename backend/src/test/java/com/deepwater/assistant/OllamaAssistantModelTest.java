@@ -113,12 +113,12 @@ class OllamaAssistantModelTest {
     @Test
     void providerIsASetting() {
         var config = new AssistantConfiguration();
-        assertThat(config.assistantModel("off", "", "m", "medium", "http://x", "hermes3", 5).enabled()).isFalse();
-        assertThat(config.assistantModel("auto", "", "m", "medium", "http://x", "hermes3", 5).enabled()).isFalse();
-        assertThat(config.assistantModel("ollama", "", "m", "medium", "http://x", "hermes3", 5).description()).isEqualTo("ollama hermes3");
-        assertThat(config.assistantModel("auto", "k", "claude-opus-5-5", "low", "http://x", "hermes3", 5).description())
+        assertThat(config.assistantModel("off", "", "m", "medium", "http://x", "hermes3", 5, "", "", "", "").enabled()).isFalse();
+        assertThat(config.assistantModel("auto", "", "m", "medium", "http://x", "hermes3", 5, "", "", "", "").enabled()).isFalse();
+        assertThat(config.assistantModel("ollama", "", "m", "medium", "http://x", "hermes3", 5, "", "", "", "").description()).isEqualTo("ollama hermes3");
+        assertThat(config.assistantModel("auto", "k", "claude-opus-5-5", "low", "http://x", "hermes3", 5, "", "", "", "").description())
                 .isEqualTo("anthropic claude-opus-5-5");
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> config.assistantModel("gpt", "", "m", "medium", "http://x", "h", 5))
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> config.assistantModel("gpt", "", "m", "medium", "http://x", "h", 5, "", "", "", ""))
                 .hasMessageContaining("Unknown ASSISTANT_PROVIDER");
     }
 }
