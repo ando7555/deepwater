@@ -67,9 +67,16 @@ public final class OpenAiCompatibleAssistantModel implements AssistantModel {
         if (log.isInfoEnabled())
             log.info("Assistant step: {} model={} finish={} toolCalls={} promptTokens={} outputTokens={}", company, model,
                     finish, calls.size(), reply.at("/usage/prompt_tokens").asInt(), reply.at("/usage/completion_tokens").asInt());
-        Stop stop = !calls.isEmpty() ? Stop.TOOLS : "length".equals(finish) ? Stop.CUT_OFF
-                : "content_filter".equals(finish) ? Stop.REFUSED : Stop.DONE;
-        return new Step(message.path(CONTENT).asString(""), calls, stop, null);
+        return new Step(message.path(CONTENT).asString(""), calls, stop(calls, finish), null);
+    }
+
+    private static Stop stop(List<ToolCall> calls, String finish) {
+        if (!calls.isEmpty()) return Stop.TOOLS;
+        return switch (finish) {
+            case "length" -> Stop.CUT_OFF;
+            case "content_filter" -> Stop.REFUSED;
+            default -> Stop.DONE;
+        };
     }
 
     Map<String, Object> request(Conversation conversation) {
