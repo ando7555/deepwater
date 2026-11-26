@@ -180,7 +180,7 @@ public class AssistantService {
         DeepwaterTools.Tool tool = profile.tools().stream().filter(t -> t.name().equals(call.name())).findFirst().orElse(null);
         DeepwaterTools.Outcome outcome = tool == null ? new DeepwaterTools.Outcome("Unknown tool: " + call.name(), true)
                 : tools.call(accountId, tool, call.input());
-        if (outcome.error()) log.info("Assistant tool: {} error: {}", call.name(), abbreviate(outcome.text()));
+        if (outcome.error() && log.isInfoEnabled()) log.info("Assistant tool: {} error: {}", call.name(), abbreviate(outcome.text()));
         else log.info("Assistant tool: {} ok", call.name());
         emit.accept(event("TOOL_CALL_RESULT", MESSAGE_ID, UUID.randomUUID().toString(), TOOL_CALL_ID, call.id(),
                 "role", "tool", "content", outcome.text(), "isError", outcome.error()));
