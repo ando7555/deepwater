@@ -51,7 +51,7 @@ class OpenAiCompatibleAssistantModelTest {
 
     private OpenAiCompatibleAssistantModel model() {
         return new OpenAiCompatibleAssistantModel("http://127.0.0.1:" + server.getAddress().getPort() + "/v1/", "key-1",
-                "gemini-2.5-flash", "Google", Duration.ofSeconds(5));
+                "gemini-3.5-flash-lite", "Google", Duration.ofSeconds(5));
     }
 
     private static final List<ToolSpec> TOOLS = List.of(new ToolSpec("echo_cards", "The person's phrase cards",
@@ -70,7 +70,7 @@ class OpenAiCompatibleAssistantModelTest {
         assertThat(step.toolCalls().getFirst().input()).containsEntry("dueOnly", true);
         assertThat(auth.getFirst()).isEqualTo("Bearer key-1");
         JsonNode sent = requests.getFirst();
-        assertThat(sent.get("model").asString()).isEqualTo("gemini-2.5-flash");
+        assertThat(sent.get("model").asString()).isEqualTo("gemini-3.5-flash-lite");
         assertThat(sent.at("/messages/0/role").asString()).isEqualTo("system");
         assertThat(sent.at("/tools/0/function/name").asString()).isEqualTo("echo_cards");
     }
@@ -106,7 +106,7 @@ class OpenAiCompatibleAssistantModelTest {
     void geminiAndGroqNeedOnlyAKey() {
         var config = new AssistantConfiguration();
         assertThat(config.assistantModel("gemini", "", "m", "medium", "http://x", "h", 5, "", "k", "", "").description())
-                .isEqualTo("google gemini-2.5-flash");
+                .isEqualTo("google gemini-3.5-flash-lite");
         assertThat(config.assistantModel("groq", "", "m", "medium", "http://x", "h", 5, "", "k", "", "").sharesDataWith())
                 .isEqualTo("Groq");
         assertThat(config.assistantModel("gemini", "", "m", "medium", "http://x", "h", 5, "", "", "", "").enabled())

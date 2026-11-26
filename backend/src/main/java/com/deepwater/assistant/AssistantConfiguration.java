@@ -64,7 +64,7 @@ public class AssistantConfiguration {
     }
 
     static final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/openai";
-    static final String GEMINI_MODEL = "gemini-2.5-flash";
+    static final String GEMINI_MODEL = "gemini-3.5-flash-lite";
     static final String GROQ_URL = "https://api.groq.com/openai/v1";
     static final String GROQ_MODEL = "llama-3.3-70b-versatile";
 
