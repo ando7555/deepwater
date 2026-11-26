@@ -22,6 +22,10 @@ final class ToolArguments {
         return args;
     }
 
+    /** A JSON object as a plain map, for sending a model's own message back unchanged. */
+    @SuppressWarnings("unchecked")
+    static Map<String, Object> asMap(JsonNode node) { return JSON.convertValue(node, Map.class); }
+
     static String write(Map<String, Object> input) { return JSON.writeValueAsString(input); }
 
     private static Object value(JsonNode v) {

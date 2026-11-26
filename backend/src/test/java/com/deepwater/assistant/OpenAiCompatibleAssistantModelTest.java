@@ -94,6 +94,24 @@ class OpenAiCompatibleAssistantModelTest {
     }
 
     @Test
+    void sendsTheModelsOwnToolCallMessageBackSoGeminiKeepsItsThoughtSignature() {
+        replies.add("""
+                {"choices":[{"finish_reason":"tool_calls","message":{"role":"assistant","content":null,
+                 "tool_calls":[{"id":"call_9","type":"function","extra_content":{"google":{"thought_signature":"sig-123"}},
+                 "function":{"name":"echo_cards","arguments":"{}"}}]}}]}""");
+        replies.add("""
+                {"choices":[{"finish_reason":"stop","message":{"role":"assistant","content":"None due."}}]}""");
+        var model = model();
+        var first = model.next(new Conversation("s", TOOLS, List.of(new UserText("q"))));
+        model.next(new Conversation("s", TOOLS, List.of(new UserText("q"), new ModelStep(first),
+                new ToolResults(List.of(new ToolResult("call_9", "echo_cards", "[]", false))))));
+
+        JsonNode sent = requests.get(1).get("messages").get(2);
+        assertThat(sent.at("/tool_calls/0/extra_content/google/thought_signature").asString()).isEqualTo("sig-123");
+        assertThat(sent.at("/tool_calls/0/id").asString()).isEqualTo("call_9");
+    }
+
+    @Test
     void lengthIsCutOffAndTheCompanyIsNamedForConsent() {
         replies.add("""
                 {"choices":[{"finish_reason":"length","message":{"role":"assistant","content":"You"}}]}""");

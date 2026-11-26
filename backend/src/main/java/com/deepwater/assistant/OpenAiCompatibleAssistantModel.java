@@ -67,7 +67,9 @@ public final class OpenAiCompatibleAssistantModel implements AssistantModel {
         if (log.isInfoEnabled())
             log.info("Assistant step: {} model={} finish={} toolCalls={} promptTokens={} outputTokens={}", company, model,
                     finish, calls.size(), reply.at("/usage/prompt_tokens").asInt(), reply.at("/usage/completion_tokens").asInt());
-        return new Step(message.path(CONTENT).asString(""), calls, stop(calls, finish), null);
+        // The reply goes back unchanged on the next step: Gemini 3 needs each tool call's thought signature
+        // (extra_content.google.thought_signature) returned as it came.
+        return new Step(message.path(CONTENT).asString(""), calls, stop(calls, finish), calls.isEmpty() ? null : message);
     }
 
     private static Stop stop(List<ToolCall> calls, String finish) {
@@ -86,7 +88,8 @@ public final class OpenAiCompatibleAssistantModel implements AssistantModel {
             switch (entry) {
                 case UserText(String text) -> messages.add(Map.of(ROLE, "user", CONTENT, text));
                 case AssistantText(String text) -> messages.add(Map.of(ROLE, "assistant", CONTENT, text));
-                case ModelStep(Step step) -> messages.add(assistantStep(step));
+                case ModelStep(Step step) -> messages.add(step.vendorMessage() instanceof JsonNode raw
+                        ? ToolArguments.asMap(raw) : assistantStep(step));
                 case ToolResults(List<ToolResult> results) -> results.forEach(r ->
                         messages.add(Map.of(ROLE, "tool", "tool_call_id", r.toolCallId(), "name", r.toolName(), CONTENT, r.content())));
             }
