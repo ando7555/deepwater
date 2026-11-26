@@ -61,13 +61,14 @@ class OpenAiCompatibleAssistantModelTest {
     void readsToolCallsWithStringArgumentsAndSendsKeyAndTools() {
         replies.add("""
                 {"choices":[{"finish_reason":"tool_calls","message":{"role":"assistant","content":null,
-                 "tool_calls":[{"id":"call_1","type":"function","function":{"name":"echo_cards","arguments":"{\\"dueOnly\\":true}"}}]}}],
+                 "tool_calls":[{"id":"call_1","type":"function","function":{"name":"echo_cards","arguments":"{\\"dueOnly\\":true,\\"tags\\":[\\"a\\",\\"b\\"]}"}}]}}],
                  "usage":{"prompt_tokens":10,"completion_tokens":3}}""");
         var step = model().next(new Conversation("Be brief.", TOOLS, List.of(new UserText("Which cards are due?"))));
 
         assertThat(step.stop()).isEqualTo(Stop.TOOLS);
         assertThat(step.toolCalls().getFirst().id()).isEqualTo("call_1");
         assertThat(step.toolCalls().getFirst().input()).containsEntry("dueOnly", true);
+        assertThat(step.toolCalls().getFirst().input().get("tags")).as("arrays stay lists").isEqualTo(List.of("a", "b"));
         assertThat(auth.getFirst()).isEqualTo("Bearer key-1");
         JsonNode sent = requests.getFirst();
         assertThat(sent.get("model").asString()).isEqualTo("gemini-3.5-flash-lite");

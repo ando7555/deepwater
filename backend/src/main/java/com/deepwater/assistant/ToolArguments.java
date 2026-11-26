@@ -33,6 +33,16 @@ final class ToolArguments {
         if (v.isIntegralNumber()) return v.asLong();
         if (v.isNumber()) return v.asDouble();
         if (v.isString()) return v.asString();
+        if (v.isArray()) {
+            java.util.List<Object> items = new java.util.ArrayList<>();
+            v.forEach(item -> items.add(value(item)));
+            return items;
+        }
+        if (v.isObject()) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            v.properties().forEach(e -> map.put(e.getKey(), value(e.getValue())));
+            return map;
+        }
         return v.isNull() ? null : v.toString();
     }
 }
