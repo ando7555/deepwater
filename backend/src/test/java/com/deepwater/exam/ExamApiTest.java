@@ -223,6 +223,51 @@ class ExamApiTest {
         return db.queryForObject("select account_id from user_sessions where token=?", String.class, token);
     }
 
+    @Test
+    void everyExamHasFivePracticeTestsWithTheSamePartsAndTheirOwnHistory() throws Exception {
+        String token = register();
+        for (String series : List.of("polish-b1", "danish-pd3", "german-b1")) {
+            List<String> tests = content.tests(series);
+            assertThat(tests).hasSize(5).first().isEqualTo(series);
+            for (int n = 0; n < tests.size(); n++) {
+                var exam = json.readTree(send(HttpMethod.GET, "/api/v1/exam/" + tests.get(n), token, null).getBody()).get("exam");
+                assertThat(exam.get("testNumber").asInt()).isEqualTo(n + 1);
+                assertThat(exam.get("tests")).hasSize(5);
+                assertThat(exam.get("language").asText()).isEqualTo(content.exam(series).language());
+                assertThat(exam.toString()).doesNotContain("\"answer\"", "topicWords");
+                assertThat(content.exam(tests.get(n)).parts().stream().map(ExamContent.Part::id).toList())
+                        .isEqualTo(content.exam(series).parts().stream().map(ExamContent.Part::id).toList());
+            }
+        }
+        assertThat(content.exam("polish-b1-3").title()).isEqualTo("Polish B1 practice exam · test 3");
+        // An attempt at test 2 shows up in test 2's history only.
+        var response = send(HttpMethod.POST, "/api/v1/exam/polish-b1-2/attempts", token, Map.of("answers", Map.of("l1", "1")));
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+        assertThat(json.readTree(send(HttpMethod.GET, "/api/v1/exam/polish-b1-2/attempts", token, null).getBody())).hasSize(1);
+        assertThat(json.readTree(send(HttpMethod.GET, "/api/v1/exam/polish-b1/attempts", token, null).getBody())).isEmpty();
+    }
+
+    @Test
+    void pricingShowsTheOwnersLaunchPricesAndNoLinkUntilOneIsSet() throws Exception {
+        var polish = json.readTree(http.getForObject("/api/v1/pricing?language=pl", String.class));
+        assertThat(polish.get("launchBuyers").asInt()).isEqualTo(50);
+        assertThat(polish.get("offers")).hasSize(1);
+        var exam = polish.get("offers").get(0);
+        assertThat(exam.get("id").asText()).isEqualTo("exam");
+        assertThat(exam.get("currency").asText()).isEqualTo("PLN");
+        assertThat(exam.get("launchPrice").asInt()).isEqualTo(100);
+        assertThat(exam.get("fullPrice").asInt()).isEqualTo(720);
+        assertThat(exam.get("link").isNull()).isTrue();
+        var danish = json.readTree(http.getForObject("/api/v1/pricing?language=da", String.class)).get("offers");
+        assertThat(danish).hasSize(2);
+        assertThat(danish.get(0).get("launchPrice").asInt()).isEqualTo(175);
+        assertThat(danish.get(1).get("fullPrice").asInt()).isEqualTo(1249);
+        var german = json.readTree(http.getForObject("/api/v1/pricing?language=de", String.class)).get("offers");
+        assertThat(german.get(0).get("currency").asText()).isEqualTo("EUR");
+        assertThat(german.get(0).get("launchPrice").asInt()).isEqualTo(25);
+        assertThat(json.readTree(http.getForObject("/api/v1/pricing?language=sv", String.class)).get("offers")).isEmpty();
+    }
+
     private String register() {
         var body = http.postForObject("/api/v1/auth/register", Map.of("name", "Exam Tester",
                 "email", "exam-" + UUID.randomUUID() + "@example.test", "password", PASSWORD), Map.class);

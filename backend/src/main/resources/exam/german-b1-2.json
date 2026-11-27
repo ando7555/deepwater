@@ -1,0 +1,252 @@
+{
+ "id": "german-b1-2",
+ "parts": [
+  {
+   "id": "reading",
+   "name": "Lesen",
+   "english": "Reading",
+   "kind": "CHOICE",
+   "instructions": "Lesen Sie die Texte und wählen Sie die richtige Antwort.",
+   "passages": [
+    {
+     "id": "p1",
+     "title": "Kursangebot der Volkshochschule: Deutsch für den Beruf",
+     "text": "Sie möchten Ihr Deutsch für den Arbeitsplatz verbessern? Unser Kurs »Deutsch für den Beruf B1« beginnt am 10. Februar und findet zweimal pro Woche abends von 18 bis 20 Uhr statt. Themen sind unter anderem Telefonieren, E-Mails schreiben und Bewerbungsgespräche. Der Kurs kostet 180 Euro; Arbeitssuchende zahlen nur die Hälfte. Bitte melden Sie sich bis zum 31. Januar online oder persönlich im Büro an. Vor Kursbeginn machen alle Teilnehmenden einen kurzen Einstufungstest."
+    },
+    {
+     "id": "p2",
+     "title": "Immer mehr Menschen teilen ihr Auto",
+     "text": "In deutschen Großstädten wird Carsharing immer beliebter. Statt ein eigenes Auto zu kaufen, mieten viele Menschen ein Auto nur für ein paar Stunden, zum Beispiel für den Großeinkauf oder einen Ausflug. Das spart Geld, denn man muss keine Versicherung, Reparaturen oder Parkplätze bezahlen. Herr Yilmaz aus Hamburg hat sein Auto vor zwei Jahren verkauft. »Ich fahre jetzt meistens Fahrrad und nehme nur am Wochenende ein Carsharing-Auto«, erzählt er. Auf dem Land funktioniert das Modell allerdings noch kaum, weil es dort zu wenige Autos gibt und die Wege zu weit sind. Experten meinen, dass Carsharing nur dann eine echte Alternative ist, wenn Busse und Bahnen gut ausgebaut sind."
+    }
+   ],
+   "items": [
+    {
+     "id": "r1",
+     "passage": "p1",
+     "prompt": "Wann findet der Kurs statt?",
+     "options": [
+      "Zweimal pro Woche am Abend",
+      "Jeden Samstag",
+      "Einmal pro Woche am Vormittag"
+     ],
+     "answer": 0
+    },
+    {
+     "id": "r2",
+     "passage": "p1",
+     "prompt": "Wer bezahlt weniger?",
+     "options": [
+      "Studierende",
+      "Arbeitssuchende",
+      "Rentner"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "r3",
+     "passage": "p1",
+     "prompt": "Was müssen alle vor dem Kurs machen?",
+     "options": [
+      "Ein Bewerbungsgespräch",
+      "Ein Formular per Post schicken",
+      "Einen Einstufungstest"
+     ],
+     "answer": 2
+    },
+    {
+     "id": "r4",
+     "passage": "p2",
+     "prompt": "Warum spart man mit Carsharing Geld?",
+     "options": [
+      "Weil das Benzin billiger ist",
+      "Weil man keine Versicherung und Reparaturen bezahlt",
+      "Weil der Staat einen Teil bezahlt"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "r5",
+     "passage": "p2",
+     "prompt": "Was macht Herr Yilmaz heute meistens?",
+     "options": [
+      "Er fährt mit dem eigenen Auto",
+      "Er fährt Fahrrad",
+      "Er nimmt jeden Tag ein Taxi"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "r6",
+     "passage": "p2",
+     "prompt": "Warum funktioniert Carsharing auf dem Land kaum?",
+     "options": [
+      "Es gibt zu wenige Autos und die Wege sind weit",
+      "Die Menschen haben keinen Führerschein",
+      "Es ist dort verboten"
+     ],
+     "answer": 0
+    }
+   ]
+  },
+  {
+   "id": "listening",
+   "name": "Hören",
+   "english": "Listening",
+   "kind": "CHOICE",
+   "instructions": "Hören Sie die Texte und wählen Sie die richtige Antwort. Each recording can be played twice.",
+   "items": [
+    {
+     "id": "l1",
+     "audio": "Guten Tag, hier ist die Praxis Dr. Schneider. Ihr Termin am Montag um neun Uhr ist bestätigt. Bitte bringen Sie Ihre Versichertenkarte und den Überweisungsschein von Ihrem Hausarzt mit. Vielen Dank.",
+     "prompt": "Was soll der Anrufer tun?",
+     "options": [
+      "Am Montag vorbeikommen",
+      "Die Versichertenkarte und den Überweisungsschein mitbringen",
+      "Einen neuen Termin online buchen"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "l2",
+     "audio": "Liebe Kundinnen und Kunden, heute haben wir für Sie ein besonderes Angebot: Alles Obst und Gemüse ist bis achtzehn Uhr zwanzig Prozent günstiger. Besuchen Sie auch unsere neue Bäckerei am Eingang.",
+     "prompt": "Was ist heute im Angebot?",
+     "options": [
+      "Brot",
+      "Obst und Gemüse",
+      "Fleisch"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "l3",
+     "audio": "Hallo Sara, hier ist Jonas. Es tut mir leid, aber ich schaffe es heute Abend nicht ins Kino. Mein Chef hat mich gebeten, länger zu bleiben, weil morgen ein wichtiger Kunde kommt. Können wir am Samstag gehen?",
+     "prompt": "Warum kann Jonas nicht zum Kino kommen?",
+     "options": [
+      "Er muss länger arbeiten",
+      "Er ist krank",
+      "Er hat keine Lust"
+     ],
+     "answer": 0
+    },
+    {
+     "id": "l4",
+     "audio": "Und nun das Wetter: Am Wochenende wird es in ganz Norddeutschland regnerisch und windig. Die Temperaturen liegen bei acht bis elf Grad. Erst ab Montag scheint wieder öfter die Sonne.",
+     "prompt": "Wie wird das Wetter am Wochenende?",
+     "options": [
+      "Sonnig und warm",
+      "Kalt mit Schnee",
+      "Regnerisch und windig"
+     ],
+     "answer": 2
+    },
+    {
+     "id": "l5",
+     "audio": "Ich arbeite jetzt drei Tage pro Woche im Homeoffice. Das Beste daran ist, dass ich jeden Tag fast zwei Stunden Fahrzeit spare. Manchmal fehlen mir aber die Gespräche mit den Kollegen in der Kaffeeküche.",
+     "prompt": "Was findet die Frau am Homeoffice gut?",
+     "options": [
+      "Sie sieht ihre Kollegen öfter",
+      "Sie spart Zeit, weil sie nicht pendeln muss",
+      "Sie verdient mehr Geld"
+     ],
+     "answer": 1
+    }
+   ]
+  },
+  {
+   "id": "writing",
+   "name": "Schreiben",
+   "english": "Writing",
+   "kind": "WRITING",
+   "instructions": "Schreiben Sie die Texte auf Deutsch. The word ranges are practice targets for this mock exam.",
+   "items": [
+    {
+     "id": "w1",
+     "prompt": "Sie haben letzte Woche einen Ausflug mit Ihrer Familie gemacht. Schreiben Sie einem Freund oder einer Freundin eine E-Mail: Wohin sind Sie gefahren, was haben Sie gemacht, und warum sollte er oder sie auch einmal dorthin fahren?",
+     "minWords": 70,
+     "maxWords": 100,
+     "topicWords": [
+      "ausflug",
+      "gefahren",
+      "gemacht",
+      "familie",
+      "empfehle"
+     ]
+    },
+    {
+     "id": "w2",
+     "prompt": "In einer Online-Zeitschrift lesen Sie einen Artikel zum Thema »Brauchen wir in der Stadt noch ein eigenes Auto?«. Schreiben Sie Ihre Meinung dazu.",
+     "minWords": 70,
+     "maxWords": 100,
+     "topicWords": [
+      "auto",
+      "stadt",
+      "meinung",
+      "finde",
+      "carsharing"
+     ]
+    },
+    {
+     "id": "w3",
+     "prompt": "Sie können morgen nicht zur Arbeit kommen, weil Ihr Kind krank ist. Schreiben Sie Ihrer Chefin, Frau Koch, eine kurze Nachricht und schlagen Sie eine Lösung vor.",
+     "minWords": 35,
+     "maxWords": 60,
+     "topicWords": [
+      "krank",
+      "kind",
+      "morgen",
+      "leider",
+      "vorschlag"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "speaking",
+   "name": "Sprechen",
+   "english": "Speaking",
+   "kind": "SPEAKING",
+   "instructions": "Antworten Sie laut (your browser writes down what you say) oder schreiben Sie Ihre Antwort. In the real exam you speak with a partner; here you say your part. Only the words are checked, not your pronunciation.",
+   "items": [
+    {
+     "id": "s1",
+     "prompt": "Ihr Deutschkurs möchte zum Kursende einen Ausflug machen. Planen Sie zusammen: Wohin soll es gehen, wann, wie fahren Sie hin und was nehmen Sie mit?",
+     "minWords": 60,
+     "maxWords": 150,
+     "topicWords": [
+      "ausflug",
+      "vorschlag",
+      "fahren",
+      "mitnehmen",
+      "treffen"
+     ]
+    },
+    {
+     "id": "s2",
+     "prompt": "Präsentieren Sie das Thema »Sport im Alltag: Wie wichtig ist Bewegung?«: Erzählen Sie von Ihren Erfahrungen, wie es in Ihrem Heimatland ist, nennen Sie Vor- und Nachteile und sagen Sie Ihre Meinung.",
+     "minWords": 80,
+     "maxWords": 200,
+     "topicWords": [
+      "sport",
+      "bewegung",
+      "gesund",
+      "heimatland",
+      "meinung"
+     ]
+    },
+    {
+     "id": "s3",
+     "prompt": "Ihr Partner hat über das Thema »Sollte man im Supermarkt nur noch ohne Plastik einkaufen?« gesprochen. Geben Sie eine kurze Rückmeldung zu seiner Präsentation und stellen Sie ihm eine Frage dazu.",
+     "minWords": 30,
+     "maxWords": 100,
+     "topicWords": [
+      "präsentation",
+      "interessant",
+      "frage",
+      "plastik",
+      "danke"
+     ]
+    }
+   ]
+  }
+ ]
+}

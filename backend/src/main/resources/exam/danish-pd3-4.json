@@ -1,0 +1,55 @@
+{
+  "id": "danish-pd3-4",
+  "parts": [
+    {
+      "id": "listening", "name": "Lytteforståelse", "english": "Listening", "kind": "CHOICE",
+      "instructions": "Lyt til optagelsen, og vælg det rigtige svar. Each recording can be played twice.",
+      "items": [
+        {"id": "l1", "audio": "Hej Ahmed, det er Pia fra vikarbureauet. Jeg har en opgave til dig på et lager i Kolding fra mandag og tre uger frem. Arbejdstiden er fra syv til femten. Hvis du er interesseret, skal du sende mig en sms i dag, så sender jeg kontrakten.",
+         "prompt": "Hvad skal Ahmed gøre, hvis han vil tage opgaven?", "options": ["Møde op på lageret mandag", "Sende en sms i dag", "Skrive under på kontrakten med det samme"], "answer": 1},
+        {"id": "l2", "audio": "Vi gør opmærksom på, at genbrugspladsen holder lukket på mandag på grund af ombygning. Fra tirsdag skal man sortere pap og plast i nye containere ved indgangen. Haveaffald afleveres som før bag ved bygningen.",
+         "prompt": "Hvad er nyt fra tirsdag?", "options": ["Haveaffald skal afleveres ved indgangen", "Pap og plast skal i nye containere ved indgangen", "Genbrugspladsen lukker for altid"], "answer": 1},
+        {"id": "l3", "audio": "En ny rapport viser, at danske lønmodtagere i gennemsnit holder færre pauser end for ti år siden. Mange spiser frokost ved skrivebordet. Forskere advarer om, at det kan føre til mere stress, og anbefaler, at man går en tur eller i hvert fald forlader skærmen i frokostpausen.",
+         "prompt": "Hvad anbefaler forskerne?", "options": ["At man arbejder i frokostpausen", "At man forlader skærmen i pausen", "At man tager kortere ferie"], "answer": 1},
+        {"id": "l4", "audio": "Undskyld, jeg er ny her. Ved du, hvor jeg kan få et adgangskort til bygningen? Receptionen er lukket, og min chef er til møde hele formiddagen.",
+         "prompt": "Hvad har personen brug for?", "options": ["Et adgangskort", "En parkeringsplads", "En ny computer"], "answer": 0},
+        {"id": "l5", "audio": "Jeg har prøvet at arbejde både i Danmark og i Tyskland. Det, der overraskede mig mest i Danmark, var den flade struktur. Her siger man du til chefen, og man forventer, at medarbejderne selv tager initiativ i stedet for at vente på ordrer.",
+         "prompt": "Hvad overraskede personen mest i Danmark?", "options": ["Den lange arbejdstid", "Den flade struktur og forventningen om initiativ", "At man skal sige De til chefen"], "answer": 1}
+      ]
+    },
+    {
+      "id": "reading", "name": "Læseforståelse", "english": "Reading", "kind": "CHOICE",
+      "instructions": "Læs teksterne, og vælg det rigtige svar. The first text is short and practises finding information; the second is longer and practises detailed reading.",
+      "passages": [
+        {"id": "p1", "title": "Information fra skolen: Forældremøde", "text": "Kære forældre i 3.B. Vi holder forældremøde tirsdag den 8. oktober klokken 17.00 i klassens lokale. Vi skal tale om den kommende lejrskole, trivsel i klassen og de nye regler for mobiltelefoner. Der vil være tolkning til arabisk og ukrainsk, hvis I giver besked senest fredag. Man kan tage søskende med, og der er pasning i SFO'en imens. Svar venligst via skolens app, om I kommer."},
+        {"id": "p2", "title": "Når man skifter fag midt i livet", "text": "Flere danskere skifter karriere, efter de er fyldt fyrre. Nogle gør det, fordi deres job er forsvundet på grund af ny teknologi, andre fordi de søger mere mening i arbejdet. Lars, 47 år, var bankrådgiver i tyve år, men læser nu til pædagog. »Jeg savnede at arbejde med mennesker i stedet for tal,« fortæller han. Økonomisk har det været hårdt, for han får mindre i SU, end han fik i løn. Hans familie har derfor skåret ned på ferier og restaurantbesøg. Karriereeksperter siger, at det er vigtigt at undersøge et nyt fag grundigt, for eksempel ved at tage i praktik, før man siger sit job op."}
+      ],
+      "items": [
+        {"id": "r1", "passage": "p1", "prompt": "Hvad skal man gøre for at få tolk?", "options": ["Give besked senest fredag", "Ringe til skolen på mødedagen", "Tage en tolk med selv"], "answer": 0},
+        {"id": "r2", "passage": "p1", "prompt": "Hvad sker der med søskende under mødet?", "options": ["De må ikke komme med", "De kan blive passet i SFO'en", "De skal sidde med i lokalet"], "answer": 1},
+        {"id": "r3", "passage": "p2", "prompt": "Hvorfor skiftede Lars fag?", "options": ["Han blev fyret", "Han savnede at arbejde med mennesker", "Han ville tjene flere penge"], "answer": 1},
+        {"id": "r4", "passage": "p2", "prompt": "Hvordan har skiftet påvirket familiens økonomi?", "options": ["De har fået flere penge", "Den er uændret", "De har skåret ned på ferier og restaurantbesøg"], "answer": 2},
+        {"id": "r5", "passage": "p2", "prompt": "Hvad anbefaler karriereeksperterne?", "options": ["At undersøge faget grundigt, fx med praktik, før man siger op", "At sige op med det samme", "At blive i det gamle job"], "answer": 0}
+      ]
+    },
+    {
+      "id": "writing", "name": "Skriftlig fremstilling", "english": "Writing", "kind": "WRITING",
+      "instructions": "Skriv teksterne på dansk. The word ranges are practice targets for this mock exam.",
+      "items": [
+        {"id": "w1", "prompt": "Dit barns klasse skal på lejrskole, men dit barn har en allergi. Skriv en mail til klasselæreren. Forklar allergien, hvad lærerne skal være opmærksomme på, og stil to spørgsmål om turen.",
+         "minWords": 100, "maxWords": 150, "topicWords": ["allergi", "lejrskole", "lærer", "barn", "spørgsmål"]},
+        {"id": "w2", "prompt": "Skriv et debatindlæg om emnet: Er det en god idé at skifte karriere, når man er over fyrre? Giv argumenter, kommentér et modargument, og afslut med din holdning.",
+         "minWords": 180, "maxWords": 250, "topicWords": ["karriere", "job", "alder", "mener", "argument"]}
+      ]
+    },
+    {
+      "id": "speaking", "name": "Mundtlig kommunikation", "english": "Speaking", "kind": "SPEAKING",
+      "instructions": "Svar højt (your browser writes down what you say), eller skriv dit svar. The first task is a topic you know well; the other two are topics you get on the day. Only the words are checked, not your pronunciation.",
+      "items": [
+        {"id": "s1", "prompt": "Fortæl om en dag på dit arbejde eller din uddannelse, der gik rigtig godt, eller rigtig dårligt. Hvad skete der?", "minWords": 80, "maxWords": 200, "topicWords": ["arbejde", "dag", "skete", "kolleger", "fordi"]},
+        {"id": "s2", "prompt": "Skal forældre bestemme, hvor meget tid deres børn bruger på skærme? Nævn fordele og ulemper.", "minWords": 80, "maxWords": 200, "topicWords": ["forældre", "børn", "skærm", "regler", "mener"]},
+        {"id": "s3", "prompt": "Bør pensionsalderen stige, fordi vi lever længere? Giv argumenter for og imod, og sig din mening.", "minWords": 80, "maxWords": 200, "topicWords": ["pension", "alder", "arbejde", "længere", "mener"]}
+      ]
+    }
+  ]
+}

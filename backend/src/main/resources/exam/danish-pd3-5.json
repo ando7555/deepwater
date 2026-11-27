@@ -1,0 +1,55 @@
+{
+  "id": "danish-pd3-5",
+  "parts": [
+    {
+      "id": "listening", "name": "Lytteforståelse", "english": "Listening", "kind": "CHOICE",
+      "instructions": "Lyt til optagelsen, og vælg det rigtige svar. Each recording can be played twice.",
+      "items": [
+        {"id": "l1", "audio": "Hej, du har ringet til lægehuset på Strandvejen. Vi har telefontid fra otte til ti på hverdage. Har du brug for akut hjælp uden for vores åbningstid, skal du ringe til lægevagten. Ved livsfare ring et-et-to.",
+         "prompt": "Hvad skal man gøre uden for åbningstiden, hvis man har brug for akut hjælp?", "options": ["Vente til næste morgen", "Ringe til lægevagten", "Skrive en mail til lægehuset"], "answer": 1},
+        {"id": "l2", "audio": "Kære kunder, fra den første marts stiger prisen på vores grønne abonnement med tyve kroner om måneden. Til gengæld kan I nu ringe gratis til hele EU. Ønsker I at skifte abonnement, kan I gøre det i vores app.",
+         "prompt": "Hvad får kunderne til gengæld for prisstigningen?", "options": ["Mere data", "Gratis opkald til hele EU", "En ny telefon"], "answer": 1},
+        {"id": "l3", "audio": "Flere danske kommuner forsøger nu med firedages skoleuge for de ældste elever. Den femte dag skal eleverne bruge på praktik i virksomheder. Lærerne er positive, men nogle forældre er bekymrede for, om eleverne lærer nok i de almindelige fag.",
+         "prompt": "Hvad er nogle forældre bekymrede for?", "options": ["At eleverne lærer for lidt i de almindelige fag", "At praktikken er for kort", "At lærerne får for meget arbejde"], "answer": 0},
+        {"id": "l4", "audio": "Hej skat, jeg har glemt mine nøgler på kontoret. Kan du lade døren være ulåst, eller lægge nøglen under måtten? Jeg er hjemme om en halv time.",
+         "prompt": "Hvorfor ringer personen?", "options": ["Han har glemt sine nøgler", "Han kommer meget sent hjem", "Han har mistet sin telefon"], "answer": 0},
+        {"id": "l5", "audio": "Jeg synes, det er en skam, at så mange små butikker lukker i byerne. Selvfølgelig er det nemt at handle på nettet, men byen bliver død, hvis der ikke er nogen butikker. Derfor prøver jeg at købe lokalt, når jeg kan.",
+         "prompt": "Hvad gør personen?", "options": ["Handler kun på nettet", "Prøver at købe lokalt, når det er muligt", "Er ligeglad med små butikker"], "answer": 1}
+      ]
+    },
+    {
+      "id": "reading", "name": "Læseforståelse", "english": "Reading", "kind": "CHOICE",
+      "instructions": "Læs teksterne, og vælg det rigtige svar. The first text is short and practises finding information; the second is longer and practises detailed reading.",
+      "passages": [
+        {"id": "p1", "title": "Udlejes: Lejlighed i Odense C", "text": "Lys toværelses lejlighed på 58 kvadratmeter udlejes fra den 1. april. Lejligheden ligger på 3. sal uden elevator, tæt på banegården og universitetets busser. Husleje 7.200 kroner om måneden plus forbrug. Depositum svarer til tre måneders husleje. Husdyr er ikke tilladt, men der er adgang til fælles cykelkælder og vaskeri. Fremvisning efter aftale, kontakt udlejer på telefon mellem 9 og 16."},
+        {"id": "p2", "title": "Frivilligt arbejde som vej ind på arbejdsmarkedet", "text": "Mange nytilkomne i Danmark oplever, at det er svært at få et job uden dansk erfaring. En vej ind kan være frivilligt arbejde. I foreninger, genbrugsbutikker og sportsklubber møder man danskere, øver sproget og får referencer, man kan bruge i en ansøgning. Maria fra Brasilien begyndte som frivillig i en lektiecafé for børn. Efter et år fik hun tilbudt et vikariat på en skole i nærheden, fordi lederen havde hørt godt om hende. Fagforeninger understreger dog, at frivilligt arbejde ikke må erstatte lønnet arbejde, og at man ikke bør arbejde gratis for virksomheder, der tjener penge."}
+      ],
+      "items": [
+        {"id": "r1", "passage": "p1", "prompt": "Hvor stort er depositummet?", "options": ["En måneds husleje", "Tre måneders husleje", "7.200 kroner i alt"], "answer": 1},
+        {"id": "r2", "passage": "p1", "prompt": "Hvad har lejligheden ikke?", "options": ["Elevator", "Adgang til vaskeri", "Cykelkælder"], "answer": 0},
+        {"id": "r3", "passage": "p2", "prompt": "Hvad kan frivilligt arbejde give ifølge teksten?", "options": ["En høj løn", "Sprogøvelse, kontakter og referencer", "Dansk statsborgerskab"], "answer": 1},
+        {"id": "r4", "passage": "p2", "prompt": "Hvordan fik Maria et vikariat?", "options": ["Hun søgte et opslag på nettet", "Lederen havde hørt godt om hende", "Hun tog en uddannelse som lærer"], "answer": 1},
+        {"id": "r5", "passage": "p2", "prompt": "Hvad understreger fagforeningerne?", "options": ["At alle bør arbejde frivilligt", "At frivilligt arbejde ikke må erstatte lønnet arbejde", "At frivillige skal betale kontingent"], "answer": 1}
+      ]
+    },
+    {
+      "id": "writing", "name": "Skriftlig fremstilling", "english": "Writing", "kind": "WRITING",
+      "instructions": "Skriv teksterne på dansk. The word ranges are practice targets for this mock exam.",
+      "items": [
+        {"id": "w1", "prompt": "Du er interesseret i lejligheden i Odense. Skriv en mail til udlejeren. Præsenter dig selv, stil spørgsmål om lejligheden, og foreslå en tid til fremvisning.",
+         "minWords": 100, "maxWords": 150, "topicWords": ["lejlighed", "udlejer", "fremvisning", "husleje", "spørgsmål"]},
+        {"id": "w2", "prompt": "Skriv et debatindlæg om emnet: Er frivilligt arbejde en god vej ind på det danske arbejdsmarked? Giv argumenter, kommentér et modargument, og afslut med din holdning.",
+         "minWords": 180, "maxWords": 250, "topicWords": ["frivillig", "arbejdsmarked", "erfaring", "mener", "argument"]}
+      ]
+    },
+    {
+      "id": "speaking", "name": "Mundtlig kommunikation", "english": "Speaking", "kind": "SPEAKING",
+      "instructions": "Svar højt (your browser writes down what you say), eller skriv dit svar. The first task is a topic you know well; the other two are topics you get on the day. Only the words are checked, not your pronunciation.",
+      "items": [
+        {"id": "s1", "prompt": "Fortæl om din fritid: hvad du laver, hvem du er sammen med, og hvad du gerne vil prøve i fremtiden.", "minWords": 80, "maxWords": 200, "topicWords": ["fritid", "venner", "sport", "gerne", "fremtiden"]},
+        {"id": "s2", "prompt": "Er det bedre at handle i små lokale butikker eller i store supermarkeder og på nettet? Nævn fordele og ulemper.", "minWords": 80, "maxWords": 200, "topicWords": ["butik", "supermarked", "nettet", "fordel", "ulempe"]},
+        {"id": "s3", "prompt": "Skal det være lovpligtigt at sortere sit affald? Giv argumenter for og imod, og sig din mening.", "minWords": 80, "maxWords": 200, "topicWords": ["affald", "sortere", "miljø", "lov", "mener"]}
+      ]
+    }
+  ]
+}

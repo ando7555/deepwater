@@ -2,18 +2,25 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { formatDate } from './api.js';
 import { restClient } from './app/http.js';
 import { canSpeak, speak } from './speech.js';
-import { answeredIn, appendDictation, lengthNote, levelText, progress } from './examTools.js';
+import { answeredIn, appendDictation, lengthNote, levelText, offerLines, progress } from './examTools.js';
 import { Button, ErrorState, Loading, Notice, Panel, Pill, SectionHeading, Tabs, useDraft } from './ui/index.jsx';
 
 // Exam practice in Echo (Polish B1, Danish PD3): the parts of the real exam, marked by the answer key and by an
 // examiner (the AI examiner when the server has an API key, otherwise a fixed rubric that says so).
 // Everything exam-specific (language, level, part names, texts) comes from the server.
+// Each exam has several practice tests (examId is test 1, then examId-2, examId-3...); the learner picks one,
+// and answers and history are kept per test.
 
 const MAX_PLAYS = 2;
 const Recognition = typeof window === 'undefined' ? null : window.SpeechRecognition || window.webkitSpeechRecognition;
 const RECOGNITION_LANG = { pl: 'pl-PL', da: 'da-DK', de: 'de-DE' };
 
 export default function ExamPractice({ examId, examinerName = 'The examiner' }) {
+  const [testId, setTestId] = useDraft(`${examId}-test`, examId);
+  return <ExamTest key={testId} seriesId={examId} examId={testId} onPickTest={setTestId} examinerName={examinerName} />;
+}
+
+function ExamTest({ seriesId, examId, onPickTest, examinerName }) {
   const exam = useMemo(() => restClient(`/api/v1/exam/${examId}`), [examId]);
   const [data, setData] = useState(null);
   const [history, setHistory] = useState([]);
@@ -29,7 +36,11 @@ export default function ExamPractice({ examId, examinerName = 'The examiner' }) 
     try {
       const [examData, attempts] = await Promise.all([exam(), exam('/attempts')]);
       setData(examData); setHistory(attempts); setError('');
-    } catch (e) { setError(e.message); }
+    } catch (e) {
+      // A test that no longer exists falls back to test 1.
+      if (e.status === 404 && examId !== seriesId) { onPickTest(seriesId); return; }
+      setError(e.message);
+    }
   }
   useEffect(() => { load(); }, [exam]);
 
@@ -60,7 +71,7 @@ export default function ExamPractice({ examId, examinerName = 'The examiner' }) 
   return <section className="exam-shell" aria-label={content.title} lang="en">
     {error && <Notice tone="error">{error}</Notice>}
     {view === 'intro' && <Intro content={content} passPercent={passPercent} aiExaminer={aiExaminer} examinerName={examinerName}
-      history={history} onStart={() => setView('exam')} onOpen={openAttempt} />}
+      history={history} onStart={() => setView('exam')} onOpen={openAttempt} onPickTest={onPickTest} />}
 
     {view === 'exam' && <Panel className="exam-panel">
       <div className="exam-top">
@@ -102,7 +113,8 @@ function partsSentence(parts) {
   return `${count} parts, as in the real exam: ${list}.`;
 }
 
-function Intro({ content, passPercent, aiExaminer, examinerName, history, onStart, onOpen }) {
+function Intro({ content, passPercent, aiExaminer, examinerName, history, onStart, onOpen, onPickTest }) {
+  const tests = content.tests || [content.id];
   return <Panel className="exam-panel exam-intro">
     <div className="exam-hero">
       <img src="/brand/mark.svg" alt="" width="112" height="112" />
@@ -110,7 +122,12 @@ function Intro({ content, passPercent, aiExaminer, examinerName, history, onStar
         <p className="eyebrow">ECHO · {content.title.toUpperCase()}</p>
         <h2>{content.question}</h2>
         <p>{partsSentence(content.parts)} {examinerName} marks every part and tells you whether you look ready for {content.shortName}. Each part needs {passPercent}% or more.</p>
-        <Button onClick={onStart}>Start the practice exam</Button>
+        {tests.length > 1 && <div className="exam-tests">
+          <p className="exam-hint">{tests.length} practice tests, each with new texts and tasks. Pick one:</p>
+          <Tabs label="Practice tests" value={content.id} onChange={onPickTest}
+            items={tests.map((id, index) => ({ id, label: `Test ${index + 1}` }))} />
+        </div>}
+        <Button onClick={onStart}>{tests.length > 1 ? `Start practice test ${content.testNumber}` : 'Start the practice exam'}</Button>
       </div>
     </div>
     <ul className="exam-parts">{content.parts.map(p => <li key={p.id}><b>{p.english}</b><span lang={content.language}>{p.name}</span><small>{p.items.length} {p.kind === 'CHOICE' ? 'questions' : 'tasks'}</small></li>)}</ul>
@@ -118,11 +135,39 @@ function Intro({ content, passPercent, aiExaminer, examinerName, history, onStar
     <p className="exam-hint">{aiExaminer
       ? 'Writing and speaking are marked by an AI examiner. It can be wrong, so treat the mark as advice, not a grade.'
       : 'The AI examiner is switched off on this server, so writing and speaking get a rough estimate from fixed rules (length, linking words, word variety). It is labelled as such in your result.'}</p>
-    {history.length > 0 && <div className="exam-history"><h3>Your earlier attempts</h3>
+    {history.length > 0 && <div className="exam-history"><h3>Your earlier attempts{tests.length > 1 ? ` at test ${content.testNumber}` : ''}</h3>
       <ul>{history.map(a => <li key={a.id}><button type="button" className="link" onClick={() => onOpen(a.id)}>{formatDate(a.createdAt)}</button>
         <span>{a.averagePercent}% · {levelText(a.levelEstimate, content.level)}</span>
         <Pill tone={isReady(a) ? 'good' : 'warn'}>{isReady(a) ? 'Looks ready' : 'Not yet'}</Pill></li>)}</ul></div>}
+    <Plans language={content.language} />
   </Panel>;
+}
+
+/** The paid offers for this language. Paying happens on the payment provider's page; without a link it says "opening soon". */
+function Plans({ language }) {
+  const [pricing, setPricing] = useState(null);
+  useEffect(() => {
+    let live = true;
+    restClient('/api/v1/pricing')(`?language=${encodeURIComponent(language)}`).then(p => { if (live) setPricing(p); }).catch(() => {});
+    return () => { live = false; };
+  }, [language]);
+  if (!pricing?.offers?.length) return null;
+  return <div className="exam-plans" aria-label="Plans">
+    <h3>Get the full course</h3>
+    <ul>{pricing.offers.map(offer => {
+      const lines = offerLines(offer, pricing.launchBuyers);
+      return <li key={offer.id} className="exam-plan">
+        <b>{offer.name}</b>
+        <span className="exam-plan-price">{lines.now}</span>
+        <small>{lines.note}</small>
+        <p>{offer.includes}</p>
+        {offer.link
+          ? <a className="button" href={offer.link} target="_blank" rel="noopener noreferrer">Join for {lines.now}</a>
+          : <Button disabled>Payments open soon</Button>}
+      </li>;
+    })}</ul>
+    <p className="exam-hint">Payment is handled by Stripe; Deepwater never sees your card.</p>
+  </div>;
 }
 
 function ChoiceItem({ item, lang, value, onChange }) {
