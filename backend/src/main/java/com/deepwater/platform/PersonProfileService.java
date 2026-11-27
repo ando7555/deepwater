@@ -155,9 +155,8 @@ public class PersonProfileService {
         if (value == null || value.isBlank()) return null;
         LocalDate date;
         try { date = LocalDate.parse(value.strip()); }
-        catch (DateTimeParseException ex) { throw bad("Enter your birth date as year-month-day, for example 1994-05-27."); }
-        Integer age = ageOn(date, today());
-        if (date.isAfter(today()) || age > 120) throw bad("Check your birth date.");
+        catch (DateTimeParseException _) { throw bad("Enter your birth date as year-month-day, for example 1994-05-27."); }
+        if (date.isAfter(today()) || Period.between(date, today()).getYears() > 120) throw bad("Check your birth date.");
         return date;
     }
 

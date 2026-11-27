@@ -57,18 +57,25 @@ public class AccountService {
         return db.update("delete from user_sessions where account_id=?", accountId);
     }
 
+    private static final Object SKIP = new Object();
+
+    /** One column as exported: dates as ISO text; secrets, binary data and internal account ids are skipped. */
+    private static Object exportValue(String key, Object value) {
+        boolean secret = key.equals("password_hash") || key.equals("token") || key.equals("account_id");
+        if (secret || value instanceof byte[] || value instanceof java.sql.Clob || value instanceof java.sql.Blob) return SKIP;
+        if (value instanceof Timestamp timestamp) return timestamp.toInstant().toString();
+        if (value instanceof java.sql.Date date) return date.toLocalDate().toString();
+        if (value instanceof java.time.OffsetDateTime time) return time.toInstant().toString();
+        return value;
+    }
+
     /** Dates as ISO text, no binary columns, no internal account ids of other people. */
     private static Map<String, Object> clean(Map<String, Object> row) {
         Map<String, Object> out = new LinkedHashMap<>();
         for (var entry : row.entrySet()) {
-            Object value = entry.getValue();
             String key = entry.getKey().toLowerCase(java.util.Locale.ROOT);
-            if (value instanceof byte[] || key.equals("password_hash") || key.equals("token") || key.equals("account_id")) continue;
-            if (value instanceof Timestamp timestamp) value = timestamp.toInstant().toString();
-            else if (value instanceof java.sql.Date date) value = date.toLocalDate().toString();
-            else if (value instanceof java.time.OffsetDateTime time) value = time.toInstant().toString();
-            else if (value instanceof java.sql.Clob || value instanceof java.sql.Blob) continue;
-            out.put(key, value);
+            Object value = exportValue(key, entry.getValue());
+            if (value != SKIP) out.put(key, value);
         }
         return out;
     }

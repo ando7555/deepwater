@@ -338,12 +338,12 @@ alter table amber_profiles alter column display_name drop not null;
 alter table amber_profiles alter column area drop not null;
 alter table amber_profiles alter column age drop not null;
 insert into person_profiles(account_id) select a.account_id from amber_profiles a
-  where a.display_name is not null and not exists (select 1 from person_profiles p where p.account_id=a.account_id);
+  left join person_profiles p on p.account_id=a.account_id where a.display_name is not null and p.account_id is null;
 update person_profiles set
   public_name=coalesce(public_name, (select a.display_name from amber_profiles a where a.account_id=person_profiles.account_id)),
   city=coalesce((select a.area from amber_profiles a where a.account_id=person_profiles.account_id), city),
   bio=coalesce(bio, (select a.about from amber_profiles a where a.account_id=person_profiles.account_id))
-  where exists (select 1 from amber_profiles a where a.account_id=person_profiles.account_id and a.display_name is not null);
+  where account_id in (select a.account_id from amber_profiles a where a.display_name is not null);
 update amber_profiles set display_name=null, area=null, about=null where display_name is not null;
 -- Ask Deepwater: the person agreed to send their questions and Deepwater data to the named AI company.
 -- No row means no agreement; withdrawing deletes the row.

@@ -78,7 +78,7 @@ public class AccountController {
     ResponseEntity<Map<String, Object>> export(@RequestHeader(value = AUTH, required = false) String auth) {
         Map<String, Object> data = accounts.export(platform.requireAccount(auth));
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"deepwater-data-" + LocalDate.now() + ".json\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"deepwater-data-" + LocalDate.now(java.time.ZoneOffset.UTC) + ".json\"")
                 .cacheControl(CacheControl.noStore())
                 .contentType(MediaType.APPLICATION_JSON).body(data);
     }

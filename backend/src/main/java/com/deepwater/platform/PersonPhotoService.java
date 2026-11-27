@@ -127,7 +127,7 @@ public class PersonPhotoService {
             param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
             param.setCompressionQuality(QUALITY);
             writer.write(null, new IIOImage(target, null, null), param);
-        } catch (IOException ex) {
+        } catch (IOException _) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The photo could not be saved.");
         } finally { writer.dispose(); }
         return out.toByteArray();

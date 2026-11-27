@@ -37,7 +37,9 @@ public class AmberService {
     static final int MAX_SUGGESTIONS = 20;
     static final Set<String> REPORT_REASONS = Set.of("UNWANTED_MESSAGES", "FAKE_PROFILE", "FEELS_UNSAFE", "UNDERAGE", "OTHER");
     /** Photos are seen only after both said yes (the default, owner's choice 2026-11-27), or by every member who sees the profile. */
-    static final Set<String> PHOTO_VISIBILITY = Set.of("CONNECTED", "MEMBERS");
+    static final String PHOTOS_CONNECTED = "CONNECTED";
+    static final String PHOTOS_MEMBERS = "MEMBERS";
+    static final Set<String> PHOTO_VISIBILITY = Set.of(PHOTOS_CONNECTED, PHOTOS_MEMBERS);
     private static final Map<String, String> LANGUAGE_NAMES = Map.of("da", "Danish", "de", "German", "pl", "Polish");
     private static final Map<String, String> ECHO_LEVEL_WORDS = Map.of("new", "just starting", "some", "knows some", "comfortable", "comfortable");
     private static final Set<String> SPEAKS_WELL = Set.of("NATIVE", "FLUENT");
@@ -70,14 +72,15 @@ public class AmberService {
         boolean harbor = usesHarbor(accountId);
         var rows = find(accountId);
         Stored p = rows.isEmpty() ? null : rows.getFirst();
-        Integer age = person.age() != null ? person.age() : p == null ? null : p.legacyAge;
+        Integer legacyAge = p == null ? null : p.legacyAge;
+        Integer age = person.age() != null ? person.age() : legacyAge;
         List<String> missing = new ArrayList<>();
         if (person.publicName() == null) missing.add("the first name others see");
         if (age == null) missing.add("your birth date");
         if (person.city() == null) missing.add("your city");
         String firstLearning = learning.isEmpty() ? null : learning.getFirst().language();
         if (p == null) return new MyProfile(false, null, person.publicName(), age, person.birthDate(), person.city(), List.of(), List.of(),
-                person.bio(), true, false, true, false, "CONNECTED", firstLearning, learning, person.languages(), person.photos(), harbor, missing);
+                person.bio(), true, false, true, false, PHOTOS_CONNECTED, firstLearning, learning, person.languages(), person.photos(), harbor, missing);
         return new MyProfile(true, p.memberId, person.publicName(), age, person.birthDate(), person.city(), names(p.intents), p.interests,
                 person.bio(), p.visible, p.shareLearning, p.shareLanguages, p.shareHarbor, p.photosVisibility, firstLearning, learning,
                 person.languages(), person.photos(), harbor, missing);
@@ -90,17 +93,12 @@ public class AmberService {
     @Transactional
     public MyProfile save(String accountId, ProfileInput in) {
         people.updatePublic(accountId, in.displayName(), in.birthDate(), in.area(), in.about());
-        PersonProfile person = people.profile(accountId);
-        var existing = find(accountId);
-        Integer legacyAge = in.age() != null ? in.age() : existing.isEmpty() ? null : existing.getFirst().legacyAge;
-        Integer age = person.age() != null ? person.age() : legacyAge;
-
-        if (person.publicName() == null) throw bad("Add the first name others will see.");
-        if (age == null) throw bad("Add your birth date. Amber is only for adults (18 or older).");
-        if (age < MIN_AGE) throw bad("Amber is only for adults (18 or older).");
-        if (age > 120) throw bad("Check your age.");
-        if (!Boolean.TRUE.equals(in.confirmAdult())) throw bad("Confirm that you are 18 or older.");
-        if (person.city() == null) throw bad("Choose your area, at city level.");
+        Integer legacyAge = in.age();
+        if (legacyAge == null) {
+            var existing = find(accountId);
+            if (!existing.isEmpty()) legacyAge = existing.getFirst().legacyAge;
+        }
+        requireJoinable(people.profile(accountId), legacyAge, in.confirmAdult());
         Set<Intent> intents = intents(in.intents());
         if (intents.isEmpty()) throw bad("Choose what you are looking for.");
         List<String> interests;
@@ -110,7 +108,7 @@ public class AmberService {
         boolean shareLearning = Boolean.TRUE.equals(in.shareLearning());
         boolean shareLanguages = in.shareLanguages() == null || in.shareLanguages();
         boolean shareHarbor = Boolean.TRUE.equals(in.shareHarbor());
-        String photosVisibility = in.photosVisibility() == null ? "CONNECTED" : in.photosVisibility();
+        String photosVisibility = in.photosVisibility() == null ? PHOTOS_CONNECTED : in.photosVisibility();
         if (!PHOTO_VISIBILITY.contains(photosVisibility)) throw bad("Choose who can see your photos.");
 
         String intentText = String.join(",", intents.stream().map(Enum::name).toList());
@@ -124,6 +122,17 @@ public class AmberService {
                     accountId, UUID.randomUUID().toString(), legacyAge, intentText, interestText, visible, shareLearning, shareLanguages,
                     shareHarbor, photosVisibility);
         return profile(accountId);
+    }
+
+    /** The Deepwater profile must have a name, an adult age and a city, and the person must confirm being an adult. */
+    private static void requireJoinable(PersonProfile person, Integer legacyAge, Boolean confirmAdult) {
+        Integer age = person.age() != null ? person.age() : legacyAge;
+        if (person.publicName() == null) throw bad("Add the first name others will see.");
+        if (age == null) throw bad("Add your birth date. Amber is only for adults (18 or older).");
+        if (age < MIN_AGE) throw bad("Amber is only for adults (18 or older).");
+        if (age > 120) throw bad("Check your age.");
+        if (!Boolean.TRUE.equals(confirmAdult)) throw bad("Confirm that you are 18 or older.");
+        if (person.city() == null) throw bad("Choose your area, at city level.");
     }
 
     /**
@@ -151,7 +160,7 @@ public class AmberService {
         if (!target.equals(viewer)) {
             Stored them = find(target).getFirst();
             boolean allowed = !blockedEitherWay(viewer, target)
-                    && (connected(viewer, target) || ("MEMBERS".equals(them.photosVisibility) && them.visible));
+                    && (connected(viewer, target) || (PHOTOS_MEMBERS.equals(them.photosVisibility) && them.visible));
             if (!allowed) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Photo not found.");
         }
         return photos.bytes(target, photoId);
@@ -278,7 +287,7 @@ public class AmberService {
         Integer age = person.age() != null ? person.age() : p.legacyAge;
         List<Learning> learning = p.shareLearning ? learning(p.accountId) : List.of();
         List<String> photoIds = person.photos().stream().map(PersonPhotoService.Photo::id).toList();
-        boolean showPhotos = connected || "MEMBERS".equals(p.photosVisibility);
+        boolean showPhotos = connected || PHOTOS_MEMBERS.equals(p.photosVisibility);
         return new Card(p.memberId, person.publicName(), age, person.city(), names(p.intents), p.interests, person.bio(),
                 learning.isEmpty() ? null : learning.getFirst().language(), learning,
                 p.shareLanguages ? person.languages() : List.of(), p.shareHarbor ? usesHarbor(p.accountId) : null,
@@ -312,13 +321,16 @@ public class AmberService {
         Set<String> seenExams = new HashSet<>();
         for (var row : db.queryForList("select exam_id, level_estimate from exam_attempts where account_id=? order by created_at desc", accountId)) {
             String examId = (String) row.get("exam_id");
-            if (!seenExams.add(examId)) continue;
-            String name;
-            try { name = LANGUAGE_NAMES.get(exams.exam(examId).language()); }
-            catch (ResponseStatusException ex) { continue; }
+            String name = seenExams.add(examId) ? examLanguage(examId) : null;
             if (name != null) levels.put(name, row.get("level_estimate") + " on a Deepwater practice exam");
         }
         return levels.entrySet().stream().map(e -> new Learning(e.getKey(), e.getValue())).toList();
+    }
+
+    /** The language name of a practice exam, or null for an exam that no longer exists. */
+    private String examLanguage(String examId) {
+        try { return LANGUAGE_NAMES.get(exams.exam(examId).language()); }
+        catch (ResponseStatusException _) { return null; }
     }
 
     private boolean usesHarbor(String accountId) {
