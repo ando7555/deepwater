@@ -111,9 +111,12 @@ public class WorkspaceVoice {
     private List<Turn> history(String accountId, String roleId, int last) {
         List<Turn> newestFirst = db.query("select speaker, text, tools, created_at from workspace_talk where account_id=? and role_id=? "
                         + "order by created_at desc limit ?",
-                (rs, n) -> new Turn(rs.getString("speaker"), rs.getString("text"),
-                        rs.getString("tools") == null || rs.getString("tools").isBlank() ? List.of() : List.of(rs.getString("tools").split(",")),
-                        rs.getTimestamp("created_at").toInstant()),
+                (rs, n) -> {
+                    String toolList = rs.getString("tools");
+                    return new Turn(rs.getString("speaker"), rs.getString("text"),
+                            toolList == null || toolList.isBlank() ? List.of() : List.of(toolList.split(",")),
+                            rs.getTimestamp("created_at").toInstant());
+                },
                 accountId, roleId, last);
         return newestFirst.reversed();
     }
