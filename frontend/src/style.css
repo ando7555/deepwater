@@ -951,3 +951,5 @@ button,.pill,.learn-tabs button,.segmented button,.echo-languages button,.ui-men
 .voice-type{display:flex;gap:10px;align-items:flex-end}
 .voice-type .ui-field{flex:1}
 .voice-room .muted{color:var(--text-3);font-size:var(--fs-xs);margin:0}
+
+.voice-time { display: block; color: var(--muted, #8a9bb5); font-size: 0.75rem; margin-top: 2px; }

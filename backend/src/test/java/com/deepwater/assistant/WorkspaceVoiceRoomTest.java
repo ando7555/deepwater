@@ -97,6 +97,32 @@ class WorkspaceVoiceRoomTest {
         assertThat(talk(owner(), "astrologer", "hi").getStatusCode().value()).isEqualTo(404);
     }
 
+    @Test
+    void theConversationIsSavedSoItCanBeContinuedAndCanBeStartedAgain() throws Exception {
+        var headers = new HttpHeaders();
+        headers.setBearerAuth(owner());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        String url = "/api/v1/workspace/roles/reliability-engineer/talk";
+        http.exchange(url, HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
+
+        model.then(c -> answer("Uptime was fine this week."));
+        assertThat(http.exchange(url, HttpMethod.POST, new HttpEntity<>(Map.of("text", "How was uptime?"), headers), String.class)
+                .getStatusCode().value()).isEqualTo(200);
+        model.then(c -> answer("Yes, the backend restarted twice."));
+        http.exchange(url, HttpMethod.POST, new HttpEntity<>(Map.of("text", "Any restarts?"), headers), String.class);
+
+        // The second turn was answered with the first one as context, from the server's saved conversation.
+        assertThat(model.seen.getLast().transcript()).hasSize(3);
+        JsonNode turns = JSON.readTree(http.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class).getBody()).get("turns");
+        assertThat(turns).hasSize(4);
+        assertThat(turns.get(0).get("role").asString()).isEqualTo("user");
+        assertThat(turns.get(0).get("text").asString()).isEqualTo("How was uptime?");
+        assertThat(turns.get(3).get("text").asString()).isEqualTo("Yes, the backend restarted twice.");
+
+        assertThat(http.exchange(url, HttpMethod.DELETE, new HttpEntity<>(headers), String.class).getStatusCode().value()).isEqualTo(204);
+        assertThat(JSON.readTree(http.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class).getBody()).get("turns")).isEmpty();
+    }
+
     private ResponseEntity<String> talk(String token, String role, String said) {
         var headers = new HttpHeaders();
         headers.setBearerAuth(token);
