@@ -24,7 +24,12 @@ MVP and acceptance criteria already written in
 | Messages refresh every 8 seconds; no push or email notifications | Proposal (no websockets for the MVP) |
 | Messages stay stored after a conversation ends (for report review), deleted when either person leaves Amber or deletes the account | Proposal; retention policy is the owner's decision |
 | Reports are stored with status OPEN; there is no reviewer screen or moderation team yet | Gap; the scope doc says Amber must not launch publicly until moderation is staffed |
-| No photos, no age-range preference, no distance | Not built; owner decisions |
+| One Deepwater profile: Amber reads name, birth date (age), city, bio, languages and photos from the account's profile | Owner, 2026-11-27 ("ten profil będzie cały dla Deepwater") |
+| Photos: up to 4, visible only after both say yes unless the person chooses "everyone in Amber" | Owner chose the default, 2026-11-27 |
+| Optional card facts, each switched on by the person: languages known (on by default), Echo languages and levels (off), "Uses Harbor" (off) | Owner ask 2026-11-27; defaults are a proposal |
+| Language exchange reasons, "Close kindly" goodbyes, whose-turn line | Proposal, from [competitor-pain-points.md](competitor-pain-points.md) |
+| Photos are not moderated by anyone | Gap; needs an owner decision before a public launch |
+| No age-range preference, no distance | Not built; owner decisions |
 
 ## Rules (AmberRules.java)
 
@@ -35,6 +40,10 @@ MVP and acceptance criteria already written in
 4. Not suggested: yourself, anyone blocked in either direction, anyone you passed in the last 30 days
    or hid, anyone with an open invitation with you, anyone who declined your invitation.
 5. A hidden profile ("Visible in discovery" off) neither appears nor sees suggestions.
+6. Language exchange: "Speaks X, which you are learning" when the other person shows their languages and speaks
+   X natively or fluently (the viewer's own learning is used only for the viewer); "Is learning X, which you
+   speak" only when the other person shows what they learn. Ranked after shared interests.
+7. People whose Deepwater profile lost a required field (first name others see, age, city) are not suggested.
 
 ## Privacy and safety
 
@@ -51,12 +60,19 @@ MVP and acceptance criteria already written in
 
 `GET/PUT/DELETE /profile` · `GET /suggestions` · `POST /suggestions/{memberId}/pass|hide` ·
 `POST /invitations` · `GET /invitations` · `POST /invitations/{id}/accept|decline|withdraw` ·
-`GET /connections` · `GET/POST /connections/{id}/messages` · `POST /connections/{id}/leave` ·
-`POST /safety/block` · `POST /safety/report`
+`GET /connections` · `GET /connections/closed` · `GET/POST /connections/{id}/messages` ·
+`POST /connections/{id}/leave` (optional `{"note": "NOT_A_MATCH" | "NO_TIME" | "MET_SOMEONE"}`) ·
+`GET /members/{memberId}/photos/{photoId}` · `POST /safety/block` · `POST /safety/report`
+
+Deepwater profile and account (`/api/v1/account`): `GET/POST /photos` · `GET/DELETE /photos/{id}` ·
+`POST /photos/{id}/first` · `GET /export` · `POST /sign-out-everywhere`. Text fields of the profile:
+GraphQL `myProfile` / `updateMyProfile` (publicName, birthDate, bio, languages).
 
 ## Tests
 
-`AmberRulesTest` (rules) and `AmberApiTest` (one test per AC-AMBER-1..6 plus account deletion);
+`AmberRulesTest` (rules), `AmberApiTest` (one test per AC-AMBER-1..6 plus account deletion),
+`AmberSharedProfileApiTest` (shared profile, photos rule, opt-in fields, language exchange, close kindly),
+`AccountManagementApiTest` (data download, sign out everywhere, deletion);
 `frontend/src/amber/amberTools.test.mjs`.
 
 ## Before a public pilot (from the scope doc)

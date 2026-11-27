@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { addInterest, profileProblems, intentWords, initial, isShared, coverFor, railPosition, COVERS, MAX_INTERESTS } from './amberTools.js';
+import { addInterest, profileProblems, intentWords, initial, isShared, coverFor, railPosition, turnText, CLOSING_NOTES, COVERS, MAX_INTERESTS } from './amberTools.js';
 
 test('interests are trimmed, deduplicated and limited', () => {
   assert.deepEqual(addInterest([], '  Board   games ').list, ['Board games']);
@@ -36,4 +36,19 @@ test('the card row says which card is in view', () => {
   assert.deepEqual(railPosition(610, 300, 4), { index: 2, label: '3 of 4' });
   assert.deepEqual(railPosition(9999, 300, 4), { index: 3, label: '4 of 4' });
   assert.deepEqual(railPosition(0, 0, 0), { index: 0, label: '' });
+});
+
+test('a missing age asks for the birth date', () => {
+  const form = { displayName: 'Anna', age: null, confirmAdult: true, area: 'Aarhus', intents: ['DATING'] };
+  assert.ok(profileProblems(form).some(p => p.includes('birth date')));
+});
+
+test('the conversation line says whose turn it is, and nudges after three quiet days', () => {
+  const now = new Date('2026-11-27T12:00:00Z');
+  const person = { displayName: 'Mia' };
+  assert.equal(turnText({ person, lastMessageMine: null }, now), 'New: say hello');
+  assert.equal(turnText({ person, lastMessageMine: true, lastMessageAt: '2026-11-20T12:00:00Z' }, now), 'Waiting for Mia');
+  assert.equal(turnText({ person, lastMessageMine: false, lastMessageAt: '2026-11-26T12:00:00Z' }, now), 'Your turn');
+  assert.equal(turnText({ person, lastMessageMine: false, lastMessageAt: '2026-11-23T12:00:00Z' }, now), 'Your turn: reply, or close kindly');
+  assert.equal(CLOSING_NOTES.length, 3);
 });

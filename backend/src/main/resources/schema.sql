@@ -302,6 +302,49 @@ create table if not exists amber_reports (
   status varchar(12) not null default 'OPEN',
   created_at timestamp with time zone not null default current_timestamp
 );
+-- One Deepwater profile (2026-11-27): the public part of the person's profile lives on the account and is shared
+-- by Echo, Harbor and Amber. public_name is the first name other people see; the account name stays private.
+alter table person_profiles add column if not exists public_name varchar(40);
+alter table person_profiles add column if not exists birth_date date;
+alter table person_profiles add column if not exists bio varchar(500);
+-- Languages the person knows. level: NATIVE, FLUENT, GOOD, BASIC.
+create table if not exists person_languages (
+  account_id varchar(36) not null references accounts(id),
+  language varchar(40) not null,
+  level varchar(8) not null,
+  position integer not null,
+  primary key(account_id, language)
+);
+-- Profile photos: re-encoded as JPEG on upload (which drops EXIF data such as GPS position), at most 4 per person.
+create table if not exists person_photos (
+  id varchar(36) primary key,
+  account_id varchar(36) not null references accounts(id),
+  position integer not null,
+  content_type varchar(32) not null,
+  bytes bytea not null,
+  created_at timestamp with time zone not null default current_timestamp
+);
+create index if not exists person_photos_account on person_photos(account_id, position);
+-- Amber reads name, age, area and intro from the Deepwater profile. Each extra field is shown only if switched on.
+-- photos_visibility: CONNECTED (only after both say yes, the default) or MEMBERS (everyone who can see the profile).
+alter table amber_profiles add column if not exists share_languages boolean not null default true;
+alter table amber_profiles add column if not exists share_harbor boolean not null default false;
+alter table amber_profiles add column if not exists photos_visibility varchar(12) not null default 'CONNECTED';
+-- Ending a conversation kindly: who ended it and the short note they chose (a fixed choice, never free text).
+alter table amber_invitations add column if not exists ended_by varchar(36);
+alter table amber_invitations add column if not exists closing_note varchar(24);
+-- Move Amber's own name, area and intro into the Deepwater profile once, then stop reading them.
+alter table amber_profiles alter column display_name drop not null;
+alter table amber_profiles alter column area drop not null;
+alter table amber_profiles alter column age drop not null;
+insert into person_profiles(account_id) select a.account_id from amber_profiles a
+  where a.display_name is not null and not exists (select 1 from person_profiles p where p.account_id=a.account_id);
+update person_profiles set
+  public_name=coalesce(public_name, (select a.display_name from amber_profiles a where a.account_id=person_profiles.account_id)),
+  city=coalesce((select a.area from amber_profiles a where a.account_id=person_profiles.account_id), city),
+  bio=coalesce(bio, (select a.about from amber_profiles a where a.account_id=person_profiles.account_id))
+  where exists (select 1 from amber_profiles a where a.account_id=person_profiles.account_id and a.display_name is not null);
+update amber_profiles set display_name=null, area=null, about=null where display_name is not null;
 -- Ask Deepwater: the person agreed to send their questions and Deepwater data to the named AI company.
 -- No row means no agreement; withdrawing deletes the row.
 create table if not exists assistant_consents (
