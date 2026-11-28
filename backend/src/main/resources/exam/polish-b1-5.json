@@ -1,0 +1,67 @@
+{
+  "id": "polish-b1-5",
+  "parts": [
+    {
+      "id": "listening", "name": "Rozumienie ze słuchu", "english": "Listening", "kind": "CHOICE",
+      "instructions": "Posłuchaj nagrania i wybierz poprawną odpowiedź. Each recording can be played twice.",
+      "items": [
+        {"id": "l1", "audio": "Dzień dobry, dzwonię z przychodni dentystycznej. Niestety doktor Lis jest chory i musimy przełożyć pana wizytę z poniedziałku na czwartek, na tę samą godzinę. Jeśli to panu nie pasuje, proszę oddzwonić.",
+         "prompt": "Kiedy będzie nowa wizyta?", "options": ["W poniedziałek", "W czwartek o tej samej godzinie", "W czwartek rano"], "answer": 1},
+        {"id": "l2", "audio": "Uwaga, prosimy kierowców o nieparkowanie na ulicy Lipowej w środę od ósmej do szesnastej. W tym czasie będzie sprzątana ulica. Samochody, które tam zostaną, zostaną odholowane.",
+         "prompt": "Co stanie się z samochodami na ulicy Lipowej w środę?", "options": ["Zostaną umyte", "Zostaną odholowane", "Nic się nie stanie"], "answer": 1},
+        {"id": "l3", "audio": "Wiesz co, ten nowy kurs jogi jest świetny. Nauczycielka jest bardzo cierpliwa, a zajęcia są rano, przed pracą, więc potem mam dużo energii. Jedyny minus to cena, bo jest dość drogi.",
+         "prompt": "Co nie podoba się tej osobie w kursie jogi?", "options": ["Nauczycielka", "Godzina zajęć", "Cena"], "answer": 2},
+        {"id": "l4", "audio": "Państwa uwagę zwracamy na nową aplikację miejską. Można w niej kupić bilet na autobus, sprawdzić rozkład jazdy i zgłosić problem, na przykład zepsutą lampę na ulicy. Aplikacja jest bezpłatna.",
+         "prompt": "Czego nie można zrobić w aplikacji?", "options": ["Kupić biletu", "Zgłosić problemu", "Zapłacić podatku"], "answer": 2},
+        {"id": "l5", "audio": "Kiedyś bałem się mówić po polsku, bo robiłem dużo błędów. Teraz wiem, że błędy są normalne. Najważniejsze, żeby ludzie mnie rozumieli. Codziennie rozmawiam z kolegami w pracy i widzę postępy.",
+         "prompt": "Co ta osoba myśli teraz o błędach?", "options": ["Że są normalne", "Że trzeba ich unikać", "Że kolegom przeszkadzają"], "answer": 0}
+      ]
+    },
+    {
+      "id": "grammar", "name": "Poprawność gramatyczna", "english": "Grammar", "kind": "CHOICE",
+      "instructions": "Wybierz poprawną formę.",
+      "items": [
+        {"id": "g1", "prompt": "Od wczoraj ___ grypę.", "options": ["mam", "miałem", "będę miał"], "answer": 0},
+        {"id": "g2", "prompt": "Daj ___ tę książkę, proszę.", "options": ["mnie", "mi", "ja"], "answer": 1},
+        {"id": "g3", "prompt": "Szukam ___ mieszkania.", "options": ["tanie", "taniego", "tanim"], "answer": 1},
+        {"id": "g4", "prompt": "Spotkajmy się ___ dworcu.", "options": ["w", "na", "do"], "answer": 1},
+        {"id": "g5", "prompt": "Wczoraj ___ cały dzień, bo byłam zmęczona.", "options": ["spałam", "śpię", "zasnę"], "answer": 0},
+        {"id": "g6", "prompt": "On jest ___ ode mnie.", "options": ["starszy", "stary", "najstarszy"], "answer": 0},
+        {"id": "g7", "prompt": "Chciałbym, ___ mi pomógł.", "options": ["że", "żebyś", "bo"], "answer": 1},
+        {"id": "g8", "prompt": "Jadę do Polski ___ dwa tygodnie.", "options": ["na", "w", "od"], "answer": 0}
+      ]
+    },
+    {
+      "id": "reading", "name": "Rozumienie tekstów pisanych", "english": "Reading", "kind": "CHOICE",
+      "instructions": "Przeczytaj teksty i wybierz poprawną odpowiedź.",
+      "passages": [
+        {"id": "p1", "title": "Informacja dla mieszkańców", "text": "Szanowni mieszkańcy, w przyszły wtorek od dziewiątej do piętnastej w budynku nie będzie ciepłej wody z powodu naprawy rur w piwnicy. Prosimy nie korzystać w tym czasie z pralek. Za utrudnienia przepraszamy. Jeśli ktoś potrzebuje pomocy, na przykład osoby starsze, prosimy o kontakt z administratorem budynku pod numerem podanym na drzwiach wejściowych."},
+        {"id": "p2", "title": "Wolontariat dla seniorów", "text": "W Krakowie działa program, w którym młodzi ludzie pomagają starszym sąsiadom. Wolontariusze robią zakupy, chodzą z seniorami na spacer albo uczą ich korzystać ze smartfona. Pani Helena ma osiemdziesiąt dwa lata i mówi, że dzięki wolontariuszce Oli rozmawia teraz przez wideo z wnukami w Kanadzie. Ola studiuje medycynę i mówi, że rozmowy z panią Heleną dają jej dużo radości. Organizatorzy szukają nowych wolontariuszy, także obcokrajowców, którzy chcą ćwiczyć polski. Wystarczy mieć dwie godziny w tygodniu."}
+      ],
+      "items": [
+        {"id": "r1", "passage": "p1", "prompt": "Czego nie będzie we wtorek?", "options": ["Prądu", "Ciepłej wody", "Gazu"], "answer": 1},
+        {"id": "r2", "passage": "p1", "prompt": "Gdzie jest numer administratora?", "options": ["Na drzwiach wejściowych", "W piwnicy", "W internecie"], "answer": 0},
+        {"id": "r3", "passage": "p2", "prompt": "Czego Ola nauczyła panią Helenę?", "options": ["Gotować", "Rozmawiać przez wideo ze smartfona", "Mówić po angielsku"], "answer": 1},
+        {"id": "r4", "passage": "p2", "prompt": "Co daje Oli ta praca?", "options": ["Pieniądze", "Dużo radości", "Punkty na studiach"], "answer": 1},
+        {"id": "r5", "passage": "p2", "prompt": "Kogo szukają organizatorzy?", "options": ["Tylko studentów medycyny", "Lekarzy", "Nowych wolontariuszy, także obcokrajowców"], "answer": 2}
+      ]
+    },
+    {
+      "id": "writing", "name": "Pisanie", "english": "Writing", "kind": "WRITING",
+      "instructions": "Napisz teksty po polsku. The word ranges are practice targets for this mock exam.",
+      "items": [
+        {"id": "w1", "prompt": "Napisz e-mail do szkoły językowej. Chcesz zapisać się na kurs polskiego. Napisz, na jakim jesteś poziomie, kiedy masz czas i o co chcesz zapytać (cena, liczba osób w grupie).", "minWords": 60, "maxWords": 100, "topicWords": ["kurs", "poziom", "cena", "grup", "zapis"]},
+        {"id": "w2", "prompt": "Napisz opinię na forum internetowym: czy warto mieć samochód w dużym mieście? Podaj argumenty za i przeciw i napisz, co sam lub sama myślisz.", "minWords": 120, "maxWords": 180, "topicWords": ["samochód", "miast", "korek", "uważam", "komunikacj"]}
+      ]
+    },
+    {
+      "id": "speaking", "name": "Mówienie", "english": "Speaking", "kind": "SPEAKING",
+      "instructions": "Odpowiedz na głos (your browser writes down what you say) albo wpisz odpowiedź. Only the words are checked, not your pronunciation.",
+      "items": [
+        {"id": "s1", "prompt": "Opowiedz o swojej pracy marzeń: co chciałbyś lub chciałabyś robić i dlaczego.", "minWords": 40, "maxWords": 120, "topicWords": ["prac", "chciał", "marze", "ponieważ", "lubię"]},
+        {"id": "s2", "prompt": "Jesteś u lekarza. Opisz, co cię boli, od kiedy i co już robiłeś lub robiłaś, żeby się lepiej poczuć.", "minWords": 40, "maxWords": 120, "topicWords": ["boli", "lekarz", "od", "tabletk", "gorączk"]},
+        {"id": "s3", "prompt": "Czy warto uczyć się języków obcych, kiedy mamy tłumacza w telefonie? Powiedz, co myślisz i dlaczego.", "minWords": 40, "maxWords": 120, "topicWords": ["język", "uczyć", "telefon", "tłumacz", "myślę"]}
+      ]
+    }
+  ]
+}

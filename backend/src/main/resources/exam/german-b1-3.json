@@ -1,0 +1,252 @@
+{
+ "id": "german-b1-3",
+ "parts": [
+  {
+   "id": "reading",
+   "name": "Lesen",
+   "english": "Reading",
+   "kind": "CHOICE",
+   "instructions": "Lesen Sie die Texte und wählen Sie die richtige Antwort.",
+   "passages": [
+    {
+     "id": "p1",
+     "title": "Anzeige: Mitbewohnerin gesucht",
+     "text": "Wir sind zwei berufstätige Frauen, 29 und 34, und suchen eine Mitbewohnerin für unsere Dreizimmerwohnung in Leipzig-Südvorstadt. Das freie Zimmer ist 16 Quadratmeter groß und unmöbliert. Die Miete beträgt 420 Euro warm, Internet ist inklusive. Wir kochen gern zusammen, wünschen uns aber auch Ruhe unter der Woche. Rauchen ist in der Wohnung nicht erlaubt, eine Katze wohnt schon hier. Einzug ab dem 1. März. Schreib uns etwas über dich!"
+    },
+    {
+     "id": "p2",
+     "title": "Ehrenamt: Wenn Freizeit anderen hilft",
+     "text": "Rund ein Drittel der Menschen in Deutschland engagiert sich ehrenamtlich, also ohne Bezahlung. Sie trainieren Kinder im Sportverein, helfen bei der Tafel, die Lebensmittel an bedürftige Menschen verteilt, oder lesen Seniorinnen und Senioren vor. Für viele ist das Ehrenamt eine Möglichkeit, neue Leute kennenzulernen und etwas Sinnvolles zu tun. Auch für Zugewanderte kann es ein guter Weg sein, Deutsch zu üben und Kontakte zu knüpfen. Allerdings klagen viele Vereine, dass es schwieriger wird, Freiwillige für feste Aufgaben zu finden. Viele Menschen möchten sich lieber kurzfristig für einzelne Projekte engagieren. Die Vereine reagieren darauf und bieten mehr flexible Einsätze an."
+    }
+   ],
+   "items": [
+    {
+     "id": "r1",
+     "passage": "p1",
+     "prompt": "Was ist in der Miete enthalten?",
+     "options": [
+      "Möbel",
+      "Internet",
+      "Ein Parkplatz"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "r2",
+     "passage": "p1",
+     "prompt": "Was ist in der Wohnung nicht erlaubt?",
+     "options": [
+      "Haustiere",
+      "Gemeinsames Kochen",
+      "Rauchen"
+     ],
+     "answer": 2
+    },
+    {
+     "id": "r3",
+     "passage": "p2",
+     "prompt": "Was machen Ehrenamtliche zum Beispiel?",
+     "options": [
+      "Sie verteilen Lebensmittel bei der Tafel",
+      "Sie arbeiten gegen Bezahlung in Firmen",
+      "Sie verkaufen Kleidung"
+     ],
+     "answer": 0
+    },
+    {
+     "id": "r4",
+     "passage": "p2",
+     "prompt": "Warum kann ein Ehrenamt für Zugewanderte gut sein?",
+     "options": [
+      "Weil man dort Geld verdient",
+      "Weil man Deutsch üben und Kontakte knüpfen kann",
+      "Weil man eine Arbeitserlaubnis bekommt"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "r5",
+     "passage": "p2",
+     "prompt": "Welches Problem haben viele Vereine?",
+     "options": [
+      "Sie haben zu viele Freiwillige",
+      "Sie finden schwer Freiwillige für feste Aufgaben",
+      "Sie haben kein Geld für Projekte"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "r6",
+     "passage": "p2",
+     "prompt": "Wie reagieren die Vereine?",
+     "options": [
+      "Sie bieten mehr flexible Einsätze an",
+      "Sie bezahlen die Freiwilligen",
+      "Sie schließen ihre Projekte"
+     ],
+     "answer": 0
+    }
+   ]
+  },
+  {
+   "id": "listening",
+   "name": "Hören",
+   "english": "Listening",
+   "kind": "CHOICE",
+   "instructions": "Hören Sie die Texte und wählen Sie die richtige Antwort. Each recording can be played twice.",
+   "items": [
+    {
+     "id": "l1",
+     "audio": "Achtung an Gleis vier: Der ICE nach München fährt heute ausnahmsweise von Gleis sieben ab. Bitte beachten Sie die geänderte Wagenreihung. Wir danken für Ihr Verständnis.",
+     "prompt": "Was ist mit dem Zug nach München?",
+     "options": [
+      "Er fällt aus",
+      "Er fährt von einem anderen Gleis",
+      "Er hat 30 Minuten Verspätung"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "l2",
+     "audio": "Guten Tag Frau Ahmadi, hier ist die Bank am Marktplatz. Für die Eröffnung Ihres Kontos brauchen wir noch Ihren Pass und eine Meldebescheinigung. Bitte bringen Sie beides zu Ihrem Termin am Donnerstag mit.",
+     "prompt": "Was soll Frau Ahmadi mitbringen?",
+     "options": [
+      "Ihren Pass und eine Meldebescheinigung",
+      "Ihren Arbeitsvertrag",
+      "Ein Passfoto und Geld"
+     ],
+     "answer": 0
+    },
+    {
+     "id": "l3",
+     "audio": "Hey Lena, ich habe heute keine Lust auf Restaurant, das ist auch so teuer. Wollen wir nicht lieber bei mir kochen? Ich habe noch Gemüse und Nudeln. Bring einfach etwas zu trinken mit.",
+     "prompt": "Was schlägt Tim vor?",
+     "options": [
+      "Ins Restaurant zu gehen",
+      "Zu Hause zu kochen",
+      "Pizza zu bestellen"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "l4",
+     "audio": "Liebe Badegäste, wegen Reparaturarbeiten bleibt das Hallenbad bis Sonntag geschlossen. Ab nächstem Montag sind wir wieder zu den gewohnten Zeiten für Sie da.",
+     "prompt": "Ab wann ist das Schwimmbad wieder geöffnet?",
+     "options": [
+      "Ab morgen",
+      "Ab nächstem Montag",
+      "Ab dem 1. Juni"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "l5",
+     "audio": "Früher habe ich in einer großen Firma gearbeitet und oft zehn Stunden am Tag. Dann ist meine Tochter geboren, und ich wollte mehr Zeit für meine Familie haben. Jetzt arbeite ich Teilzeit in einem kleinen Büro, und das ist genau richtig für mich.",
+     "prompt": "Warum hat der Mann seinen Job gewechselt?",
+     "options": [
+      "Er wollte mehr Geld verdienen",
+      "Er wollte mehr Zeit für seine Familie",
+      "Er ist in eine andere Stadt gezogen"
+     ],
+     "answer": 1
+    }
+   ]
+  },
+  {
+   "id": "writing",
+   "name": "Schreiben",
+   "english": "Writing",
+   "kind": "WRITING",
+   "instructions": "Schreiben Sie die Texte auf Deutsch. The word ranges are practice targets for this mock exam.",
+   "items": [
+    {
+     "id": "w1",
+     "prompt": "Sie haben die Anzeige der Wohngemeinschaft in Leipzig gelesen. Schreiben Sie eine E-Mail: Stellen Sie sich vor, erklären Sie, warum das Zimmer zu Ihnen passt, und fragen Sie nach einem Besichtigungstermin.",
+     "minWords": 70,
+     "maxWords": 100,
+     "topicWords": [
+      "zimmer",
+      "wohnung",
+      "besichtigung",
+      "vorstellen",
+      "interessiere"
+     ]
+    },
+    {
+     "id": "w2",
+     "prompt": "Im Radio wurde über das Thema »Sollte jeder Mensch ein Jahr ehrenamtlich arbeiten?« diskutiert. Schreiben Sie Ihre Meinung in einem Online-Forum.",
+     "minWords": 70,
+     "maxWords": 100,
+     "topicWords": [
+      "ehrenamt",
+      "meinung",
+      "finde",
+      "helfen",
+      "jahr"
+     ]
+    },
+    {
+     "id": "w3",
+     "prompt": "Ihr Nachbar, Herr Becker, hat Sie zu seinem Geburtstag eingeladen. Sie können nicht kommen. Schreiben Sie ihm eine kurze, höfliche Nachricht.",
+     "minWords": 35,
+     "maxWords": 60,
+     "topicWords": [
+      "geburtstag",
+      "leider",
+      "einladung",
+      "gratuliere",
+      "danke"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "speaking",
+   "name": "Sprechen",
+   "english": "Speaking",
+   "kind": "SPEAKING",
+   "instructions": "Antworten Sie laut (your browser writes down what you say) oder schreiben Sie Ihre Antwort. In the real exam you speak with a partner; here you say your part. Only the words are checked, not your pronunciation.",
+   "items": [
+    {
+     "id": "s1",
+     "prompt": "Eine Freundin aus Ihrem Kurs zieht um. Planen Sie zusammen, wie Sie ihr helfen: Wann ist der Umzug, wer hilft mit, wie transportieren Sie die Möbel und wer kümmert sich ums Essen?",
+     "minWords": 60,
+     "maxWords": 150,
+     "topicWords": [
+      "umzug",
+      "helfen",
+      "möbel",
+      "vorschlag",
+      "auto"
+     ]
+    },
+    {
+     "id": "s2",
+     "prompt": "Präsentieren Sie das Thema »Ehrenamt: Freizeit für andere?«: Erzählen Sie von Ihren Erfahrungen, wie es in Ihrem Heimatland ist, nennen Sie Vor- und Nachteile und sagen Sie Ihre Meinung.",
+     "minWords": 80,
+     "maxWords": 200,
+     "topicWords": [
+      "ehrenamt",
+      "helfen",
+      "heimatland",
+      "vorteil",
+      "meinung"
+     ]
+    },
+    {
+     "id": "s3",
+     "prompt": "Ihre Partnerin hat über das Thema »Sollten Kinder schon früh eine Fremdsprache lernen?« gesprochen. Geben Sie eine kurze Rückmeldung und stellen Sie ihr eine Frage dazu.",
+     "minWords": 30,
+     "maxWords": 100,
+     "topicWords": [
+      "präsentation",
+      "interessant",
+      "frage",
+      "sprache",
+      "kinder"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,56 @@
+{
+  "id": "danish-pd3-3",
+  "parts": [
+    {
+      "id": "listening", "name": "Lytteforståelse", "english": "Listening", "kind": "CHOICE",
+      "instructions": "Lyt til optagelsen, og vælg det rigtige svar. Each recording can be played twice.",
+      "items": [
+        {"id": "l1", "audio": "Hej, det er Lone fra tandlægeklinikken på Nørregade. Jeg ringer for at minde dig om din tid i morgen klokken halv ni. Hvis du ikke kan komme, skal du melde afbud senest i dag, ellers koster det et gebyr på to hundrede kroner.",
+         "prompt": "Hvad sker der, hvis man ikke melder afbud i tide?", "options": ["Man får en ny tid automatisk", "Man skal betale et gebyr", "Man mister sin tandlæge"], "answer": 1},
+        {"id": "l2", "audio": "Kære beboere. På lørdag holder vi arbejdsdag i gården fra klokken ti. Vi skal male bænkene og plante blomster. Bagefter griller vi sammen, og foreningen betaler maden. Skriv dig på listen i opgangen, hvis du kan være med.",
+         "prompt": "Hvad skal man gøre, hvis man vil være med?", "options": ["Betale for maden", "Skrive sig på listen i opgangen", "Ringe til foreningen"], "answer": 1},
+        {"id": "l3", "audio": "Regeringen foreslår, at flere skal kunne tage en uddannelse som voksne uden at miste deres indkomst. Forslaget skal især hjælpe ufaglærte, der gerne vil blive faglærte, for eksempel som tømrer eller social- og sundhedsassistent. Oppositionen kalder forslaget for dyrt.",
+         "prompt": "Hvem skal forslaget især hjælpe?", "options": ["Studerende på universitetet", "Ufaglærte voksne, der vil blive faglærte", "Pensionister"], "answer": 1},
+        {"id": "l4", "audio": "Har du set, at fitnesscentret har fået nye åbningstider? Nu åbner de allerede klokken fem om morgenen, men til gengæld lukker de klokken ni om aftenen i stedet for elleve.",
+         "prompt": "Hvad er nyt ved fitnesscentret?", "options": ["Det åbner tidligere og lukker tidligere", "Det har åbent hele natten", "Det er lukket i weekenden"], "answer": 0},
+        {"id": "l5", "audio": "Personligt synes jeg, at det er vigtigt at sige sin mening på arbejdet, også når man er uenig med chefen. Men man skal gøre det på en ordentlig måde og helst ikke foran hele afdelingen.",
+         "prompt": "Hvad mener personen?", "options": ["Man skal aldrig være uenig med chefen", "Man skal sige sin mening, men på en ordentlig måde", "Man skal altid diskutere foran alle"], "answer": 1}
+      ]
+    },
+    {
+      "id": "reading", "name": "Læseforståelse", "english": "Reading", "kind": "CHOICE",
+      "instructions": "Læs teksterne, og vælg det rigtige svar. The first text is short and practises finding information; the second is longer and practises detailed reading.",
+      "passages": [
+        {"id": "p1", "title": "Jobopslag: Social- og sundhedshjælper", "text": "Plejecenter Solgården søger en social- og sundhedshjælper til aften- og weekendvagter, 28 timer om ugen. Du skal hjælpe beboerne med personlig pleje, måltider og aktiviteter. Vi forventer, at du har en relevant uddannelse og taler godt dansk, fordi du skal kommunikere med beboere og pårørende. Kørekort er ikke et krav. Vi tilbyder grundig oplæring, gode kolleger og løn efter overenskomst. Ansøgningsfristen er den 15. januar."},
+        {"id": "p2", "title": "Madspild: Danskerne smider mindre ud", "text": "Danskerne er blevet bedre til at undgå madspild. Ifølge en ny opgørelse smider en gennemsnitlig husstand nu omkring tyve procent mindre mad ud end for ti år siden. Forklaringen er blandt andet, at supermarkederne sælger varer med kort holdbarhed billigere, og at flere bruger apps, hvor butikker og restauranter sælger overskudsmad. Alligevel ender store mængder brød, frugt og grøntsager stadig i skraldespanden. Eksperter anbefaler, at man planlægger sine indkøb, ser i køleskabet, før man handler, og husker, at »bedst før« ikke betyder, at maden er dårlig dagen efter."}
+      ],
+      "items": [
+        {"id": "r1", "passage": "p1", "prompt": "Hvornår skal man arbejde?", "options": ["Om dagen på hverdage", "Om aftenen og i weekenden", "Kun om natten"], "answer": 1},
+        {"id": "r2", "passage": "p1", "prompt": "Hvorfor skal man tale godt dansk?", "options": ["For at kunne kommunikere med beboere og pårørende", "For at kunne køre bil", "For at kunne skrive rapporter"], "answer": 0},
+        {"id": "r3", "passage": "p2", "prompt": "Hvor meget mindre mad smider en husstand ud end for ti år siden?", "options": ["Halvdelen", "Omkring tyve procent", "Ti procent"], "answer": 1},
+        {"id": "r4", "passage": "p2", "prompt": "Hvad er en af forklaringerne?", "options": ["Maden er blevet dyrere", "Apps, hvor man kan købe overskudsmad", "Folk spiser mindre"], "answer": 1},
+        {"id": "r5", "passage": "p2", "prompt": "Hvad ender stadig ofte i skraldespanden?", "options": ["Kød og fisk", "Mejeriprodukter", "Brød, frugt og grøntsager"], "answer": 2},
+        {"id": "r6", "passage": "p2", "prompt": "Hvad betyder »bedst før« ifølge eksperterne?", "options": ["At maden ikke nødvendigvis er dårlig dagen efter", "At maden skal smides ud", "At maden kun kan fryses"], "answer": 0}
+      ]
+    },
+    {
+      "id": "writing", "name": "Skriftlig fremstilling", "english": "Writing", "kind": "WRITING",
+      "instructions": "Skriv teksterne på dansk. The word ranges are practice targets for this mock exam.",
+      "items": [
+        {"id": "w1", "prompt": "Du søger jobbet som social- og sundhedshjælper på Plejecenter Solgården. Skriv en kort ansøgning. Fortæl om din uddannelse og erfaring, hvorfor du vil have jobbet, og hvornår du kan starte.",
+         "minWords": 100, "maxWords": 150, "topicWords": ["ansøgning", "erfaring", "uddannelse", "stilling", "starte"]},
+        {"id": "w2", "prompt": "Skriv et debatindlæg om emnet: Bør supermarkeder have pligt til at give overskudsmad væk i stedet for at smide den ud? Giv argumenter, kommentér et modargument, og afslut med din holdning.",
+         "minWords": 180, "maxWords": 250, "topicWords": ["madspild", "supermarked", "mad", "mener", "argument"]}
+      ]
+    },
+    {
+      "id": "speaking", "name": "Mundtlig kommunikation", "english": "Speaking", "kind": "SPEAKING",
+      "instructions": "Svar højt (your browser writes down what you say), eller skriv dit svar. The first task is a topic you know well; the other two are topics you get on the day. Only the words are checked, not your pronunciation.",
+      "items": [
+        {"id": "s1", "prompt": "Fortæl om en tradition fra dit hjemland, og sammenlign den med en dansk tradition.", "minWords": 80, "maxWords": 200, "topicWords": ["tradition", "hjemland", "jul", "dansk", "forskel"]},
+        {"id": "s2", "prompt": "Er det bedst at bo til leje eller at eje sin bolig? Nævn fordele og ulemper, og sig, hvad du selv foretrækker.", "minWords": 80, "maxWords": 200, "topicWords": ["leje", "eje", "bolig", "fordel", "ulempe"]},
+        {"id": "s3", "prompt": "Skal det være gratis at tage bus og tog for alle? Giv argumenter for og imod.", "minWords": 80, "maxWords": 200, "topicWords": ["gratis", "bus", "tog", "skat", "mener"]}
+      ]
+    }
+  ]
+}

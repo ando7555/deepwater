@@ -45,3 +45,17 @@ export function levelText(estimate, target) {
   if (target && estimate !== target) return `${estimate}, getting close to ${target}`;
   return estimate;
 }
+
+/** "100 PLN" / "1,249 DKK" / "€25": a whole monthly price in its currency. */
+export function priceText(amount, currency) {
+  const number = Number(amount).toLocaleString('en-US');
+  return currency === 'EUR' ? `€${number}` : `${number} ${currency}`;
+}
+
+/** The two lines under an offer: the launch price and what it becomes later. */
+export function offerLines(offer, launchBuyers) {
+  return {
+    now: `${priceText(offer.launchPrice, offer.currency)} / month`,
+    note: `Launch price for the first ${launchBuyers} learners, who keep it. Later ${priceText(offer.fullPrice, offer.currency)} / month.`,
+  };
+}

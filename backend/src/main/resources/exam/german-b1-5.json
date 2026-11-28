@@ -1,0 +1,252 @@
+{
+ "id": "german-b1-5",
+ "parts": [
+  {
+   "id": "reading",
+   "name": "Lesen",
+   "english": "Reading",
+   "kind": "CHOICE",
+   "instructions": "Lesen Sie die Texte und wählen Sie die richtige Antwort.",
+   "passages": [
+    {
+     "id": "p1",
+     "title": "Mitteilung der Hausverwaltung",
+     "text": "Liebe Mieterinnen und Mieter, am Mittwoch, dem 12. März, wird zwischen 9 und 15 Uhr das Wasser im ganzen Haus abgestellt, weil die Leitungen im Keller repariert werden. Bitte füllen Sie vorher Wasser in Flaschen ab. Außerdem erinnern wir daran, dass Fahrräder nicht im Treppenhaus stehen dürfen; bitte nutzen Sie den Fahrradkeller. Bei Fragen erreichen Sie den Hausmeister, Herrn Wolf, montags bis freitags von 8 bis 12 Uhr."
+    },
+    {
+     "id": "p2",
+     "title": "Mehrsprachig aufwachsen",
+     "text": "Immer mehr Kinder in Deutschland wachsen mit zwei oder mehr Sprachen auf. Früher hatten viele Eltern Angst, dass ihre Kinder dadurch verwirrt werden und keine Sprache richtig lernen. Heute weiß man, dass das meistens nicht stimmt. Kinder können mehrere Sprachen gleichzeitig lernen, auch wenn sie am Anfang manchmal Wörter mischen. Die Sprachwissenschaftlerin Dr. Neumann empfiehlt Eltern, mit ihren Kindern in der Sprache zu sprechen, in der sie sich selbst am wohlsten fühlen. Wichtig sei außerdem, dass die Kinder früh Kontakt mit Deutsch haben, zum Beispiel in der Kita. Mehrsprachigkeit ist später oft ein Vorteil, etwa bei der Suche nach einem Arbeitsplatz."
+    }
+   ],
+   "items": [
+    {
+     "id": "r1",
+     "passage": "p1",
+     "prompt": "Warum wird das Wasser abgestellt?",
+     "options": [
+      "Wegen einer Reparatur im Keller",
+      "Weil die Miete nicht bezahlt wurde",
+      "Wegen einer Reinigung des Treppenhauses"
+     ],
+     "answer": 0
+    },
+    {
+     "id": "r2",
+     "passage": "p1",
+     "prompt": "Wo sollen die Fahrräder stehen?",
+     "options": [
+      "Im Treppenhaus",
+      "Im Fahrradkeller",
+      "Vor der Haustür"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "r3",
+     "passage": "p2",
+     "prompt": "Wovor hatten Eltern früher Angst?",
+     "options": [
+      "Dass ihre Kinder keine Sprache richtig lernen",
+      "Dass die Kita zu teuer ist",
+      "Dass die Kinder keine Freunde finden"
+     ],
+     "answer": 0
+    },
+    {
+     "id": "r4",
+     "passage": "p2",
+     "prompt": "Was passiert manchmal am Anfang?",
+     "options": [
+      "Die Kinder sprechen gar nicht",
+      "Die Kinder mischen Wörter",
+      "Die Kinder vergessen die Muttersprache"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "r5",
+     "passage": "p2",
+     "prompt": "Was empfiehlt Dr. Neumann?",
+     "options": [
+      "Nur Deutsch zu sprechen",
+      "Die Sprache zu sprechen, in der man sich am wohlsten fühlt",
+      "Die Kinder nicht in die Kita zu schicken"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "r6",
+     "passage": "p2",
+     "prompt": "Wann ist Mehrsprachigkeit ein Vorteil?",
+     "options": [
+      "Beim Einkaufen",
+      "Bei der Arbeitssuche",
+      "Beim Sport"
+     ],
+     "answer": 1
+    }
+   ]
+  },
+  {
+   "id": "listening",
+   "name": "Hören",
+   "english": "Listening",
+   "kind": "CHOICE",
+   "instructions": "Hören Sie die Texte und wählen Sie die richtige Antwort. Each recording can be played twice.",
+   "items": [
+    {
+     "id": "l1",
+     "audio": "Guten Tag Herr Novak, hier ist Frau Richter von der Firma Bauer Elektro. Leider müssen wir Ihr Vorstellungsgespräch am Donnerstag verschieben. Würde Ihnen Freitag um vierzehn Uhr passen? Bitte rufen Sie mich zurück.",
+     "prompt": "Warum ruft die Firma an?",
+     "options": [
+      "Um ein Vorstellungsgespräch zu verschieben",
+      "Um eine Absage zu geben",
+      "Um nach Zeugnissen zu fragen"
+     ],
+     "answer": 0
+    },
+    {
+     "id": "l2",
+     "audio": "Liebe Fahrgäste, wegen einer Baustelle hält die Buslinie zwölf heute nicht an der Haltestelle Rathaus. Bitte steigen Sie an der Haltestelle Marktstraße aus. Alle anderen Haltestellen werden normal angefahren.",
+     "prompt": "Wo hält der Bus heute nicht?",
+     "options": [
+      "Am Rathaus",
+      "Am Bahnhof",
+      "An der Schule"
+     ],
+     "answer": 0
+    },
+    {
+     "id": "l3",
+     "audio": "Hallo Kati, hier ist Peter. Das Wetter soll am Samstag super werden. Hast du Lust auf eine Radtour zum See? Wir könnten dort picknicken. Ruf mich an!",
+     "prompt": "Was möchte Peter am Wochenende machen?",
+     "options": [
+      "Zu Hause bleiben",
+      "Eine Radtour machen",
+      "Ins Museum gehen"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "l4",
+     "audio": "Neu in unserer Stadtbibliothek: Ab sofort können Sie mit Ihrem Bibliotheksausweis auch E-Books ausleihen, ganz bequem von zu Hause aus. Fragen Sie an der Information nach Ihrem Zugang.",
+     "prompt": "Was ist neu in der Bibliothek?",
+     "options": [
+      "Sie ist jetzt auch sonntags geöffnet",
+      "Man kann jetzt E-Books ausleihen",
+      "Der Ausweis kostet nichts mehr"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "l5",
+     "audio": "Als ich vor vier Jahren nach Deutschland kam, war vieles schwer: die Sprache, die Bürokratie, das Wetter. Aber inzwischen habe ich eine gute Arbeit und viele Freunde. Ich fühle mich hier wirklich wohl.",
+     "prompt": "Wie findet der Mann das Leben in Deutschland?",
+     "options": [
+      "Alles ist einfach",
+      "Am Anfang war es schwer, jetzt fühlt er sich wohl",
+      "Er möchte zurück in sein Heimatland"
+     ],
+     "answer": 1
+    }
+   ]
+  },
+  {
+   "id": "writing",
+   "name": "Schreiben",
+   "english": "Writing",
+   "kind": "WRITING",
+   "instructions": "Schreiben Sie die Texte auf Deutsch. The word ranges are practice targets for this mock exam.",
+   "items": [
+    {
+     "id": "w1",
+     "prompt": "Ihr Freund möchte nach Deutschland ziehen und hat Fragen. Schreiben Sie ihm eine E-Mail: Was sollte er vorher machen, wie findet er eine Wohnung, und was war für Sie am Anfang schwierig?",
+     "minWords": 70,
+     "maxWords": 100,
+     "topicWords": [
+      "wohnung",
+      "deutschland",
+      "schwierig",
+      "empfehle",
+      "anfang"
+     ]
+    },
+    {
+     "id": "w2",
+     "prompt": "Im Fernsehen gab es eine Diskussion zum Thema »Sollten Kinder in der Kita nur Deutsch sprechen?«. Schreiben Sie Ihre Meinung in einem Online-Forum.",
+     "minWords": 70,
+     "maxWords": 100,
+     "topicWords": [
+      "kinder",
+      "kita",
+      "sprache",
+      "meinung",
+      "finde"
+     ]
+    },
+    {
+     "id": "w3",
+     "prompt": "Sie haben in einem Online-Shop eine Jacke bestellt, aber sie ist zu klein. Schreiben Sie eine kurze Nachricht an den Kundenservice und bitten Sie um einen Umtausch.",
+     "minWords": 35,
+     "maxWords": 60,
+     "topicWords": [
+      "jacke",
+      "umtausch",
+      "klein",
+      "bestellt",
+      "bitte"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "speaking",
+   "name": "Sprechen",
+   "english": "Speaking",
+   "kind": "SPEAKING",
+   "instructions": "Antworten Sie laut (your browser writes down what you say) oder schreiben Sie Ihre Antwort. In the real exam you speak with a partner; here you say your part. Only the words are checked, not your pronunciation.",
+   "items": [
+    {
+     "id": "s1",
+     "prompt": "Sie und eine Kursteilnehmerin möchten einer Lehrerin zum Abschied ein Geschenk machen. Planen Sie zusammen: Was schenken Sie, wer sammelt das Geld, und wann und wie übergeben Sie das Geschenk?",
+     "minWords": 60,
+     "maxWords": 150,
+     "topicWords": [
+      "geschenk",
+      "abschied",
+      "geld",
+      "vorschlag",
+      "lehrerin"
+     ]
+    },
+    {
+     "id": "s2",
+     "prompt": "Präsentieren Sie das Thema »Mit mehreren Sprachen aufwachsen«: Erzählen Sie von Ihren Erfahrungen, wie es in Ihrem Heimatland ist, nennen Sie Vor- und Nachteile und sagen Sie Ihre Meinung.",
+     "minWords": 80,
+     "maxWords": 200,
+     "topicWords": [
+      "sprachen",
+      "kinder",
+      "heimatland",
+      "vorteil",
+      "meinung"
+     ]
+    },
+    {
+     "id": "s3",
+     "prompt": "Ihre Partnerin hat über das Thema »Sollte man im Haus Fahrräder im Treppenhaus abstellen dürfen?« gesprochen. Geben Sie eine kurze Rückmeldung und stellen Sie ihr eine Frage dazu.",
+     "minWords": 30,
+     "maxWords": 100,
+     "topicWords": [
+      "präsentation",
+      "interessant",
+      "frage",
+      "fahrrad",
+      "nachbarn"
+     ]
+    }
+   ]
+  }
+ ]
+}
