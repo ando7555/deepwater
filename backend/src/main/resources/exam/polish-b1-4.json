@@ -1,0 +1,67 @@
+{
+  "id": "polish-b1-4",
+  "parts": [
+    {
+      "id": "listening", "name": "Rozumienie ze słuchu", "english": "Listening", "kind": "CHOICE",
+      "instructions": "Posłuchaj nagrania i wybierz poprawną odpowiedź. Each recording can be played twice.",
+      "items": [
+        {"id": "l1", "audio": "Dzień dobry, tu firma kurierska Szybka Paczka. Nie zastaliśmy pani w domu, więc paczka czeka w punkcie odbioru w kiosku przy ulicy Polnej. Można ją odebrać przez trzy dni.",
+         "prompt": "Gdzie jest teraz paczka?", "options": ["U sąsiada", "W kiosku przy ulicy Polnej", "Na poczcie głównej"], "answer": 1},
+        {"id": "l2", "audio": "Szanowni pasażerowie, lot do Oslo jest opóźniony o godzinę z powodu złej pogody. Nowa godzina odlotu to piętnasta czterdzieści. Wyjście numer dwanaście bez zmian.",
+         "prompt": "Dlaczego lot jest opóźniony?", "options": ["Z powodu złej pogody", "Z powodu strajku", "Bo samolot jest zepsuty"], "answer": 0},
+        {"id": "l3", "audio": "Paweł, kupisz po drodze chleb i masło? Mleko już mam. A, i jeszcze jakieś owoce dla dzieci, najlepiej jabłka albo banany.",
+         "prompt": "Czego Paweł nie musi kupować?", "options": ["Chleba", "Owoców", "Mleka"], "answer": 2},
+        {"id": "l4", "audio": "Zapraszamy na kurs gotowania kuchni włoskiej. Zajęcia odbywają się w czwartki wieczorem przez sześć tygodni. W cenie są wszystkie produkty. Liczba miejsc jest ograniczona do dziesięciu osób.",
+         "prompt": "Co jest w cenie kursu?", "options": ["Wszystkie produkty", "Książka kucharska", "Kolacja w restauracji"], "answer": 0},
+        {"id": "l5", "audio": "Przeprowadziłam się do Wrocławia z Ukrainy trzy lata temu. Na początku nie znałam nikogo, ale zapisałam się do chóru i tam poznałam najlepszych przyjaciół. Teraz czuję się tu jak w domu.",
+         "prompt": "Jak ta kobieta poznała przyjaciół?", "options": ["W pracy", "W chórze", "Na kursie polskiego"], "answer": 1}
+      ]
+    },
+    {
+      "id": "grammar", "name": "Poprawność gramatyczna", "english": "Grammar", "kind": "CHOICE",
+      "instructions": "Wybierz poprawną formę.",
+      "items": [
+        {"id": "g1", "prompt": "W zeszłym roku (oni) ___ dom na wsi.", "options": ["kupili", "kupią", "kupują"], "answer": 0},
+        {"id": "g2", "prompt": "Interesuję się ___.", "options": ["historia", "historią", "historii"], "answer": 1},
+        {"id": "g3", "prompt": "Nie znam ___ ludzi w tym mieście.", "options": ["tych", "ci", "tymi"], "answer": 0},
+        {"id": "g4", "prompt": "Idę ___ lekarza o dziesiątej.", "options": ["u", "do", "na"], "answer": 1},
+        {"id": "g5", "prompt": "Ten pociąg jedzie ___ szybciej.", "options": ["dużo", "duży", "dużym"], "answer": 0},
+        {"id": "g6", "prompt": "Jeśli jutro będzie ładna pogoda, ___ na spacer.", "options": ["pójdziemy", "poszliśmy", "poszlibyśmy"], "answer": 0},
+        {"id": "g7", "prompt": "Mam dwóch ___.", "options": ["brat", "braci", "bracia"], "answer": 1},
+        {"id": "g8", "prompt": "Książka, ___ czytam, jest bardzo ciekawa.", "options": ["który", "którą", "która"], "answer": 1}
+      ]
+    },
+    {
+      "id": "reading", "name": "Rozumienie tekstów pisanych", "english": "Reading", "kind": "CHOICE",
+      "instructions": "Przeczytaj teksty i wybierz poprawną odpowiedź.",
+      "passages": [
+        {"id": "p1", "title": "Praca: kierowca dostawczy", "text": "Firma Świeże Warzywa szuka kierowcy z prawem jazdy kategorii B. Praca od poniedziałku do piątku, od szóstej do czternastej. Oferujemy umowę o pracę, samochód służbowy i telefon. Doświadczenie nie jest konieczne, wszystkiego nauczymy. Wymagamy podstawowej znajomości języka polskiego i punktualności. CV prosimy wysyłać na adres e-mail podany na stronie firmy."},
+        {"id": "p2", "title": "Mniej plastiku w kuchni", "text": "Rodzina Kowalskich z Poznania od roku próbuje żyć bez plastiku. Na zakupy chodzą z własnymi torbami i słoikami, a warzywa kupują na targu, gdzie nic nie jest zapakowane. Pani Ewa mówi, że na początku zakupy trwały dłużej, ale teraz to już przyzwyczajenie. Najtrudniej jest z dziećmi, które chcą słodycze w kolorowych opakowaniach. Kowalscy wyrzucają teraz o połowę mniej śmieci niż rok temu. Mówią, że nie chodzi o to, żeby być idealnym, tylko żeby zacząć od małych zmian."}
+      ],
+      "items": [
+        {"id": "r1", "passage": "p1", "prompt": "Czego firma wymaga od kierowcy?", "options": ["Doświadczenia w pracy", "Punktualności i podstaw polskiego", "Prawa jazdy kategorii C"], "answer": 1},
+        {"id": "r2", "passage": "p1", "prompt": "Co oferuje firma?", "options": ["Pracę w weekendy", "Mieszkanie służbowe", "Umowę o pracę i samochód służbowy"], "answer": 2},
+        {"id": "r3", "passage": "p2", "prompt": "Gdzie Kowalscy kupują warzywa?", "options": ["W supermarkecie", "Na targu", "Przez internet"], "answer": 1},
+        {"id": "r4", "passage": "p2", "prompt": "Co jest dla Kowalskich najtrudniejsze?", "options": ["Dzieci chcą słodycze w opakowaniach", "Zakupy są za drogie", "Targ jest daleko"], "answer": 0},
+        {"id": "r5", "passage": "p2", "prompt": "Co się zmieniło po roku?", "options": ["Nie wyrzucają żadnych śmieci", "Wyrzucają o połowę mniej śmieci", "Jedzą tylko warzywa"], "answer": 1}
+      ]
+    },
+    {
+      "id": "writing", "name": "Pisanie", "english": "Writing", "kind": "WRITING",
+      "instructions": "Napisz teksty po polsku. The word ranges are practice targets for this mock exam.",
+      "items": [
+        {"id": "w1", "prompt": "Znalazłeś lub znalazłaś w autobusie portfel. Napisz ogłoszenie na stronę internetową osiedla: opisz, co i gdzie znalazłeś lub znalazłaś i jak właściciel może się z tobą skontaktować.", "minWords": 60, "maxWords": 100, "topicWords": ["portfel", "znalazł", "autobus", "kontakt", "telefon"]},
+        {"id": "w2", "prompt": "Twój znajomy chce przyjechać do Polski do pracy. Napisz do niego list: co powinien przygotować przed przyjazdem, jak szukać mieszkania i pracy i czego może się spodziewać na początku.", "minWords": 120, "maxWords": 180, "topicWords": ["prac", "mieszkani", "dokument", "polsk", "radzę"]}
+      ]
+    },
+    {
+      "id": "speaking", "name": "Mówienie", "english": "Speaking", "kind": "SPEAKING",
+      "instructions": "Odpowiedz na głos (your browser writes down what you say) albo wpisz odpowiedź. Only the words are checked, not your pronunciation.",
+      "items": [
+        {"id": "s1", "prompt": "Opowiedz o swoim hobby: czym się interesujesz, od kiedy i dlaczego to lubisz.", "minWords": 40, "maxWords": 120, "topicWords": ["hobby", "interesuj", "lubię", "czas", "wolny"]},
+        {"id": "s2", "prompt": "Chcesz zarezerwować stolik w restauracji na urodziny przyjaciela. Powiedz, na kiedy, dla ilu osób i o co jeszcze prosisz.", "minWords": 40, "maxWords": 120, "topicWords": ["stolik", "rezerw", "osób", "urodzin", "proszę"]},
+        {"id": "s3", "prompt": "Gdzie lepiej mieszkać: w dużym mieście czy na wsi? Porównaj i powiedz, co wybierasz.", "minWords": 40, "maxWords": 120, "topicWords": ["miast", "wsi", "lepiej", "wolę", "spokoj"]}
+      ]
+    }
+  ]
+}

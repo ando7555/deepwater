@@ -1,0 +1,67 @@
+{
+  "id": "polish-b1-2",
+  "parts": [
+    {
+      "id": "listening", "name": "Rozumienie ze słuchu", "english": "Listening", "kind": "CHOICE",
+      "instructions": "Posłuchaj nagrania i wybierz poprawną odpowiedź. Each recording can be played twice.",
+      "items": [
+        {"id": "l1", "audio": "Dzień dobry, mówi Anna Nowak z biura podróży Słońce. Pani wycieczka do Zakopanego zaczyna się w piątek, ale zbiórka jest o siódmej rano przed dworcem autobusowym, a nie przed biurem. Proszę zabrać dowód osobisty.",
+         "prompt": "Gdzie jest zbiórka przed wycieczką?", "options": ["Przed biurem podróży", "Przed dworcem autobusowym", "Na dworcu kolejowym"], "answer": 1},
+        {"id": "l2", "audio": "Szanowni klienci, informujemy, że w niedzielę sklep będzie zamknięty z powodu inwentaryzacji. Zapraszamy w poniedziałek od godziny ósmej. W sobotę sklep jest czynny dłużej, do dwudziestej drugiej.",
+         "prompt": "Co wiemy o sklepie?", "options": ["W sobotę jest otwarty dłużej niż zwykle", "W poniedziałek jest zamknięty", "W niedzielę jest otwarty do dwudziestej drugiej"], "answer": 0},
+        {"id": "l3", "audio": "Cześć Tomek, tu Kasia. Nie mogę dziś przyjść na trening, bo mój syn jest chory i muszę zostać z nim w domu. Możesz powiedzieć trenerowi? Dzięki, zadzwonię jutro.",
+         "prompt": "Dlaczego Kasia nie przyjdzie na trening?", "options": ["Bo jest chora", "Bo musi pracować", "Bo opiekuje się chorym synem"], "answer": 2},
+        {"id": "l4", "audio": "Prognoza pogody na jutro: rano będzie pochmurno, ale sucho. Po południu na zachodzie kraju zacznie padać deszcz, a wieczorem możliwe są burze. Temperatura od dwunastu do szesnastu stopni.",
+         "prompt": "Jaka będzie pogoda jutro po południu na zachodzie?", "options": ["Słonecznie i ciepło", "Deszczowo", "Będzie padał śnieg"], "answer": 1},
+        {"id": "l5", "audio": "Pracuję w szpitalu jako pielęgniarka już dziesięć lat. Lubię swoją pracę, bo pomagam ludziom, ale nie lubię nocnych dyżurów. Po nocy jestem bardzo zmęczona i cały dzień śpię.",
+         "prompt": "Czego ta osoba nie lubi w swojej pracy?", "options": ["Pomagania ludziom", "Pracy w nocy", "Swoich kolegów"], "answer": 1}
+      ]
+    },
+    {
+      "id": "grammar", "name": "Poprawność gramatyczna", "english": "Grammar", "kind": "CHOICE",
+      "instructions": "Wybierz poprawną formę.",
+      "items": [
+        {"id": "g1", "prompt": "Jutro (my) ___ do babci na obiad.", "options": ["pojechaliśmy", "pojedziemy", "jechaliśmy"], "answer": 1},
+        {"id": "g2", "prompt": "Nie lubię ___, wolę herbatę.", "options": ["kawa", "kawy", "kawą"], "answer": 1},
+        {"id": "g3", "prompt": "Rozmawiałam wczoraj z ___ o pracy.", "options": ["mój szef", "moim szefem", "mojego szefa"], "answer": 1},
+        {"id": "g4", "prompt": "Ten film jest ___ niż książka.", "options": ["ciekawy", "najciekawszy", "ciekawszy"], "answer": 2},
+        {"id": "g5", "prompt": "Gdybym miał więcej czasu, ___ więcej czytał.", "options": ["będę", "bym", "byłem"], "answer": 1},
+        {"id": "g6", "prompt": "Mieszkam w ___ od pięciu lat.", "options": ["Warszawie", "Warszawa", "Warszawę"], "answer": 0},
+        {"id": "g7", "prompt": "Proszę ___ mi, która jest godzina.", "options": ["powiedzieć", "powiedział", "mówię"], "answer": 0},
+        {"id": "g8", "prompt": "Kupiłem prezent dla ___ siostry.", "options": ["moja", "mojej", "moją"], "answer": 1}
+      ]
+    },
+    {
+      "id": "reading", "name": "Rozumienie tekstów pisanych", "english": "Reading", "kind": "CHOICE",
+      "instructions": "Przeczytaj teksty i wybierz poprawną odpowiedź.",
+      "passages": [
+        {"id": "p1", "title": "Ogłoszenie: pokój do wynajęcia", "text": "Wynajmę jasny pokój w trzypokojowym mieszkaniu na Mokotowie, blisko metra. Pokój ma dwanaście metrów, jest umeblowany i ma balkon. W mieszkaniu mieszkają dwie studentki, które szukają spokojnej osoby. Cena: tysiąc dwieście złotych miesięcznie plus rachunki, około stu pięćdziesięciu złotych. Nie akceptujemy zwierząt. Pokój jest wolny od pierwszego marca. Kontakt tylko przez SMS."},
+        {"id": "p2", "title": "Rowerem do pracy", "text": "Coraz więcej mieszkańców polskich miast jeździ do pracy rowerem. W Gdańsku w ostatnich pięciu latach liczba rowerzystów wzrosła prawie dwa razy. Miasto buduje nowe drogi rowerowe, a niektóre firmy płacą pracownikom dodatkowe pieniądze, jeśli przyjeżdżają rowerem. Pan Marek, księgowy, mówi, że rower zmienił jego życie: schudł osiem kilogramów i nie stoi już w korkach. Zimą jednak wraca do autobusu, bo boi się śliskich ulic. Eksperci mówią, że miasta muszą zrobić więcej, na przykład postawić bezpieczne parkingi dla rowerów przy biurach i dworcach."}
+      ],
+      "items": [
+        {"id": "r1", "passage": "p1", "prompt": "Ile trzeba płacić za rachunki?", "options": ["Około stu pięćdziesięciu złotych", "Tysiąc dwieście złotych", "Nic, są w cenie"], "answer": 0},
+        {"id": "r2", "passage": "p1", "prompt": "Jak można się skontaktować?", "options": ["Telefonicznie", "E-mailem", "SMS-em"], "answer": 2},
+        {"id": "r3", "passage": "p2", "prompt": "Co robią niektóre firmy?", "options": ["Kupują pracownikom rowery", "Płacą więcej pracownikom, którzy przyjeżdżają rowerem", "Budują drogi rowerowe"], "answer": 1},
+        {"id": "r4", "passage": "p2", "prompt": "Dlaczego pan Marek zimą jeździ autobusem?", "options": ["Bo ulice są śliskie", "Bo jest za zimno", "Bo nie ma parkingu dla rowerów"], "answer": 0},
+        {"id": "r5", "passage": "p2", "prompt": "Czego według ekspertów brakuje?", "options": ["Autobusów", "Bezpiecznych parkingów dla rowerów", "Tańszych rowerów"], "answer": 1}
+      ]
+    },
+    {
+      "id": "writing", "name": "Pisanie", "english": "Writing", "kind": "WRITING",
+      "instructions": "Napisz teksty po polsku. The word ranges are practice targets for this mock exam.",
+      "items": [
+        {"id": "w1", "prompt": "Twój sąsiad jedzie na urlop i prosi cię o pomoc. Napisz do niego wiadomość: zgódź się podlewać kwiaty, zapytaj, gdzie są klucze, i napisz, kiedy możesz przyjść.", "minWords": 60, "maxWords": 100, "topicWords": ["kwiat", "klucz", "sąsiad", "podlew", "urlop"]},
+        {"id": "w2", "prompt": "Byłeś lub byłaś na kursie zawodowym, który ci się nie podobał. Napisz list do organizatora. Napisz, jaki to był kurs, co było nie tak (sala, nauczyciel, materiały) i czego oczekujesz (na przykład zwrotu pieniędzy).", "minWords": 120, "maxWords": 180, "topicWords": ["kurs", "nauczyciel", "zwrot", "pieniądz", "oczekuj"]}
+      ]
+    },
+    {
+      "id": "speaking", "name": "Mówienie", "english": "Speaking", "kind": "SPEAKING",
+      "instructions": "Odpowiedz na głos (your browser writes down what you say) albo wpisz odpowiedź. Only the words are checked, not your pronunciation.",
+      "items": [
+        {"id": "s1", "prompt": "Opowiedz o swoim mieście: gdzie leży, co można tam robić i co ci się w nim podoba.", "minWords": 40, "maxWords": 120, "topicWords": ["miast", "mieszka", "można", "podoba", "park"]},
+        {"id": "s2", "prompt": "Opowiedz o ostatnich wakacjach: gdzie byłeś lub byłaś, z kim i co robiłeś lub robiłaś.", "minWords": 40, "maxWords": 120, "topicWords": ["wakacj", "byłem", "byłam", "pojecha", "morze"]},
+        {"id": "s3", "prompt": "Czy lepiej robić zakupy w internecie czy w sklepie? Podaj argumenty i powiedz, co sam lub sama wolisz.", "minWords": 40, "maxWords": 120, "topicWords": ["internet", "sklep", "zakup", "wolę", "ponieważ"]}
+      ]
+    }
+  ]
+}

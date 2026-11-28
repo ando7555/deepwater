@@ -1,0 +1,252 @@
+{
+ "id": "german-b1-4",
+ "parts": [
+  {
+   "id": "reading",
+   "name": "Lesen",
+   "english": "Reading",
+   "kind": "CHOICE",
+   "instructions": "Lesen Sie die Texte und wählen Sie die richtige Antwort.",
+   "passages": [
+    {
+     "id": "p1",
+     "title": "Stellenanzeige: Pflegehelfer/in (m/w/d)",
+     "text": "Das Seniorenheim »Haus am See« in Potsdam sucht ab sofort eine Pflegehelferin oder einen Pflegehelfer in Teilzeit, 25 Stunden pro Woche. Zu Ihren Aufgaben gehören die Unterstützung bei der Körperpflege, beim Essen und bei Freizeitaktivitäten. Eine Ausbildung ist nicht notwendig, wir bieten einen Einführungskurs an. Wichtig sind uns Geduld, Zuverlässigkeit und Deutschkenntnisse auf B1-Niveau. Wir bezahlen nach Tarif und bieten ein kostenloses Jobticket. Bewerbungen bitte per E-Mail an Frau Lorenz."
+    },
+    {
+     "id": "p2",
+     "title": "Lebensmittel retten statt wegwerfen",
+     "text": "In Deutschland landen jedes Jahr Millionen Tonnen Lebensmittel im Müll, ein großer Teil davon in privaten Haushalten. Dagegen kämpfen sogenannte Foodsaver. Sie holen bei Bäckereien und Supermärkten Lebensmittel ab, die nicht mehr verkauft werden, aber noch gut sind, und verteilen sie kostenlos weiter, oft über »Fairteiler«, öffentliche Kühlschränke in der Stadt. Die Studentin Mira aus Köln ist seit drei Jahren dabei. »Am Anfang war ich überrascht, wie viel noch gutes Brot und Obst weggeworfen wird«, sagt sie. Kritiker meinen, dass das Problem so nicht gelöst wird, weil die Geschäfte weiterhin zu viel bestellen. Sie fordern ein Gesetz wie in Frankreich, wo Supermärkte Lebensmittel spenden müssen."
+    }
+   ],
+   "items": [
+    {
+     "id": "r1",
+     "passage": "p1",
+     "prompt": "Was braucht man für die Stelle nicht?",
+     "options": [
+      "Geduld",
+      "Eine Ausbildung",
+      "Deutschkenntnisse auf B1-Niveau"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "r2",
+     "passage": "p1",
+     "prompt": "Was bietet das Seniorenheim?",
+     "options": [
+      "Ein kostenloses Jobticket",
+      "Eine Wohnung",
+      "Einen Firmenwagen"
+     ],
+     "answer": 0
+    },
+    {
+     "id": "r3",
+     "passage": "p2",
+     "prompt": "Was machen Foodsaver?",
+     "options": [
+      "Sie verkaufen Lebensmittel billiger",
+      "Sie holen übrige Lebensmittel ab und verteilen sie kostenlos",
+      "Sie kochen für arme Menschen"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "r4",
+     "passage": "p2",
+     "prompt": "Was ist ein »Fairteiler«?",
+     "options": [
+      "Ein öffentlicher Kühlschrank",
+      "Ein Supermarkt",
+      "Eine App"
+     ],
+     "answer": 0
+    },
+    {
+     "id": "r5",
+     "passage": "p2",
+     "prompt": "Was hat Mira am Anfang überrascht?",
+     "options": [
+      "Dass die Arbeit so anstrengend ist",
+      "Dass so viel gutes Essen weggeworfen wird",
+      "Dass Supermärkte nichts spenden"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "r6",
+     "passage": "p2",
+     "prompt": "Was fordern die Kritiker?",
+     "options": [
+      "Mehr Foodsaver",
+      "Ein Gesetz, das Supermärkte zum Spenden verpflichtet",
+      "Höhere Preise für Lebensmittel"
+     ],
+     "answer": 1
+    }
+   ]
+  },
+  {
+   "id": "listening",
+   "name": "Hören",
+   "english": "Listening",
+   "kind": "CHOICE",
+   "instructions": "Hören Sie die Texte und wählen Sie die richtige Antwort. Each recording can be played twice.",
+   "items": [
+    {
+     "id": "l1",
+     "audio": "Guten Tag, hier ist der Kundenservice von Netzwelt. Wegen Ihrer Internetstörung kommt morgen zwischen acht und zwölf Uhr ein Techniker zu Ihnen. Bitte sorgen Sie dafür, dass jemand zu Hause ist.",
+     "prompt": "Wann kommt der Techniker?",
+     "options": [
+      "Heute Nachmittag",
+      "Morgen zwischen acht und zwölf Uhr",
+      "Am Freitag"
+     ],
+     "answer": 1
+    },
+    {
+     "id": "l2",
+     "audio": "Liebe Kunden, an Kasse eins und zwei gibt es leider ein technisches Problem. Bitte gehen Sie zu Kasse drei, wir öffnen auch gleich Kasse vier. Vielen Dank für Ihre Geduld.",
+     "prompt": "Was sollen die Kunden tun?",
+     "options": [
+      "Zur Kasse drei gehen",
+      "Den Laden verlassen",
+      "Ihre Taschen kontrollieren lassen"
+     ],
+     "answer": 0
+    },
+    {
+     "id": "l3",
+     "audio": "Hallo Mama, ich bin's, Anna. Ich glaube, ich habe meine Brille bei dir auf dem Küchentisch liegen lassen. Kannst du mal nachsehen? Ich komme sie heute Abend abholen.",
+     "prompt": "Was hat Anna vergessen?",
+     "options": [
+      "Ihren Schlüssel",
+      "Ihr Handy",
+      "Ihre Brille"
+     ],
+     "answer": 2
+    },
+    {
+     "id": "l4",
+     "audio": "Das Stadtfest geht am Sonntag weiter: Ab zehn Uhr findet auf dem Marktplatz ein großer Flohmarkt statt. Für Kinder gibt es außerdem ein Kinderprogramm mit Musik im Stadtpark.",
+     "prompt": "Was gibt es beim Stadtfest am Sonntag?",
+     "options": [
+      "Einen Flohmarkt",
+      "Ein Fußballspiel",
+      "Ein Konzert"
+     ],
+     "answer": 0
+    },
+    {
+     "id": "l5",
+     "audio": "Ich lerne jeden Tag zehn Minuten mit einer App, das hilft mir bei den Wörtern. Aber sprechen lernt man damit nicht wirklich. Deshalb gehe ich zusätzlich einmal pro Woche in ein Sprachcafé.",
+     "prompt": "Was denkt die Frau über das Lernen mit Apps?",
+     "options": [
+      "Apps sind besser als jeder Kurs",
+      "Apps helfen, aber man muss auch sprechen",
+      "Apps sind nutzlos"
+     ],
+     "answer": 1
+    }
+   ]
+  },
+  {
+   "id": "writing",
+   "name": "Schreiben",
+   "english": "Writing",
+   "kind": "WRITING",
+   "instructions": "Schreiben Sie die Texte auf Deutsch. The word ranges are practice targets for this mock exam.",
+   "items": [
+    {
+     "id": "w1",
+     "prompt": "Sie haben eine Stelle als Pflegehelfer oder Pflegehelferin gefunden. Schreiben Sie einer Freundin oder einem Freund eine E-Mail: Erzählen Sie von der neuen Arbeit, was Ihnen gefällt und was schwierig ist, und schlagen Sie ein Treffen vor.",
+     "minWords": 70,
+     "maxWords": 100,
+     "topicWords": [
+      "arbeit",
+      "stelle",
+      "gefällt",
+      "schwierig",
+      "treffen"
+     ]
+    },
+    {
+     "id": "w2",
+     "prompt": "In einer Zeitung lesen Sie einen Artikel zum Thema »Sollten Supermärkte Lebensmittel spenden müssen?«. Schreiben Sie Ihre Meinung dazu in einem Online-Forum.",
+     "minWords": 70,
+     "maxWords": 100,
+     "topicWords": [
+      "lebensmittel",
+      "supermarkt",
+      "meinung",
+      "finde",
+      "spenden"
+     ]
+    },
+    {
+     "id": "w3",
+     "prompt": "Sie haben einen Termin bei der Ausländerbehörde, können aber nicht kommen. Schreiben Sie eine kurze, höfliche E-Mail und bitten Sie um einen neuen Termin.",
+     "minWords": 35,
+     "maxWords": 60,
+     "topicWords": [
+      "termin",
+      "leider",
+      "neuen",
+      "bitte",
+      "entschuldigen"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "speaking",
+   "name": "Sprechen",
+   "english": "Speaking",
+   "kind": "SPEAKING",
+   "instructions": "Antworten Sie laut (your browser writes down what you say) oder schreiben Sie Ihre Antwort. In the real exam you speak with a partner; here you say your part. Only the words are checked, not your pronunciation.",
+   "items": [
+    {
+     "id": "s1",
+     "prompt": "Sie möchten mit einer Kollegin für die Firma ein Sommerfest organisieren. Planen Sie zusammen: Wann und wo, was gibt es zu essen und zu trinken, welches Programm gibt es?",
+     "minWords": 60,
+     "maxWords": 150,
+     "topicWords": [
+      "sommerfest",
+      "essen",
+      "programm",
+      "vorschlag",
+      "kollegen"
+     ]
+    },
+    {
+     "id": "s2",
+     "prompt": "Präsentieren Sie das Thema »Lebensmittel wegwerfen: ein Problem?«: Erzählen Sie von Ihren Erfahrungen, wie es in Ihrem Heimatland ist, nennen Sie Vor- und Nachteile von Lösungen und sagen Sie Ihre Meinung.",
+     "minWords": 80,
+     "maxWords": 200,
+     "topicWords": [
+      "lebensmittel",
+      "wegwerfen",
+      "heimatland",
+      "problem",
+      "meinung"
+     ]
+    },
+    {
+     "id": "s3",
+     "prompt": "Ihr Partner hat über das Thema »Sprachen lernen mit Apps oder im Kurs?« gesprochen. Geben Sie eine kurze Rückmeldung und stellen Sie ihm eine Frage dazu.",
+     "minWords": 30,
+     "maxWords": 100,
+     "topicWords": [
+      "präsentation",
+      "interessant",
+      "frage",
+      "app",
+      "kurs"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -93,3 +93,9 @@ export function talkHistory(turns, { maxTurns = 12, maxChars = 2000 } = {}) {
   return turns.filter(t => (t.role === 'user' || t.role === 'assistant') && t.text?.trim())
     .slice(-maxTurns).map(t => ({ role: t.role, content: t.text.trim().slice(0, maxChars) }));
 }
+
+/** Turns saved on the server (oldest first) as voice-room turns; the agent's turns are labelled with the role's name. */
+export function savedTurns(turns, roleName) {
+  return (turns || []).filter(t => (t.role === 'user' || t.role === 'assistant') && t.text)
+    .map(t => ({ role: t.role, text: t.text, who: t.role === 'assistant' ? roleName : undefined, tools: t.tools || [], at: t.at, saved: true }));
+}

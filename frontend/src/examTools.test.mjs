@@ -42,3 +42,13 @@ test('the level estimate reads against the level the exam tests', () => {
 test('Danish letters count as word letters', () => {
   assert.equal(wordCount('Jeg bor på Østerbro og går på sprogskole.'), 8);
 });
+
+test('prices read the way the owner set them', async () => {
+  const { priceText, offerLines } = await import('./examTools.js');
+  assert.equal(priceText(100, 'PLN'), '100 PLN');
+  assert.equal(priceText(1249, 'DKK'), '1,249 DKK');
+  assert.equal(priceText(25, 'EUR'), '€25');
+  const lines = offerLines({ launchPrice: 175, fullPrice: 1249, currency: 'DKK' }, 50);
+  assert.equal(lines.now, '175 DKK / month');
+  assert.equal(lines.note, 'Launch price for the first 50 learners, who keep it. Later 1,249 DKK / month.');
+});

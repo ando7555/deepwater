@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { restClient } from '../app/http.js';
 import { Button, Field, Notice, Panel, SectionHeading } from '../ui/index.jsx';
-import { VOICE_LANGUAGES, speechRecognizer, talkHistory } from './workspaceTools.js';
+import { VOICE_LANGUAGES, savedTurns, speechRecognizer } from './workspaceTools.js';
 
 // The voice room: talk with one AI role. The browser listens (speech to text), the role answers from its contract,
 // and the browser reads the answer aloud (text to speech). Nothing said here can approve work; that stays on the board.
@@ -21,8 +21,27 @@ export default function VoiceRoom({ roles, onTasksChanged }) {
   const Recognizer = speechRecognizer();
   const role = roles.find(r => r.id === roleId);
 
-  // A new role starts a new conversation, and nobody keeps talking over it.
-  useEffect(() => { setTurns([]); stopSpeaking(); }, [roleId]);
+  // Each role keeps its own conversation on the server; opening a role picks it up where it was left.
+  useEffect(() => {
+    let current = true;
+    setTurns([]); stopSpeaking();
+    if (!roleId) return undefined;
+    api(`/roles/${roleId}/talk`)
+      .then(saved => { if (current) setTurns(savedTurns(saved?.turns, role?.name)); })
+      .catch(e => { if (current) setTurns([{ role: 'error', text: e.message }]); });
+    return () => { current = false; };
+  }, [roleId]);
+
+  async function startOver() {
+    if (thinking) return;
+    stopSpeaking();
+    try {
+      await api(`/roles/${roleId}/talk`, { method: 'DELETE' });
+      setTurns([]);
+    } catch (e) {
+      setTurns(current => [...current, { role: 'error', text: e.message }]);
+    }
+  }
   useEffect(() => () => { recognition.current?.abort?.(); stopSpeaking(); }, []);
 
   function stopSpeaking() {
@@ -50,7 +69,7 @@ export default function VoiceRoom({ roles, onTasksChanged }) {
     const next = [...turns, { role: 'user', text: said }];
     setTurns(next); setHeard(''); setTyped(''); setThinking(true);
     try {
-      const reply = await api(`/roles/${roleId}/talk`, { method: 'POST', body: { messages: talkHistory(next) }, timeoutMs: 120000 });
+      const reply = await api(`/roles/${roleId}/talk`, { method: 'POST', body: { text: said }, timeoutMs: 120000 });
       setTurns(current => [...current, { role: 'assistant', text: reply.text, who: reply.roleName, tools: reply.toolsUsed }]);
       speak(reply.text);
       if (reply.toolsUsed?.some(name => name !== 'workspace_tasks')) onTasksChanged?.();
@@ -98,12 +117,15 @@ export default function VoiceRoom({ roles, onTasksChanged }) {
         <span aria-hidden="true">{listening ? '■' : '🎙'}</span>{listening ? 'Listening… tap to send' : thinking ? `${role?.name || 'Agent'} is thinking…` : 'Tap to talk'}
       </button>
       {speaking && <Button variant="quiet" onClick={stopSpeaking}>Stop speaking</Button>}
+      {turns.some(t => t.role !== 'error') && <Button variant="quiet" onClick={startOver} disabled={thinking}>New conversation</Button>}
     </div>
     {!Recognizer && <Notice>This browser can’t listen (Chrome, Edge and Safari can). You can still type below, and answers are read aloud.</Notice>}
     {heard && <p className="voice-heard" aria-live="polite">“{heard}”</p>}
+    {turns.some(t => t.saved) && <p className="muted">Your earlier conversation with the {role?.name}. Keep talking to continue it, or start a new one.</p>}
     <ol className="voice-log" aria-live="polite">
       {turns.map((t, i) => <li key={i} className={`voice-turn ${t.role}`}>
         <b>{t.role === 'user' ? 'You' : t.role === 'error' ? 'Problem' : t.who}</b>
+        {t.at && <small className="voice-time">{new Date(t.at).toLocaleString()}</small>}
         <p>{t.text}</p>
         {t.tools?.length > 0 && <small>Used: {t.tools.join(', ')}</small>}
         {t.role === 'assistant' && <button type="button" className="link" onClick={() => speak(t.text)}>Play again</button>}

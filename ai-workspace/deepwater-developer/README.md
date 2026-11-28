@@ -414,7 +414,7 @@ Everything that is specific to one repository lives in that repository, in
 and its discovery rules. That is the file to edit when a project moves its plans, changes its
 build, or switches tracker. To change how the method or the course works, edit the files under `skills/`; a new course is a
 new folder under `skills/course/courses/` with a README and module files. Afterwards
-run `claude plugin validate ./deepwater-developer` in the Terminal tab.
+run `claude plugin validate ./ai-workspace/deepwater-developer` in the Terminal tab.
 
 If something in this manual was unclear to you, that is a bug in the manual. It is a Markdown file
 like any other: fix it, or open a ticket and say which sentence lost you.

@@ -1,0 +1,67 @@
+{
+  "id": "polish-b1-3",
+  "parts": [
+    {
+      "id": "listening", "name": "Rozumienie ze słuchu", "english": "Listening", "kind": "CHOICE",
+      "instructions": "Posłuchaj nagrania i wybierz poprawną odpowiedź. Each recording can be played twice.",
+      "items": [
+        {"id": "l1", "audio": "Dzień dobry, dzwonię z urzędu miasta w sprawie pana wniosku o kartę pobytu. Brakuje jeszcze jednego zdjęcia i zaświadczenia z pracy. Proszę przynieść te dokumenty do końca miesiąca, pokój numer czternaście.",
+         "prompt": "Czego brakuje we wniosku?", "options": ["Paszportu i zdjęcia", "Zdjęcia i zaświadczenia z pracy", "Tylko podpisu"], "answer": 1},
+        {"id": "l2", "audio": "Uwaga, w związku z remontem linii tramwajowej tramwaje numer dwa i sześć nie kursują do Ronda Grunwaldzkiego. Zamiast nich jeżdżą autobusy zastępcze z przystanku przy poczcie.",
+         "prompt": "Skąd odjeżdżają autobusy zastępcze?", "options": ["Z przystanku przy poczcie", "Z Ronda Grunwaldzkiego", "Z dworca"], "answer": 0},
+        {"id": "l3", "audio": "Słuchaj, w sobotę jest festyn w parku. Będą koncerty, jedzenie z różnych krajów i zabawy dla dzieci. Wejście jest bezpłatne, ale za jedzenie trzeba płacić. Idziemy razem?",
+         "prompt": "Za co trzeba płacić na festynie?", "options": ["Za wejście", "Za koncerty", "Za jedzenie"], "answer": 2},
+        {"id": "l4", "audio": "Dzień dobry, chciałabym zapisać córkę na lekcje pływania. Ma osiem lat i trochę już umie pływać. Czy są jeszcze wolne miejsca w grupie we wtorki po szkole?",
+         "prompt": "Po co dzwoni ta kobieta?", "options": ["Chce zapisać córkę na pływanie", "Chce odwołać lekcję", "Szuka pracy na basenie"], "answer": 0},
+        {"id": "l5", "audio": "Kiedyś jadłem dużo mięsa, ale od dwóch lat jestem wegetarianinem. Na początku było trudno, szczególnie w restauracjach, ale teraz czuję się lepiej i mam więcej energii.",
+         "prompt": "Jak ta osoba czuje się teraz?", "options": ["Gorzej niż kiedyś", "Lepiej i ma więcej energii", "Jest ciągle głodna"], "answer": 1}
+      ]
+    },
+    {
+      "id": "grammar", "name": "Poprawność gramatyczna", "english": "Grammar", "kind": "CHOICE",
+      "instructions": "Wybierz poprawną formę.",
+      "items": [
+        {"id": "g1", "prompt": "Codziennie rano ___ kawę z mlekiem.", "options": ["piję", "wypiłem", "piją"], "answer": 0},
+        {"id": "g2", "prompt": "Czekam na ___ przed kinem.", "options": ["ciebie", "ty", "tobą"], "answer": 0},
+        {"id": "g3", "prompt": "W tym tygodniu nie mam ___ zajęć.", "options": ["żadne", "żadnych", "żadnymi"], "answer": 1},
+        {"id": "g4", "prompt": "Dzieci bawią się ___ ogrodzie.", "options": ["na", "w", "do"], "answer": 1},
+        {"id": "g5", "prompt": "Kiedy byłem mały, często ___ w piłkę.", "options": ["grałem", "zagram", "gram"], "answer": 0},
+        {"id": "g6", "prompt": "To jest najlepsza restauracja ___ mieście.", "options": ["w", "na", "z"], "answer": 0},
+        {"id": "g7", "prompt": "Musisz ___ ten list do piątku.", "options": ["napisać", "napisał", "piszesz"], "answer": 0},
+        {"id": "g8", "prompt": "Pojechaliśmy nad morze ___.", "options": ["samochód", "samochodem", "samochodu"], "answer": 1}
+      ]
+    },
+    {
+      "id": "reading", "name": "Rozumienie tekstów pisanych", "english": "Reading", "kind": "CHOICE",
+      "instructions": "Przeczytaj teksty i wybierz poprawną odpowiedź.",
+      "passages": [
+        {"id": "p1", "title": "Biblioteka miejska zaprasza", "text": "Od pierwszego października biblioteka miejska jest otwarta także w soboty, od dziesiątej do czternastej. Karta biblioteczna jest bezpłatna, wystarczy pokazać dowód osobisty albo kartę pobytu. Można wypożyczyć do pięciu książek na miesiąc. W każdą środę o siedemnastej odbywa się klub rozmów po polsku dla obcokrajowców. Zajęcia prowadzi wolontariuszka, nauczycielka języka polskiego. Nie trzeba się zapisywać."},
+        {"id": "p2", "title": "Praca zdalna: plusy i minusy", "text": "Po pandemii wiele firm w Polsce pozwala pracownikom pracować z domu dwa albo trzy dni w tygodniu. Badania pokazują, że większość pracowników jest z tego zadowolona: oszczędzają czas i pieniądze na dojazdy. Są jednak też problemy. Niektórzy czują się samotni i tęsknią za rozmowami z kolegami przy kawie. Inni mówią, że w domu trudno skończyć pracę o normalnej godzinie, bo komputer jest cały czas obok. Psycholog Anna Wiśniewska radzi, żeby mieć w domu osobne miejsce do pracy i wyłączać służbowy telefon po pracy."}
+      ],
+      "items": [
+        {"id": "r1", "passage": "p1", "prompt": "Co trzeba zrobić, żeby dostać kartę biblioteczną?", "options": ["Zapłacić za kartę", "Pokazać dokument tożsamości", "Zapisać się na klub rozmów"], "answer": 1},
+        {"id": "r2", "passage": "p1", "prompt": "Kiedy jest klub rozmów po polsku?", "options": ["W soboty o dziesiątej", "W środy o siedemnastej", "Codziennie"], "answer": 1},
+        {"id": "r3", "passage": "p2", "prompt": "Dlaczego pracownicy lubią pracę z domu?", "options": ["Bo zarabiają więcej", "Bo oszczędzają czas i pieniądze na dojazdy", "Bo pracują krócej"], "answer": 1},
+        {"id": "r4", "passage": "p2", "prompt": "Jaki problem mają niektórzy pracownicy?", "options": ["Czują się samotni", "Nie mają komputera", "Mają za mało pracy"], "answer": 0},
+        {"id": "r5", "passage": "p2", "prompt": "Co radzi psycholog?", "options": ["Wrócić do biura na stałe", "Pracować w kawiarni", "Mieć osobne miejsce do pracy i wyłączać telefon po pracy"], "answer": 2}
+      ]
+    },
+    {
+      "id": "writing", "name": "Pisanie", "english": "Writing", "kind": "WRITING",
+      "instructions": "Napisz teksty po polsku. The word ranges are practice targets for this mock exam.",
+      "items": [
+        {"id": "w1", "prompt": "Jesteś chory lub chora i nie możesz przyjść jutro do pracy. Napisz e-mail do szefa: wyjaśnij, co się stało, jak długo cię nie będzie i kto może cię zastąpić.", "minWords": 60, "maxWords": 100, "topicWords": ["chor", "prac", "lekarz", "zastąp", "przepraszam"]},
+        {"id": "w2", "prompt": "Napisz artykuł do gazetki szkoły językowej o tym, jak uczysz się polskiego. Opisz, co pomaga ci najbardziej, co jest dla ciebie trudne i co poradziłbyś lub poradziłabyś innym uczniom.", "minWords": 120, "maxWords": 180, "topicWords": ["polsk", "uczę", "trudn", "pomaga", "radz"]}
+      ]
+    },
+    {
+      "id": "speaking", "name": "Mówienie", "english": "Speaking", "kind": "SPEAKING",
+      "instructions": "Odpowiedz na głos (your browser writes down what you say) albo wpisz odpowiedź. Only the words are checked, not your pronunciation.",
+      "items": [
+        {"id": "s1", "prompt": "Opowiedz o swoim ulubionym święcie: kiedy jest, z kim je spędzasz i co wtedy robicie.", "minWords": 40, "maxWords": 120, "topicWords": ["święt", "rodzin", "jemy", "spędzam", "prezent"]},
+        {"id": "s2", "prompt": "Jesteś w sklepie i kupione wczoraj buty są zepsute. Powiedz sprzedawcy, co się stało i czego chcesz.", "minWords": 40, "maxWords": 120, "topicWords": ["but", "kupił", "zwrot", "wymien", "paragon"]},
+        {"id": "s3", "prompt": "Czy dzieci powinny mieć telefon komórkowy już w szkole podstawowej? Powiedz, co o tym myślisz i dlaczego.", "minWords": 40, "maxWords": 120, "topicWords": ["dziec", "telefon", "szkoł", "myślę", "ponieważ"]}
+      ]
+    }
+  ]
+}

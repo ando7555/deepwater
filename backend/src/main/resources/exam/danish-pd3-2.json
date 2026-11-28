@@ -1,0 +1,56 @@
+{
+  "id": "danish-pd3-2",
+  "parts": [
+    {
+      "id": "listening", "name": "Lytteforståelse", "english": "Listening", "kind": "CHOICE",
+      "instructions": "Lyt til optagelsen, og vælg det rigtige svar. Each recording can be played twice.",
+      "items": [
+        {"id": "l1", "audio": "Hej, det er Søren fra Aarhus Kommune, Borgerservice. Du har bestilt en tid til at forny dit opholdskort. Vi skal desværre flytte tiden fra tirsdag til fredag klokken ti, fordi en medarbejder er syg. Husk at tage dit pas og et nyt foto med.",
+         "prompt": "Hvorfor bliver tiden flyttet?", "options": ["Fordi borgeren har bedt om det", "Fordi en medarbejder er syg", "Fordi kontoret er lukket om tirsdagen"], "answer": 1},
+        {"id": "l2", "audio": "Godmorgen, og velkommen til personalemødet. Fra næste måned indfører vi faste mødefri onsdage. Det betyder, at der ikke må lægges interne møder om onsdagen, så alle har tid til at arbejde koncentreret. Kundemøder er dog stadig tilladt.",
+         "prompt": "Hvad må man ikke om onsdagen?", "options": ["Holde interne møder", "Holde møder med kunder", "Arbejde hjemme"], "answer": 0},
+        {"id": "l3", "audio": "Ifølge Danmarks Statistik bruger danskerne i gennemsnit næsten fire timer om dagen på deres mobiltelefon. Især de unge mellem seksten og fireogtyve år ligger højt. Mange siger selv, at de gerne vil bruge mindre tid på skærmen, men at det er svært at ændre vaner.",
+         "prompt": "Hvad siger mange om deres skærmtid?", "options": ["At den er passende", "At de gerne vil bruge mindre tid, men at det er svært", "At de ikke bruger mobilen om aftenen"], "answer": 1},
+        {"id": "l4", "audio": "Du, jeg kan ikke hente børnene i dag, mit tog er aflyst. Kan du nå at hente dem inden klokken fem? Ellers ringer jeg til min mor, hun kan måske.",
+         "prompt": "Hvad er problemet?", "options": ["Børnene er syge", "Personen kommer for sent, fordi toget er aflyst", "Børnehaven lukker tidligt"], "answer": 1},
+        {"id": "l5", "audio": "Jeg var skeptisk over for elbiler i starten, især på grund af rækkevidden. Men efter et år må jeg sige, at det fungerer fint i hverdagen. Det eneste problem er lange ture om vinteren, hvor batteriet holder kortere tid.",
+         "prompt": "Hvad mener personen om elbilen nu?", "options": ["Den fungerer fint i hverdagen, men er mindre god på lange vinterture", "Den er for dyr", "Den skal sælges hurtigst muligt"], "answer": 0}
+      ]
+    },
+    {
+      "id": "reading", "name": "Læseforståelse", "english": "Reading", "kind": "CHOICE",
+      "instructions": "Læs teksterne, og vælg det rigtige svar. The first text is short and practises finding information; the second is longer and practises detailed reading.",
+      "passages": [
+        {"id": "p1", "title": "Opslag: Sprogcafé på biblioteket", "text": "Hver torsdag fra klokken 16 til 18 holder Hovedbiblioteket sprogcafé for alle, der vil øve sig i at tale dansk. Frivillige danskere sidder ved bordene og snakker om alt fra madlavning til arbejdsliv. Det er gratis, og du behøver ikke at tilmelde dig. Der er kaffe og te, men tag gerne selv kage med. Børn er velkomne, og der er en legekrog i lokalet ved siden af. Har du spørgsmål, kan du skrive til biblioteket via deres hjemmeside."},
+        {"id": "p2", "title": "Flere vælger at pendle over Øresund", "text": "Hver dag krydser tusindvis af mennesker Øresundsbroen for at arbejde i det andet land. Mange bor i Malmø, hvor boligerne er billigere, og arbejder i København, hvor lønnen ofte er højere. For den enkelte kan regnestykket være godt, men pendlerne fortæller også om udfordringer. Toget er ofte forsinket, og reglerne om skat og pension er indviklede, når man bor i ét land og arbejder i et andet. »Jeg brugte et halvt år på at finde ud af, hvor jeg skulle betale skat,« siger en polsk sygeplejerske, der bor i Malmø. Arbejdsgiverne på begge sider af sundet efterlyser bedre information og en mere stabil togforbindelse, så de kan tiltrække medarbejdere fra hele regionen."}
+      ],
+      "items": [
+        {"id": "r1", "passage": "p1", "prompt": "Hvad skal man gøre for at deltage i sprogcaféen?", "options": ["Tilmelde sig på hjemmesiden", "Ingenting, man kan bare komme", "Betale for kaffen"], "answer": 1},
+        {"id": "r2", "passage": "p1", "prompt": "Hvad bliver man bedt om at tage med?", "options": ["Kage", "Kaffe", "En ordbog"], "answer": 0},
+        {"id": "r3", "passage": "p2", "prompt": "Hvorfor bor mange pendlere i Malmø?", "options": ["Fordi lønnen er højere", "Fordi boligerne er billigere", "Fordi skatten er lavere"], "answer": 1},
+        {"id": "r4", "passage": "p2", "prompt": "Hvilken udfordring nævner pendlerne?", "options": ["At broen er lukket om natten", "Forsinkede tog og indviklede regler om skat og pension", "At de ikke må arbejde i Danmark"], "answer": 1},
+        {"id": "r5", "passage": "p2", "prompt": "Hvad brugte sygeplejersken et halvt år på?", "options": ["At finde en bolig", "At lære svensk", "At finde ud af, hvor hun skulle betale skat"], "answer": 2},
+        {"id": "r6", "passage": "p2", "prompt": "Hvad efterlyser arbejdsgiverne?", "options": ["Lavere løn", "Bedre information og en mere stabil togforbindelse", "Flere biler over broen"], "answer": 1}
+      ]
+    },
+    {
+      "id": "writing", "name": "Skriftlig fremstilling", "english": "Writing", "kind": "WRITING",
+      "instructions": "Skriv teksterne på dansk. The word ranges are practice targets for this mock exam.",
+      "items": [
+        {"id": "w1", "prompt": "Du har købt en vaskemaskine på nettet, men den er gået i stykker efter en uge. Skriv en klage til butikken. Forklar, hvad der er sket, hvad du har prøvet, og hvad du forventer, at butikken gør.",
+         "minWords": 100, "maxWords": 150, "topicWords": ["vaskemaskine", "klage", "butik", "reparer", "pengene"]},
+        {"id": "w2", "prompt": "Skriv et debatindlæg om emnet: Skal arbejdspladser tilbyde gratis danskundervisning til udenlandske medarbejdere? Giv mindst to argumenter, kommentér et modargument, og afslut med din holdning.",
+         "minWords": 180, "maxWords": 250, "topicWords": ["danskundervisning", "arbejdsplads", "medarbejder", "mener", "argument"]}
+      ]
+    },
+    {
+      "id": "speaking", "name": "Mundtlig kommunikation", "english": "Speaking", "kind": "SPEAKING",
+      "instructions": "Svar højt (your browser writes down what you say), eller skriv dit svar. The first task is a topic you know well; the other two are topics you get on the day. Only the words are checked, not your pronunciation.",
+      "items": [
+        {"id": "s1", "prompt": "Fortæl om, hvordan du kom til Danmark, og hvad der har været det sværeste og det bedste ved at bo her.", "minWords": 80, "maxWords": 200, "topicWords": ["danmark", "flyttede", "svært", "bedste", "fordi"]},
+        {"id": "s2", "prompt": "Skal alle unge tage en uddannelse, eller er det også fint at gå direkte ud på arbejdsmarkedet? Nævn fordele og ulemper.", "minWords": 80, "maxWords": 200, "topicWords": ["uddannelse", "unge", "arbejde", "fordel", "ulempe"]},
+        {"id": "s3", "prompt": "Bør man forbyde mobiltelefoner i skolen? Giv argumenter for og imod, og sig din mening.", "minWords": 80, "maxWords": 200, "topicWords": ["mobil", "skole", "elever", "mener", "forbud"]}
+      ]
+    }
+  ]
+}
