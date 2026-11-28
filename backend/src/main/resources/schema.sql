@@ -338,3 +338,15 @@ create table if not exists workspace_events (
   created_at timestamp with time zone not null default current_timestamp
 );
 create index if not exists workspace_events_task on workspace_events(task_id, created_at);
+
+-- The owner's conversations with each AI role in the voice room, so a talk can be continued later.
+create table if not exists workspace_talk (
+  id varchar(36) primary key,
+  account_id varchar(64) not null,
+  role_id varchar(40) not null,
+  speaker varchar(10) not null,
+  text varchar(8000) not null,
+  tools varchar(500),
+  created_at timestamp with time zone not null
+);
+create index if not exists workspace_talk_role on workspace_talk(account_id, role_id, created_at);

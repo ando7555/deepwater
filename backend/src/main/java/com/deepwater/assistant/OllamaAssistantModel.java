@@ -53,7 +53,7 @@ public final class OllamaAssistantModel implements AssistantModel {
         for (JsonNode call : message.path("tool_calls")) {
             JsonNode fn = call.path(FUNCTION);
             calls.add(new ToolCall(call.path("id").asString(UUID.randomUUID().toString()), fn.path("name").asString(""),
-                    arguments(fn.path("arguments"))));
+                    ToolArguments.read(fn.path("arguments"))));
         }
         if (log.isInfoEnabled())
             log.info("Assistant step: ollama model={} done={} toolCalls={} promptTokens={} outputTokens={}", model,
@@ -92,19 +92,5 @@ public final class OllamaAssistantModel implements AssistantModel {
             message.put("tool_calls", step.toolCalls().stream()
                     .map(c -> Map.of(FUNCTION, Map.of("name", c.name(), "arguments", c.input()))).toList());
         return message;
-    }
-
-    private static Map<String, Object> arguments(JsonNode node) {
-        Map<String, Object> args = new LinkedHashMap<>();
-        if (node.isObject()) node.properties().forEach(e -> args.put(e.getKey(), value(e.getValue())));
-        return args;
-    }
-
-    private static Object value(JsonNode v) {
-        if (v.isBoolean()) return v.asBoolean();
-        if (v.isIntegralNumber()) return v.asLong();
-        if (v.isNumber()) return v.asDouble();
-        if (v.isString()) return v.asString();
-        return v.isNull() ? null : v.toString();
     }
 }

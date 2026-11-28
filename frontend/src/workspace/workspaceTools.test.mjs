@@ -48,3 +48,13 @@ test('the voice room sends recent turns only and finds the browser recogniser', 
   assert.equal(speechRecognizer({ webkitSpeechRecognition: Fake }), Fake);
   assert.equal(speechRecognizer({}), null);
 });
+
+test('saved conversation turns come back labelled and in order', async () => {
+  const { savedTurns } = await import('./workspaceTools.js');
+  const turns = savedTurns([{ role: 'user', text: 'hi', tools: [] }, { role: 'assistant', text: 'Hello', tools: ['workspace_tasks'] }, { role: 'x', text: 'no' }], 'AI architect');
+  assert.equal(turns.length, 2);
+  assert.equal(turns[1].who, 'AI architect');
+  assert.deepEqual(turns[1].tools, ['workspace_tasks']);
+  assert.equal(turns[0].who, undefined);
+  assert.deepEqual(savedTurns(null, 'x'), []);
+});

@@ -47,10 +47,25 @@ public class WorkspaceController {
     @PostMapping("/roles/{roleId}/talk")
     WorkspaceVoice.Reply talk(@RequestHeader(value = AUTH, required = false) String auth, @PathVariable String roleId,
                               @RequestBody TalkRequest body) {
-        return voice.talk(platform.requireAccount(auth), roleId, body == null ? null : body.messages());
+        return voice.talk(platform.requireAccount(auth), roleId, body == null ? null : body.messages(),
+                body == null ? null : body.text());
     }
 
-    record TalkRequest(List<com.deepwater.assistant.AssistantService.ChatMessage> messages) {}
+    /** {@code text}: what the owner just said, continuing the saved conversation. {@code messages}: a full context instead. */
+    record TalkRequest(List<com.deepwater.assistant.AssistantService.ChatMessage> messages, String text) {}
+
+    /** The saved conversation with one role, so it can be continued later. */
+    @GetMapping("/roles/{roleId}/talk")
+    Map<String, Object> conversation(@RequestHeader(value = AUTH, required = false) String auth, @PathVariable String roleId) {
+        return Map.of("turns", voice.conversation(platform.requireAccount(auth), roleId));
+    }
+
+    /** Starts a new conversation with one role. */
+    @org.springframework.web.bind.annotation.DeleteMapping("/roles/{roleId}/talk")
+    org.springframework.http.ResponseEntity<Void> forget(@RequestHeader(value = AUTH, required = false) String auth, @PathVariable String roleId) {
+        voice.forget(platform.requireAccount(auth), roleId);
+        return org.springframework.http.ResponseEntity.noContent().build();
+    }
 
     /** Whether the signed-in account may open the workspace; the app shows the entry point only when true. */
     @GetMapping("/access")

@@ -74,6 +74,17 @@ class WorkspaceVoiceRoomTest {
     }
 
     @Test
+    void aProviderLimitIsSaidPlainlyNotAsAServerProblem() throws Exception {
+        model.then(c -> {
+            throw org.springframework.web.client.HttpClientErrorException.create(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS,
+                    "Too Many Requests", HttpHeaders.EMPTY, new byte[0], null);
+        });
+        ResponseEntity<String> response = talk(owner(), "product-manager", "Hello");
+        assertThat(response.getStatusCode().value()).isEqualTo(429);
+        assertThat(response.getBody()).contains("free limit is used up");
+    }
+
+    @Test
     void aRoleWithoutTheToolCannotUseItAndOthersCannotEnter() throws Exception {
         model.then(c -> tools(new ToolCall("t1", "workspace_propose_task", Map.of("title", "x"))))
              .then(c -> answer("I can't propose tasks; the product manager can."));
@@ -84,6 +95,32 @@ class WorkspaceVoiceRoomTest {
         String stranger = register("stranger-" + UUID.randomUUID() + "@example.test");
         assertThat(talk(stranger, "ml-engineer", "hi").getStatusCode().value()).isEqualTo(403);
         assertThat(talk(owner(), "astrologer", "hi").getStatusCode().value()).isEqualTo(404);
+    }
+
+    @Test
+    void theConversationIsSavedSoItCanBeContinuedAndCanBeStartedAgain() throws Exception {
+        var headers = new HttpHeaders();
+        headers.setBearerAuth(owner());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        String url = "/api/v1/workspace/roles/reliability-engineer/talk";
+        http.exchange(url, HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
+
+        model.then(c -> answer("Uptime was fine this week."));
+        assertThat(http.exchange(url, HttpMethod.POST, new HttpEntity<>(Map.of("text", "How was uptime?"), headers), String.class)
+                .getStatusCode().value()).isEqualTo(200);
+        model.then(c -> answer("Yes, the backend restarted twice."));
+        http.exchange(url, HttpMethod.POST, new HttpEntity<>(Map.of("text", "Any restarts?"), headers), String.class);
+
+        // The second turn was answered with the first one as context, from the server's saved conversation.
+        assertThat(model.seen.getLast().transcript()).hasSize(3);
+        JsonNode turns = JSON.readTree(http.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class).getBody()).get("turns");
+        assertThat(turns).hasSize(4);
+        assertThat(turns.get(0).get("role").asString()).isEqualTo("user");
+        assertThat(turns.get(0).get("text").asString()).isEqualTo("How was uptime?");
+        assertThat(turns.get(3).get("text").asString()).isEqualTo("Yes, the backend restarted twice.");
+
+        assertThat(http.exchange(url, HttpMethod.DELETE, new HttpEntity<>(headers), String.class).getStatusCode().value()).isEqualTo(204);
+        assertThat(JSON.readTree(http.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class).getBody()).get("turns")).isEmpty();
     }
 
     private ResponseEntity<String> talk(String token, String role, String said) {

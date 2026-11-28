@@ -1,7 +1,7 @@
 # Repository mapping: Deepwater
 
 > Project settings for the spec-driven delivery method (plugin `deepwater-developer`, in this
-> repository under `deepwater-developer/`). The method itself is generic; everything that is true
+> repository under `ai-workspace/deepwater-developer/`). The method itself is generic; everything that is true
 > only of this repository is written here, so it can be reviewed and changed on its own. Refresh
 > it with `/deepwater-developer:init` or edit it by hand whenever the repository changes.
 
@@ -50,7 +50,8 @@ isolation uses its own `jdbc:h2:mem:` URL and must not publish lessons into the 
 - The owner's board of tasks for the five AI roles lives in the app (`com.deepwater.workspace`, account menu >
   AI workspace) and is reached from Claude Code through the MCP tools `workspace_tasks`,
   `workspace_propose_task`, `workspace_start_task` and `workspace_submit_evidence` (see `.mcp.json`).
-- The roles are agents in `deepwater-developer/agents/` and data in
-  `backend/src/main/resources/workspace/roles.json`; `AgentRolesInStepTest` keeps the two in step.
+- Everything for the AI workspace starts at `ai-workspace/README.md`. The roles are agents in
+  `ai-workspace/deepwater-developer/agents/` and data in
+  `ai-workspace/roles.json`; `AgentRolesInStepTest` keeps the two in step.
 - An agent works only on an APPROVED task assigned to its role, calls `workspace_start_task` before changing
   code and `workspace_submit_evidence` when the pull request is open. It never approves, merges or deploys.
