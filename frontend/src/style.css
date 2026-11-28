@@ -414,6 +414,7 @@ kbd{font:600 var(--fs-2xs) 'DM Sans',sans-serif;padding:2px 5px;margin-left:6px;
 .profile-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:var(--fs-md)}
 .profile-form{padding:24px}
 .profile-form h3{margin:0 0 16px}
+.profile-form h3:not(:first-child){margin-top:32px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .form-grid label{display:grid;gap:7px;font-weight:600;font-size:var(--fs-md)}
 .form-grid label small,.optional{font-weight:500;color:var(--text-3);font-size:var(--fs-xs)}
@@ -876,6 +877,38 @@ button,.pill,.learn-tabs button,.segmented button,.echo-languages button,.ui-men
 .amber-bubble.me{background:linear-gradient(140deg,var(--accent-2),var(--accent-deep))}
 @media(prefers-reduced-motion:reduce){.amber-person-card{transition:none}}
 @media(max-width:600px){.amber-cover{min-height:170px}.amber-cover-initial{font-size:8rem}}
+/* Photos on the one Deepwater profile and on Amber cards (2026-11-27) */
+.amber-cover.has-photo{min-height:300px}
+.amber-cover-photo{position:absolute;inset:0;padding:0;border:0;background:none;cursor:pointer}
+.amber-cover-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.amber-cover-dots{position:absolute;z-index:1;top:12px;right:14px;display:flex;gap:5px}
+.amber-cover-dots i{width:7px;height:7px;border-radius:50%;background:#ffffff66}
+.amber-cover-dots i.on{background:#fff}
+.amber-avatar.photo{object-fit:cover;padding:0}
+.amber-facts{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0 0 12px;font-size:var(--fs-sm)}
+.amber-facts dt{font-weight:700;color:var(--text-3)}
+.amber-facts dd{margin:0}
+.amber-turn{font-weight:700;color:var(--accent-text);font-size:var(--fs-sm)}
+.amber-photos{margin:18px 0 6px;display:grid;gap:10px}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.photo-tile{margin:0;border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden;background:var(--deep)}
+.photo-tile img,.photo-placeholder{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;background:var(--deep)}
+.photo-tile figcaption{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:6px 8px;font-size:var(--fs-sm)}
+.photo-add{aspect-ratio:4/5;border:1.5px dashed var(--line-hover);border-radius:var(--radius-sm);background:transparent;color:var(--accent-text);
+  display:grid;place-content:center;gap:6px;font:600 var(--fs-sm) var(--font-text,inherit);cursor:pointer}
+.photo-add span{font-size:2rem;line-height:1}
+.photo-add:disabled{opacity:.6;cursor:wait}
+.avatar.photo{object-fit:cover}
+.languages-editor{display:grid;gap:8px;margin-top:6px}
+.language-row{display:grid;grid-template-columns:minmax(0,1fr) 140px auto;gap:8px;align-items:center}
+.field-label{display:block;font-weight:600;margin-bottom:2px}
+.account-settings{padding:24px;margin-top:18px}
+.visibility-list{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:8px}
+.visibility-list li{display:grid;grid-template-columns:90px 1fr;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--deep);border:1px solid var(--line-soft)}
+.account-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.account-actions p{margin:4px 0 10px;font-size:var(--fs-sm);color:var(--text-3)}
+@media(max-width:600px){.language-row{grid-template-columns:1fr 1fr}.language-row button{grid-column:span 2;justify-self:start}
+  .visibility-list li{grid-template-columns:1fr;gap:2px}.amber-cover.has-photo{min-height:260px}}
 
 /* Harbor: company logos, employer strip and hiring process. */
 .harbor-logo{width:48px;height:48px;flex:0 0 auto;border-radius:12px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}

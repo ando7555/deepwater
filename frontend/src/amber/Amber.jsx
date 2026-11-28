@@ -1,13 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { restClient } from '../app/http.js';
+import { usePhoto } from '../app/photos.js';
+import PhotoManager from '../profile/PhotoManager.jsx';
+import { ageFrom, languagesText } from '../profile/profileTools.js';
 import { Button, Choice, EmptyState, ErrorState, Field, Loading, FormGrid, Notice, Panel, Pill, ProblemList, SectionHeading, Tabs } from '../ui/index.jsx';
-import { INTENTS, REPORT_REASONS, addInterest, coverFor, initial, intentWords, isShared, profileProblems, railPosition } from './amberTools.js';
+import { CLOSING_NOTES, INTENTS, REPORT_REASONS, addInterest, coverFor, initial, intentWords, isShared, profileProblems, railPosition, turnText } from './amberTools.js';
 
 // Amber: connection by choice. Suggestions explain themselves, and a conversation opens only when both say yes.
 
 const amber = restClient('/api/v1/amber');
 
-export default function Amber() {
+export default function Amber({ onOpenProfile }) {
   const [profile, setProfile] = useState(null);
   const [view, setView] = useState('discover');
   const [incoming, setIncoming] = useState(0);
@@ -25,7 +28,7 @@ export default function Amber() {
 
   if (!profile.joined) return <div className="amber-app">
     <AmberIntro />
-    <ProfileForm profile={profile} onSaved={next => { setProfile(next); setView('discover'); }} />
+    <ProfileForm profile={profile} onOpenProfile={onOpenProfile} onSaved={next => { setProfile(next); setView('discover'); }} />
   </div>;
 
   return <div className="amber-app">
@@ -42,7 +45,7 @@ export default function Amber() {
     {view === 'discover' && <Discover profile={profile} goToProfile={() => setView('profile')} />}
     {view === 'invitations' && <Invitations onChanged={refreshCount} openConversations={() => setView('connections')} />}
     {view === 'connections' && <Conversations />}
-    {view === 'profile' && <ProfileForm profile={profile} onSaved={setProfile} onLeft={() => amber('/profile').then(setProfile)} />}
+    {view === 'profile' && <ProfileForm profile={profile} onOpenProfile={onOpenProfile} onSaved={setProfile} onLeft={() => amber('/profile').then(setProfile)} />}
   </div>;
 }
 
@@ -50,25 +53,28 @@ function AmberIntro() {
   return <section className="welcome amber-welcome">
     <p className="eyebrow">AMBER · BY DEEPWATER</p>
     <h1>Connection, <span className="amber-accent">by choice</span>.</h1>
-    <p className="intro">Every suggestion tells you why it appears, and a conversation opens only when both people say yes. Your Deepwater account is not on Amber until you create a profile here.</p>
+    <p className="intro">Every suggestion tells you why it appears, and a conversation opens only when both people say yes. Your Deepwater account is not on Amber until you join here.</p>
     <ul className="amber-principles">
-      <li><b>Nothing hidden</b><span>Every suggestion shows the shared choices behind it. No scores, no hidden ranking.</span></li>
-      <li><b>Both say yes</b><span>No messages until both people accept the same invitation.</span></li>
-      <li><b>Leave anytime</b><span>Pass, hide, block or report in one step, with no penalty.</span></li>
-      <li><b>Echo stays in Echo</b><span>Your lessons are never shared. "Learning Danish" shows only if you switch it on.</span></li>
+      <li><b>Nothing hidden</b><span>Every suggestion shows the shared choices behind it. No scores, no hidden ranking, no paying to be seen.</span></li>
+      <li><b>Both say yes</b><span>No messages until both people accept the same invitation. Photos open then too, unless you choose otherwise.</span></li>
+      <li><b>Learn together</b><span>Amber can suggest people who speak the language you are learning, or who learn yours.</span></li>
+      <li><b>No ghosting</b><span>End a conversation with one kind sentence instead of silence. Pass, hide, block or report in one step.</span></li>
+      <li><b>You choose what shows</b><span>Echo levels and Harbor stay private until you switch them on, one by one.</span></li>
     </ul>
   </section>;
 }
 
 // ------------------------------------------------------------------ profile
 
-function ProfileForm({ profile, onSaved, onLeft }) {
+function ProfileForm({ profile, onSaved, onLeft, onOpenProfile }) {
   const joined = profile.joined;
   const [form, setForm] = useState({
-    displayName: profile.displayName ?? '', age: profile.age ?? '', confirmAdult: joined, area: profile.area ?? '',
+    displayName: profile.displayName ?? '', birthDate: profile.birthDate ?? '', confirmAdult: joined, area: profile.area ?? '',
     intents: profile.intents ?? [], interests: profile.interests ?? [], about: profile.about ?? '',
-    visible: profile.visible ?? true, shareLearning: profile.shareLearning ?? false,
+    visible: profile.visible ?? true, shareLearning: profile.shareLearning ?? false, shareLanguages: profile.shareLanguages ?? true,
+    shareHarbor: profile.shareHarbor ?? false, photosVisibility: profile.photosVisibility ?? 'CONNECTED',
   });
+  const [photos, setPhotos] = useState(profile.photos ?? []);
   const [typed, setTyped] = useState('');
   const [problem, setProblem] = useState('');
   const [tried, setTried] = useState(false);
@@ -76,7 +82,10 @@ function ProfileForm({ profile, onSaved, onLeft }) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const set = (key, value) => setForm(current => ({ ...current, [key]: value }));
-  const problems = profileProblems(form);
+  // People from the first version typed an age; it counts until they add a birth date.
+  const age = form.birthDate ? ageFrom(form.birthDate) : profile.age;
+  const problems = profileProblems({ ...form, age });
+  const learning = profile.learningDetails ?? [];
 
   const add = () => {
     const next = addInterest(form.interests, typed);
@@ -90,19 +99,20 @@ function ProfileForm({ profile, onSaved, onLeft }) {
     if (problems.length) return;
     setBusy(true);
     try {
-      const saved = await amber('/profile', { method: 'PUT', body: { ...form, age: Number(form.age) } });
+      const saved = await amber('/profile', { method: 'PUT', body: form });
       setMessage(joined ? 'Saved.' : '');
       onSaved(saved);
     } catch (e) { setError(e.message); } finally { setBusy(false); }
   };
 
   return <Panel as="form" className="amber-card" onSubmit={save} noValidate>
-    <SectionHeading eyebrow={joined ? 'What you share' : 'Step 1 of 1'} title={joined ? 'Your Amber profile' : 'Create your Amber profile'}
-      lead="Amber uses only what is on this form to make suggestions. Other people see your first name, age, area, what you are looking for, your interests and your intro." />
+    <SectionHeading eyebrow={joined ? 'What you share' : 'Join Amber'} title={joined ? 'Your Amber profile' : 'Create your Amber profile'}
+      lead="Amber uses only what is on this page. Your name, birth date, city and bio are part of your one Deepwater profile, so you fill them in once for every product." />
     <FormGrid>
-      <Field label="First name" maxLength={40} value={form.displayName} onChange={e => set('displayName', e.target.value)} autoComplete="given-name" />
-      <Field label="Age" type="number" min={18} max={120} inputMode="numeric" value={form.age} onChange={e => set('age', e.target.value)} />
-      <Field label="Area" hint="City level only, for example Copenhagen. Never your address." maxLength={80} value={form.area} onChange={e => set('area', e.target.value)} />
+      <Field label="First name others see" maxLength={40} value={form.displayName} onChange={e => set('displayName', e.target.value)} autoComplete="given-name" />
+      <Field label="Birth date" type="date" value={form.birthDate} onChange={e => set('birthDate', e.target.value)} autoComplete="bday"
+        hint={age != null && age >= 0 ? `Others see your age: ${age}. Never the date.` : 'Others see only your age, never the date.'} />
+      <Field label="City" hint="City level only, for example Copenhagen. Never your address." maxLength={80} value={form.area} onChange={e => set('area', e.target.value)} />
       <div className="ui-field">
         <span className="ui-label">Looking for</span>
         <div className="amber-intents">
@@ -123,17 +133,36 @@ function ProfileForm({ profile, onSaved, onLeft }) {
         </div>
         {problem && <small className="amber-problem">{problem}</small>}
       </div>
-      <Field label="Short intro" optional as="textarea" wide rows={3} maxLength={300} value={form.about} onChange={e => set('about', e.target.value)}
-        hint={`${form.about.length}/300`} />
+      <Field label="Bio" optional as="textarea" wide rows={3} maxLength={500} value={form.about} onChange={e => set('about', e.target.value)}
+        hint={`${form.about.length}/500`} />
     </FormGrid>
+
+    <div className="amber-photos">
+      <span className="ui-label">Photos <small className="optional"> · optional, up to 4</small></span>
+      <PhotoManager photos={photos} onChange={setPhotos} />
+      <fieldset className="amber-reasons">
+        <legend>Who sees your photos</legend>
+        <Choice type="radio" name="photos-visibility" checked={form.photosVisibility === 'CONNECTED'} onChange={() => set('photosVisibility', 'CONNECTED')}>
+          Only people I connect with, after we both say yes <small>(recommended)</small></Choice>
+        <Choice type="radio" name="photos-visibility" checked={form.photosVisibility === 'MEMBERS'} onChange={() => set('photosVisibility', 'MEMBERS')}>
+          Everyone who sees my profile in Amber</Choice>
+      </fieldset>
+    </div>
 
     <div className="amber-switches">
       <Toggle checked={form.visible} onChange={value => set('visible', value)} title="Visible in discovery"
         detail="Turn off to pause. While you are hidden, suggestions pause for you too." />
-      <Toggle checked={form.shareLearning} disabled={!profile.echoLearning} onChange={value => set('shareLearning', value)}
-        title={profile.echoLearning ? `Show "learning ${profile.echoLearning}" from Echo` : 'Show what you learn in Echo'}
-        detail={profile.echoLearning ? 'Off by default. Only the language name is shared. Lesson answers are never shared.' : 'You have no Echo course yet, so there is nothing to show.'} />
+      <Toggle checked={form.shareLanguages} disabled={!profile.languages?.length} onChange={value => set('shareLanguages', value)}
+        title="Show the languages you know"
+        detail={profile.languages?.length ? `${languagesText(profile.languages)}. Lets Amber suggest language partners.` : 'Add languages on your Deepwater profile first.'} />
+      <Toggle checked={form.shareLearning} disabled={!learning.length} onChange={value => set('shareLearning', value)}
+        title="Show what you learn in Echo, with levels"
+        detail={learning.length ? `${learning.map(line => `${line.language}: ${line.level}`).join(' · ')}. Off by default. Lessons and answers are never shared.` : 'You have no Echo course or practice exam yet, so there is nothing to show.'} />
+      <Toggle checked={form.shareHarbor} disabled={!profile.usesHarbor} onChange={value => set('shareHarbor', value)}
+        title='Show "Uses Harbor"'
+        detail={profile.usesHarbor ? 'Off by default. Only the fact that you use Harbor is shown; your CV, jobs and applications never are.' : 'You do not use Harbor yet.'} />
     </div>
+    {onOpenProfile && <p className="amber-note">Languages, photos and the rest of your details live on <button type="button" className="link" onClick={onOpenProfile}>your Deepwater profile</button>.</p>}
 
     {!joined && <Choice checked={form.confirmAdult} onChange={e => set('confirmAdult', e.target.checked)}>I am 18 or older.</Choice>}
     {tried && <ProblemList problems={problems} />}
@@ -162,7 +191,7 @@ function LeaveAmber({ onLeft }) {
   return <div className="amber-leave">
     {!asking && <Button variant="link" onClick={() => setAsking(true)}>Leave Amber</Button>}
     {asking && <>
-      <p>Leaving deletes your Amber profile, invitations and conversations. Your Deepwater account, Echo and Harbor stay.</p>
+      <p>Leaving deletes your Amber profile, invitations and conversations. Your Deepwater account and profile (with photos), Echo and Harbor stay.</p>
       <div className="amber-row"><Button variant="danger" onClick={leave}>Leave Amber</Button><Button variant="quiet" onClick={() => setAsking(false)}>Stay</Button></div>
     </>}
     {error && <Notice tone="error">{error}</Notice>}
@@ -209,6 +238,7 @@ function Discover({ profile, goToProfile }) {
     {list.map(item => <Panel as="article" key={item.person.memberId} className="amber-card amber-person-card" role="listitem">
       <Cover person={item.person} />
       <div className="amber-card-body">
+      <PersonFacts person={item.person} />
       <div className="harbor-chips">
         {item.person.interests.map(interest => <span key={interest} className={`amber-chip${isShared(interest, item.sharedInterests) ? ' match' : ''}`}>{interest}</span>)}
       </div>
@@ -278,30 +308,56 @@ function Chevron({ left }) {
   </svg>;
 }
 
-/** The top of a profile card: a warm colour band with the person's initial, name and age. */
+/**
+ * The top of a profile card: the person's photo when this viewer may see it, otherwise a Deepwater blue band with
+ * their initial. Tapping the photo shows the next one.
+ */
 function Cover({ person }) {
   const [from, to] = coverFor(person.displayName);
-  return <div className="amber-cover" style={{ '--cover-a': from, '--cover-b': to }}>
-    <span className="amber-cover-initial" aria-hidden="true">{initial(person.displayName)}</span>
+  const ids = person.photoIds ?? [];
+  const [index, setIndex] = useState(0);
+  const photo = usePhoto(ids.length ? `/api/v1/amber/members/${person.memberId}/photos/${ids[index % ids.length]}` : null);
+  return <div className={`amber-cover${photo ? ' has-photo' : ''}`} style={{ '--cover-a': from, '--cover-b': to }}>
+    {photo
+      ? <button type="button" className="amber-cover-photo" aria-label={ids.length > 1 ? `Photo ${index % ids.length + 1} of ${ids.length}. Show the next photo` : `Photo of ${person.displayName}`}
+          onClick={() => setIndex(current => current + 1)}><img src={photo} alt="" /></button>
+      : <span className="amber-cover-initial" aria-hidden="true">{initial(person.displayName)}</span>}
+    {ids.length > 1 && <span className="amber-cover-dots" aria-hidden="true">{ids.map((id, i) => <i key={id} className={i === index % ids.length ? 'on' : ''} />)}</span>}
     <div className="amber-cover-text">
       <h3>{person.displayName}, {person.age}</h3>
       <p>{person.area} · {intentWords(person.intents)}</p>
     </div>
-    {person.learning && <span className="amber-cover-tag">Learning {person.learning}</span>}
+    {person.photosAfterYes && <span className="amber-cover-tag">{person.photoCount === 1 ? '1 photo' : `${person.photoCount} photos`} after you both say yes</span>}
   </div>;
 }
 
-function Avatar({ name }) {
-  const [from, to] = coverFor(name);
-  return <span className="amber-avatar" aria-hidden="true" style={{ '--cover-a': from, '--cover-b': to }}>{initial(name)}</span>;
+/** The optional facts a person chose to show: languages, Echo levels, Harbor, and a confirmed email. */
+function PersonFacts({ person }) {
+  const languages = person.languages ?? [];
+  const learning = person.learningDetails ?? [];
+  if (!languages.length && !learning.length && !person.usesHarbor && !person.emailConfirmed) return null;
+  return <dl className="amber-facts">
+    {languages.length > 0 && <><dt>Speaks</dt><dd>{languagesText(languages)}</dd></>}
+    {learning.length > 0 && <><dt>Learning</dt><dd>{learning.map(line => `${line.language}: ${line.level}`).join(' · ')}</dd></>}
+    {(person.usesHarbor || person.emailConfirmed) && <><dt>Also</dt><dd>{[person.usesHarbor && 'Uses Harbor', person.emailConfirmed && 'Email confirmed'].filter(Boolean).join(' · ')}</dd></>}
+  </dl>;
 }
 
-function PersonHeader({ person }) {
+function Avatar({ person }) {
+  const [from, to] = coverFor(person.displayName);
+  const id = person.photoIds?.[0];
+  const photo = usePhoto(id ? `/api/v1/amber/members/${person.memberId}/photos/${id}` : null);
+  if (photo) return <img className="amber-avatar photo" src={photo} alt="" />;
+  return <span className="amber-avatar" aria-hidden="true" style={{ '--cover-a': from, '--cover-b': to }}>{initial(person.displayName)}</span>;
+}
+
+function PersonHeader({ person, extra }) {
   return <div className="amber-person">
-    <Avatar name={person.displayName} />
+    <Avatar person={person} />
     <div>
       <h3>{person.displayName}, {person.age}</h3>
-      <p>{person.area} · {intentWords(person.intents)}{person.learning ? ` · Learning ${person.learning}` : ''}</p>
+      <p>{person.area} · {intentWords(person.intents)}{person.languages?.length ? ` · Speaks ${languagesText(person.languages)}` : ''}</p>
+      {extra && <p className="amber-turn">{extra}</p>}
     </div>
   </div>;
 }
@@ -337,6 +393,7 @@ function Invitations({ onChanged, openConversations }) {
     {data.incoming.map(invitation => <Panel as="article" key={invitation.id} className="amber-card amber-person-card" role="listitem">
       <Cover person={invitation.person} />
       <div className="amber-card-body">
+      <PersonFacts person={invitation.person} />
       {invitation.person.about && <p className="amber-about">{invitation.person.about}</p>}
       {invitation.reasons.length > 0 && <div className="amber-why"><b>What you share</b><ul>{invitation.reasons.map(r => <li key={r}>{r}</li>)}</ul></div>}
       <div className="amber-actions two">
@@ -363,7 +420,11 @@ function Conversations() {
   const [list, setList] = useState(null);
   const [open, setOpen] = useState(null);
   const [error, setError] = useState('');
-  const load = useCallback(() => { amber('/connections').then(setList).catch(e => setError(e.message)); }, []);
+  const [closed, setClosed] = useState([]);
+  const load = useCallback(() => {
+    amber('/connections').then(setList).catch(e => setError(e.message));
+    amber('/connections/closed').then(setClosed).catch(() => {});
+  }, []);
   useEffect(load, [load]);
 
   if (!list) return error ? <ErrorState title="Conversations didn’t load" error={error} onRetry={() => { setError(''); load(); }} /> : <Loading label="Loading conversations…" />;
@@ -372,9 +433,15 @@ function Conversations() {
   return <div className="amber-stack">
     {list.length === 0 && <EmptyState title="No conversations yet">A conversation opens when someone accepts your invitation, or you accept theirs.</EmptyState>}
     {list.map(connection => <button type="button" key={connection.id} className="amber-thread" onClick={() => setOpen(connection)}>
-      <PersonHeader person={connection.person} />
+      <PersonHeader person={connection.person} extra={turnText(connection, new Date())} />
       <span className="amber-open">Open</span>
     </button>)}
+    {closed.length > 0 && <>
+      <SectionHeading level={2} title="Closed kindly" lead="These people ended a conversation and said why, so you are not left waiting." />
+      {closed.map(item => <Panel as="article" key={item.id} className="amber-card amber-sent">
+        <b>{item.displayName}</b><p className="amber-about">“{item.note}”</p>
+      </Panel>)}
+    </>}
   </div>;
 }
 
@@ -410,8 +477,9 @@ function Chat({ connection, onBack }) {
     } catch (e) { if (e.status === 404) setClosed(true); else setError(e.message); }
   };
 
+  const [note, setNote] = useState('NOT_A_MATCH');
   const leave = async () => {
-    try { await amber(`/connections/${connection.id}/leave`, { method: 'POST' }); onBack(); } catch (e) { setError(e.message); }
+    try { await amber(`/connections/${connection.id}/leave`, { method: 'POST', body: { note: note || null } }); onBack(); } catch (e) { setError(e.message); }
   };
 
   return <Panel className="amber-card amber-chat">
@@ -425,7 +493,13 @@ function Chat({ connection, onBack }) {
     <PersonHeader person={connection.person} />
     {leaving && <div className="amber-why">
       <b>Leave this conversation?</b>
-      <p>It closes for both of you, and neither of you can write again. {name} is not told why.</p>
+      <p>It closes for both of you, and neither of you can write again. A short, kind goodbye means {name} is not left wondering.</p>
+      <fieldset className="amber-reasons">
+        <legend>Your goodbye</legend>
+        {CLOSING_NOTES.map(option => <Choice key={option.id} type="radio" name={`note-${connection.id}`} checked={note === option.id}
+          onChange={() => setNote(option.id)}>{option.label}</Choice>)}
+        <Choice type="radio" name={`note-${connection.id}`} checked={note === ''} onChange={() => setNote('')}>Leave without a note</Choice>
+      </fieldset>
       <div className="amber-row"><Button variant="danger" onClick={leave}>Leave conversation</Button><Button variant="quiet" onClick={() => setLeaving(false)}>Stay</Button></div>
     </div>}
     {safety && <SafetySheet person={connection.person} onClose={done => { setSafety(false); if (done) setClosed(true); }} />}

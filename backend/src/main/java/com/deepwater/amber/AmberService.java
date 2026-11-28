@@ -1,12 +1,18 @@
 package com.deepwater.amber;
 
 import com.deepwater.amber.AmberRules.Intent;
+import com.deepwater.exam.ExamContent;
+import com.deepwater.platform.PersonPhotoService;
+import com.deepwater.platform.PersonProfileService;
+import com.deepwater.platform.PersonProfileService.KnownLanguage;
+import com.deepwater.platform.PersonProfileService.PersonProfile;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,61 +36,109 @@ public class AmberService {
     static final int PASS_DAYS = 30;
     static final int MAX_SUGGESTIONS = 20;
     static final Set<String> REPORT_REASONS = Set.of("UNWANTED_MESSAGES", "FAKE_PROFILE", "FEELS_UNSAFE", "UNDERAGE", "OTHER");
-    /** The only Echo fact Amber reads: the language being learned, shown only if the person switches it on. */
+    /** Photos are seen only after both said yes (the default, owner's choice 2026-11-27), or by every member who sees the profile. */
+    static final String PHOTOS_CONNECTED = "CONNECTED";
+    static final String PHOTOS_MEMBERS = "MEMBERS";
+    static final Set<String> PHOTO_VISIBILITY = Set.of(PHOTOS_CONNECTED, PHOTOS_MEMBERS);
     private static final Map<String, String> LANGUAGE_NAMES = Map.of("da", "Danish", "de", "German", "pl", "Polish");
+    private static final Map<String, String> ECHO_LEVEL_WORDS = Map.of("new", "just starting", "some", "knows some", "comfortable", "comfortable");
+    private static final Set<String> SPEAKS_WELL = Set.of("NATIVE", "FLUENT");
 
     private final JdbcTemplate db;
     private final ApplicationEventPublisher events;
+    private final PersonProfileService people;
+    private final PersonPhotoService photos;
+    private final ExamContent exams;
 
-    public AmberService(JdbcTemplate db, ApplicationEventPublisher events) {
+    public AmberService(JdbcTemplate db, ApplicationEventPublisher events, PersonProfileService people, PersonPhotoService photos,
+                        ExamContent exams) {
         this.db = db;
         this.events = events;
+        this.people = people;
+        this.photos = photos;
+        this.exams = exams;
     }
 
     // ---------------------------------------------------------------- profile
 
+    /**
+     * The person's own Amber profile. Name, age, area, intro, languages and photos come from the Deepwater profile;
+     * the rest is Amber's own. {@code learningDetails} and {@code usesHarbor} are what <em>would</em> be shown if the
+     * matching switch is on.
+     */
     public MyProfile profile(String accountId) {
-        String learning = echoLearning(accountId);
+        PersonProfile person = people.profile(accountId);
+        List<Learning> learning = learning(accountId);
+        boolean harbor = usesHarbor(accountId);
         var rows = find(accountId);
-        if (rows.isEmpty()) return MyProfile.notJoined(learning);
-        Stored p = rows.getFirst();
-        return new MyProfile(true, p.memberId, p.name, p.age, p.area, names(p.intents), p.interests, p.about, p.visible,
-                p.shareLearning, learning);
+        Stored p = rows.isEmpty() ? null : rows.getFirst();
+        Integer legacyAge = p == null ? null : p.legacyAge;
+        Integer age = person.age() != null ? person.age() : legacyAge;
+        List<String> missing = new ArrayList<>();
+        if (person.publicName() == null) missing.add("the first name others see");
+        if (age == null) missing.add("your birth date");
+        if (person.city() == null) missing.add("your city");
+        String firstLearning = learning.isEmpty() ? null : learning.getFirst().language();
+        if (p == null) return new MyProfile(false, null, person.publicName(), age, person.birthDate(), person.city(), List.of(), List.of(),
+                person.bio(), true, false, true, false, PHOTOS_CONNECTED, firstLearning, learning, person.languages(), person.photos(), harbor, missing);
+        return new MyProfile(true, p.memberId, person.publicName(), age, person.birthDate(), person.city(), names(p.intents), p.interests,
+                person.bio(), p.visible, p.shareLearning, p.shareLanguages, p.shareHarbor, p.photosVisibility, firstLearning, learning,
+                person.languages(), person.photos(), harbor, missing);
     }
 
+    /**
+     * Joins Amber or saves the Amber settings. Name, birth date, area and intro, when sent, are saved on the Deepwater
+     * profile (one profile for every product); the older {@code age} field is kept for people without a birth date.
+     */
     @Transactional
     public MyProfile save(String accountId, ProfileInput in) {
-        String name = required(in.displayName(), "Add the first name others will see.", 40);
-        if (in.age() == null || in.age() < MIN_AGE) throw bad("Amber is only for adults (18 or older).");
-        if (in.age() > 120) throw bad("Check your age.");
-        if (!Boolean.TRUE.equals(in.confirmAdult())) throw bad("Confirm that you are 18 or older.");
-        String area = required(in.area(), "Choose your area, at city level.", 80);
+        people.updatePublic(accountId, in.displayName(), in.birthDate(), in.area(), in.about());
+        Integer legacyAge = in.age();
+        if (legacyAge == null) {
+            var existing = find(accountId);
+            if (!existing.isEmpty()) legacyAge = existing.getFirst().legacyAge;
+        }
+        requireJoinable(people.profile(accountId), legacyAge, in.confirmAdult());
         Set<Intent> intents = intents(in.intents());
         if (intents.isEmpty()) throw bad("Choose what you are looking for.");
         List<String> interests;
         try { interests = AmberRules.cleanInterests(in.interests()); }
         catch (IllegalArgumentException ex) { throw bad(ex.getMessage()); }
-        String about = in.about() == null || in.about().isBlank() ? null : in.about().strip();
-        if (about != null && about.length() > 300) throw bad("Keep the short intro under 300 characters.");
         boolean visible = in.visible() == null || in.visible();
         boolean shareLearning = Boolean.TRUE.equals(in.shareLearning());
+        boolean shareLanguages = in.shareLanguages() == null || in.shareLanguages();
+        boolean shareHarbor = Boolean.TRUE.equals(in.shareHarbor());
+        String photosVisibility = in.photosVisibility() == null ? PHOTOS_CONNECTED : in.photosVisibility();
+        if (!PHOTO_VISIBILITY.contains(photosVisibility)) throw bad("Choose who can see your photos.");
 
         String intentText = String.join(",", intents.stream().map(Enum::name).toList());
         String interestText = String.join(",", interests);
-        int updated = db.update("update amber_profiles set display_name=?, age=?, area=?, intents=?, interests=?, about=?, visible=?, " +
-                        "share_learning=?, updated_at=current_timestamp where account_id=?",
-                name, in.age(), area, intentText, interestText, about, visible, shareLearning, accountId);
+        int updated = db.update("update amber_profiles set age=?, intents=?, interests=?, visible=?, share_learning=?, share_languages=?, " +
+                        "share_harbor=?, photos_visibility=?, updated_at=current_timestamp where account_id=?",
+                legacyAge, intentText, interestText, visible, shareLearning, shareLanguages, shareHarbor, photosVisibility, accountId);
         if (updated == 0)
-            db.update("insert into amber_profiles(account_id,member_id,display_name,age,area,intents,interests,about,visible,share_learning) " +
-                            "values(?,?,?,?,?,?,?,?,?,?)",
-                    accountId, UUID.randomUUID().toString(), name, in.age(), area, intentText, interestText, about, visible, shareLearning);
+            db.update("insert into amber_profiles(account_id,member_id,age,intents,interests,visible,share_learning,share_languages,share_harbor," +
+                            "photos_visibility) values(?,?,?,?,?,?,?,?,?,?)",
+                    accountId, UUID.randomUUID().toString(), legacyAge, intentText, interestText, visible, shareLearning, shareLanguages,
+                    shareHarbor, photosVisibility);
         return profile(accountId);
+    }
+
+    /** The Deepwater profile must have a name, an adult age and a city, and the person must confirm being an adult. */
+    private static void requireJoinable(PersonProfile person, Integer legacyAge, Boolean confirmAdult) {
+        Integer age = person.age() != null ? person.age() : legacyAge;
+        if (person.publicName() == null) throw bad("Add the first name others will see.");
+        if (age == null) throw bad("Add your birth date. Amber is only for adults (18 or older).");
+        if (age < MIN_AGE) throw bad("Amber is only for adults (18 or older).");
+        if (age > 120) throw bad("Check your age.");
+        if (!Boolean.TRUE.equals(confirmAdult)) throw bad("Confirm that you are 18 or older.");
+        if (person.city() == null) throw bad("Choose your area, at city level.");
     }
 
     /**
      * Leaves Amber: removes the profile, the person's invitations and their messages, and their pass/hide
      * choices. Blocks other people placed on this account stay, so leaving and rejoining cannot undo them,
-     * and reports stay for review. The Deepwater account and Echo are untouched.
+     * and reports stay for review. The Deepwater account and profile (with its photos), Echo and Harbor are untouched.
      */
     @Transactional
     public void leave(String accountId) {
@@ -95,13 +149,30 @@ public class AmberService {
         db.update("delete from amber_profiles where account_id=?", accountId);
     }
 
+    /**
+     * One photo of another member, if this viewer may see it: never across a block, and otherwise only after both
+     * said yes, unless that member chose to show photos to everyone who sees their profile. Anything else looks
+     * exactly like a photo that does not exist.
+     */
+    public byte[] photo(String viewer, String memberId, String photoId) {
+        requireMember(viewer);
+        String target = accountOf(memberId);
+        if (!target.equals(viewer)) {
+            Stored them = find(target).getFirst();
+            boolean allowed = !blockedEitherWay(viewer, target)
+                    && (connected(viewer, target) || (PHOTOS_MEMBERS.equals(them.photosVisibility) && them.visible));
+            if (!allowed) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Photo not found.");
+        }
+        return photos.bytes(target, photoId);
+    }
+
     // ---------------------------------------------------------------- suggestions
 
     public List<Suggestion> suggestions(String accountId) {
         Stored me = requireMember(accountId);
         if (!me.visible) throw new ResponseStatusException(HttpStatus.CONFLICT,
                 "Your profile is hidden, so suggestions are paused too. Turn on \"Visible in discovery\" to see people.");
-        AmberRules.Facts mine = facts(me);
+        AmberRules.Facts mine = facts(me, true);
         Set<String> excluded = new HashSet<>(blockedEitherWay(accountId));
         excluded.addAll(db.queryForList("select target_account_id from amber_decisions where account_id=? and (decision='HIDE' or decided_at>?)",
                 String.class, accountId, java.sql.Timestamp.from(java.time.Instant.now().minus(java.time.Duration.ofDays(PASS_DAYS)))));
@@ -116,12 +187,13 @@ public class AmberService {
         for (Stored other : db.query("select * from amber_profiles where visible=true and account_id<>? order by updated_at desc",
                 (rs, row) -> stored(rs), accountId)) {
             if (excluded.contains(other.accountId)) continue;
-            AmberRules.Match match = AmberRules.match(mine, facts(other));
+            AmberRules.Match match = AmberRules.match(mine, facts(other, false));
             if (match.eligible()) ranked.add(new Ranked(other, match));
         }
         ranked.sort((a, b) -> AmberRules.ORDER.compare(a.match, b.match));
-        return ranked.stream().limit(MAX_SUGGESTIONS)
-                .map(r -> new Suggestion(card(r.person), r.match.reasons(), r.match.sharedInterests())).toList();
+        // People whose Deepwater profile lost a required field (name, age, area) are not shown until they add it back.
+        return ranked.stream().map(r -> new Suggestion(card(r.person, false), r.match.reasons(), r.match.sharedInterests()))
+                .filter(s -> s.person().complete()).limit(MAX_SUGGESTIONS).toList();
     }
 
     @Transactional
@@ -181,15 +253,21 @@ public class AmberService {
                 Integer.class, a, b, b, a) > 0;
     }
 
-    Card cardOf(String accountId) {
+    /** What the viewer sees of this member; {@code connected} means both said yes, which unlocks photos. */
+    Card cardOf(String accountId, boolean connected) {
         var rows = find(accountId);
-        return rows.isEmpty() ? null : card(rows.getFirst());
+        return rows.isEmpty() ? null : card(rows.getFirst(), connected);
     }
 
     AmberRules.Match matchBetween(String viewer, String other) {
         Stored me = requireMember(viewer);
         var rows = find(other);
-        return rows.isEmpty() ? null : AmberRules.match(facts(me), facts(rows.getFirst()));
+        return rows.isEmpty() ? null : AmberRules.match(facts(me, true), facts(rows.getFirst(), false));
+    }
+
+    boolean connected(String a, String b) {
+        return db.queryForObject("select count(*) from amber_invitations where status='ACCEPTED' and " +
+                "((sender_id=? and recipient_id=?) or (sender_id=? and recipient_id=?))", Integer.class, a, b, b, a) > 0;
     }
 
     // ---------------------------------------------------------------- helpers
@@ -204,18 +282,59 @@ public class AmberService {
         return result;
     }
 
-    private Card card(Stored p) {
-        return new Card(p.memberId, p.name, p.age, p.area, names(p.intents), p.interests, p.about,
-                p.shareLearning ? echoLearning(p.accountId) : null);
+    private Card card(Stored p, boolean connected) {
+        PersonProfile person = people.profile(p.accountId);
+        Integer age = person.age() != null ? person.age() : p.legacyAge;
+        List<Learning> learning = p.shareLearning ? learning(p.accountId) : List.of();
+        List<String> photoIds = person.photos().stream().map(PersonPhotoService.Photo::id).toList();
+        boolean showPhotos = connected || PHOTOS_MEMBERS.equals(p.photosVisibility);
+        return new Card(p.memberId, person.publicName(), age, person.city(), names(p.intents), p.interests, person.bio(),
+                learning.isEmpty() ? null : learning.getFirst().language(), learning,
+                p.shareLanguages ? person.languages() : List.of(), p.shareHarbor ? usesHarbor(p.accountId) : null,
+                showPhotos ? photoIds : List.of(), photoIds.size(), !showPhotos && !photoIds.isEmpty(), person.emailVerified());
     }
 
-    private AmberRules.Facts facts(Stored p) {
-        return new AmberRules.Facts(p.intents, p.area, p.interests, p.shareLearning ? echoLearning(p.accountId) : null);
+    /**
+     * What one person brings to matching. The viewer's own Echo languages and spoken languages always count for
+     * their own view; another person's count only if that person switched them on.
+     */
+    private AmberRules.Facts facts(Stored p, boolean viewer) {
+        PersonProfile person = people.profile(p.accountId);
+        Set<String> learning = new HashSet<>();
+        if (viewer || p.shareLearning) for (Learning line : learning(p.accountId)) learning.add(line.language());
+        Set<String> speaks = new HashSet<>();
+        if (viewer || p.shareLanguages)
+            for (KnownLanguage language : person.languages()) if (SPEAKS_WELL.contains(language.level())) speaks.add(language.language());
+        return new AmberRules.Facts(p.intents, person.city(), p.interests, learning, p.shareLearning, speaks);
     }
 
-    private String echoLearning(String accountId) {
-        var codes = db.queryForList("select language_code from echo_learner_profiles where account_id=?", String.class, accountId);
-        return codes.isEmpty() ? null : LANGUAGE_NAMES.get(codes.getFirst());
+    /**
+     * The languages this person learns in Deepwater: the Echo course language with their own starting level, and every
+     * language they took a practice exam in, with the latest estimate (which replaces the own level).
+     */
+    List<Learning> learning(String accountId) {
+        Map<String, String> levels = new LinkedHashMap<>();
+        for (var row : db.queryForList("select language_code, self_reported_level from echo_learner_profiles where account_id=?", accountId)) {
+            String name = LANGUAGE_NAMES.get((String) row.get("language_code"));
+            if (name != null) levels.put(name, ECHO_LEVEL_WORDS.getOrDefault((String) row.get("self_reported_level"), "learning") + " (own estimate)");
+        }
+        Set<String> seenExams = new HashSet<>();
+        for (var row : db.queryForList("select exam_id, level_estimate from exam_attempts where account_id=? order by created_at desc", accountId)) {
+            String examId = (String) row.get("exam_id");
+            String name = seenExams.add(examId) ? examLanguage(examId) : null;
+            if (name != null) levels.put(name, row.get("level_estimate") + " on a Deepwater practice exam");
+        }
+        return levels.entrySet().stream().map(e -> new Learning(e.getKey(), e.getValue())).toList();
+    }
+
+    /** The language name of a practice exam, or null for an exam that no longer exists. */
+    private String examLanguage(String examId) {
+        try { return LANGUAGE_NAMES.get(exams.exam(examId).language()); }
+        catch (ResponseStatusException _) { return null; }
+    }
+
+    private boolean usesHarbor(String accountId) {
+        return db.queryForObject("select count(*) from harbor_profiles where account_id=?", Integer.class, accountId) > 0;
     }
 
     private static Set<Intent> intents(List<String> raw) {
@@ -229,41 +348,60 @@ public class AmberService {
 
     private static List<String> names(Set<Intent> intents) { return intents.stream().map(Enum::name).toList(); }
 
-    private static String required(String value, String message, int max) {
-        if (value == null || value.isBlank()) throw bad(message);
-        String clean = value.strip();
-        if (clean.length() > max) throw bad("Keep it under " + max + " characters.");
-        return clean;
-    }
-
     static ResponseStatusException bad(String message) { return new ResponseStatusException(HttpStatus.BAD_REQUEST, message); }
 
     private static Stored stored(ResultSet rs) throws SQLException {
         Set<Intent> intents = EnumSet.noneOf(Intent.class);
         for (String value : rs.getString("intents").split(",")) if (!value.isBlank()) intents.add(Intent.valueOf(value));
         String interests = rs.getString("interests");
-        return new Stored(rs.getString("account_id"), rs.getString("member_id"), rs.getString("display_name"), rs.getInt("age"),
-                rs.getString("area"), intents, interests == null || interests.isBlank() ? List.of() : Arrays.asList(interests.split(",")),
-                rs.getString("about"), rs.getBoolean("visible"), rs.getBoolean("share_learning"));
+        int age = rs.getInt("age");
+        return new Stored(rs.getString("account_id"), rs.getString("member_id"), rs.wasNull() ? null : age, intents,
+                interests == null || interests.isBlank() ? List.of() : Arrays.asList(interests.split(",")),
+                rs.getBoolean("visible"), rs.getBoolean("share_learning"), rs.getBoolean("share_languages"), rs.getBoolean("share_harbor"),
+                rs.getString("photos_visibility"));
     }
 
-    record Stored(String accountId, String memberId, String name, int age, String area, Set<Intent> intents,
-                  List<String> interests, String about, boolean visible, boolean shareLearning) {}
+    /** Amber's own row. Name, area and intro live on the Deepwater profile; {@code legacyAge} is the typed age of the first version. */
+    record Stored(String accountId, String memberId, Integer legacyAge, Set<Intent> intents, List<String> interests, boolean visible,
+                  boolean shareLearning, boolean shareLanguages, boolean shareHarbor, String photosVisibility) {}
 
-    public record ProfileInput(String displayName, Integer age, Boolean confirmAdult, String area, List<String> intents,
-                               List<String> interests, String about, Boolean visible, Boolean shareLearning) {}
+    /**
+     * @param displayName,birthDate,area,about optional: saved on the Deepwater profile when sent
+     * @param age            the first version's typed age, used only while there is no birth date
+     * @param shareLanguages show the languages from the Deepwater profile (on unless switched off)
+     * @param shareHarbor    show "Uses Harbor" (off unless switched on)
+     * @param photosVisibility CONNECTED (default) or MEMBERS
+     */
+    public record ProfileInput(String displayName, Integer age, String birthDate, Boolean confirmAdult, String area, List<String> intents,
+                               List<String> interests, String about, Boolean visible, Boolean shareLearning, Boolean shareLanguages,
+                               Boolean shareHarbor, String photosVisibility) {}
 
-    /** The person's own profile. {@code echoLearning} is what would be shown if they switch the Echo signal on. */
-    public record MyProfile(boolean joined, String memberId, String displayName, Integer age, String area, List<String> intents,
-                            List<String> interests, String about, boolean visible, boolean shareLearning, String echoLearning) {
-        static MyProfile notJoined(String echoLearning) {
-            return new MyProfile(false, null, null, null, null, List.of(), List.of(), null, true, false, echoLearning);
-        }
+    /** One language the person learns in Deepwater, with a short level text such as "B1 on a Deepwater practice exam". */
+    public record Learning(String language, String level) {}
+
+    /**
+     * The person's own profile. {@code echoLearning}, {@code learningDetails} and {@code usesHarbor} are what would be
+     * shown if the matching switch is on; {@code missing} lists Deepwater profile fields Amber still needs.
+     */
+    public record MyProfile(boolean joined, String memberId, String displayName, Integer age, String birthDate, String area,
+                            List<String> intents, List<String> interests, String about, boolean visible, boolean shareLearning,
+                            boolean shareLanguages, boolean shareHarbor, String photosVisibility, String echoLearning,
+                            List<Learning> learningDetails, List<KnownLanguage> languages, List<PersonPhotoService.Photo> photos,
+                            boolean usesHarbor, List<String> missing) {}
+
+    /**
+     * What other members see. Optional parts are empty or null unless this person switched them on.
+     *
+     * @param learning       the first Echo language, kept for the first version's screens
+     * @param usesHarbor     null when not shown
+     * @param photoIds       the photos this viewer may load; empty before both said yes unless shown to everyone
+     * @param photosAfterYes true when photos exist but open only after both say yes
+     */
+    public record Card(String memberId, String displayName, Integer age, String area, List<String> intents, List<String> interests,
+                       String about, String learning, List<Learning> learningDetails, List<KnownLanguage> languages, Boolean usesHarbor,
+                       List<String> photoIds, int photoCount, boolean photosAfterYes, boolean emailConfirmed) {
+        public boolean complete() { return displayName != null && age != null && area != null; }
     }
-
-    /** What other members see. {@code learning} is null unless this person chose to show it. */
-    public record Card(String memberId, String displayName, int age, String area, List<String> intents, List<String> interests,
-                       String about, String learning) {}
 
     public record Suggestion(Card person, List<String> reasons, List<String> sharedInterests) {}
 }

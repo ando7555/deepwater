@@ -55,4 +55,22 @@ class AmberRulesTest {
         assertThatThrownBy(() -> AmberRules.cleanInterests(java.util.stream.IntStream.range(0, 13).mapToObj(i -> "i" + i).toList()))
                 .hasMessageContaining("up to 12");
     }
+
+    @Test
+    void speakingWhatTheOtherLearnsIsAReasonButTheirLearningCountsOnlyIfTheyShowIt() {
+        // The viewer's own learning always counts for their own view.
+        var me = new Facts(Set.of(Intent.FRIENDS), "Aarhus", List.of(), Set.of("Danish"), false, Set.of("Polish"));
+        var danishSpeaker = new Facts(Set.of(Intent.FRIENDS), "Oslo", List.of(), Set.of(), false, Set.of("danish"));
+        var shyPolishLearner = new Facts(Set.of(Intent.FRIENDS), "Oslo", List.of(), Set.of(), false, Set.of());
+        var openPolishLearner = new Facts(Set.of(Intent.FRIENDS), "Oslo", List.of(), Set.of("Polish"), true, Set.of());
+
+        assertThat(AmberRules.match(me, danishSpeaker).reasons()).contains("Speaks Danish, which you are learning");
+        assertThat(AmberRules.match(me, shyPolishLearner).exchange()).isEmpty();
+        assertThat(AmberRules.match(me, openPolishLearner).reasons()).contains("Is learning Polish, which you speak");
+        // "Both learning" still needs both to show it, even when the viewer learns the same language privately.
+        var alsoDanish = new Facts(Set.of(Intent.FRIENDS), "Oslo", List.of(), Set.of("Danish"), true, Set.of());
+        assertThat(AmberRules.match(me, alsoDanish).reasons()).noneMatch(r -> r.startsWith("You are both learning"));
+        // A language exchange ranks above nothing else in common.
+        assertThat(AmberRules.ORDER.compare(AmberRules.match(me, danishSpeaker), AmberRules.match(me, shyPolishLearner))).isNegative();
+    }
 }

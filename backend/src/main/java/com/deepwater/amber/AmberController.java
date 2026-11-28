@@ -1,5 +1,6 @@
 package com.deepwater.amber;
 
+import com.deepwater.platform.AccountController;
 import com.deepwater.platform.PlatformService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -116,10 +117,25 @@ public class AmberController {
         return connections.send(platform.requireAccount(auth), id, body.body());
     }
 
+    /** Ends a conversation for both. The optional body {"note": "NOT_A_MATCH"} sends one of the fixed kind goodbyes. */
     @PostMapping("/connections/{id}/leave")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void leaveConnection(@RequestHeader(value = AUTH, required = false) String auth, @PathVariable String id) {
-        connections.leave(platform.requireAccount(auth), id);
+    void leaveConnection(@RequestHeader(value = AUTH, required = false) String auth, @PathVariable String id,
+                         @RequestBody(required = false) LeaveRequest body) {
+        connections.leave(platform.requireAccount(auth), id, body == null ? null : body.note());
+    }
+
+    /** Conversations the other person closed with a kind note in the last 30 days. */
+    @GetMapping("/connections/closed")
+    List<AmberConnections.ClosedView> closed(@RequestHeader(value = AUTH, required = false) String auth) {
+        return connections.closed(platform.requireAccount(auth));
+    }
+
+    /** Another member's photo, when this viewer may see it (see AmberService.photo). */
+    @GetMapping("/members/{memberId}/photos/{photoId}")
+    ResponseEntity<byte[]> photo(@RequestHeader(value = AUTH, required = false) String auth, @PathVariable String memberId,
+                                 @PathVariable String photoId) {
+        return AccountController.jpeg(amber.photo(platform.requireAccount(auth), memberId, photoId));
     }
 
     @PostMapping("/safety/block")
@@ -142,4 +158,5 @@ public class AmberController {
     record MemberRequest(String memberId) {}
     record MessageRequest(String body) {}
     record ReportRequest(String memberId, String reason, String note) {}
+    record LeaveRequest(String note) {}
 }

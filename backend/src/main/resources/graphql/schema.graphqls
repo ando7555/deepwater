@@ -246,7 +246,27 @@ type PersonProfile {
   city: String
   country: String
   nativeLanguage: String
+  "Why the person is learning. Private."
   about: String
+  "The first name other people see where a product shows the profile (Amber)."
+  publicName: String
+  "ISO date, for example 1994-05-27."
+  birthDate: String
+  "Whole years from birthDate."
+  age: Int
+  "A short public bio."
+  bio: String
+  languages: [KnownLanguage!]!
+  photos: [ProfilePhoto!]!
+}
+type KnownLanguage {
+  language: String!
+  "NATIVE, FLUENT, GOOD or BASIC"
+  level: String!
+}
+type ProfilePhoto {
+  id: ID!
+  position: Int!
 }
 input PersonProfileInput {
   name: String!
@@ -255,4 +275,13 @@ input PersonProfileInput {
   country: String
   nativeLanguage: String
   about: String
+  publicName: String
+  birthDate: String
+  bio: String
+  "Leave out to keep the saved list."
+  languages: [KnownLanguageInput!]
+}
+input KnownLanguageInput {
+  language: String!
+  level: String!
 }

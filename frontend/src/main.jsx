@@ -319,10 +319,13 @@ function App() {
   const courseCode = home?.onboarded ? home.profile.languageCode : languageCode;
   const echoLanguage = languageOfExam(examId) || ECHO_LANGUAGES.find(option => option.code === courseCode) || ECHO_LANGUAGES[0];
 
+  // The one Deepwater profile (shared by Echo, Harbor and Amber) opens from the account menu or from Amber.
+  const openProfile = () => { chooseProduct('echo'); setExamId(null); setReviewing(false); setWarmUp(false); setTab('profile'); };
+
   return <main className="app-shell">
     <AppHeader product={product} onProduct={chooseProduct} productLabel={workspaceOpen ? 'AI workspace' : productName(product)} user={user}
       profileOpen={product === 'echo' && tab === 'profile'} onSignOut={logout}
-      onProfile={() => { chooseProduct('echo'); setExamId(null); setReviewing(false); setWarmUp(false); setTab('profile'); }}
+      onProfile={openProfile}
       accountExtras={<>
         {isOwner && <button type="button" className="ask-header" aria-pressed={workspaceOpen} onClick={() => setWorkspaceOpen(true)}><span aria-hidden="true">◆</span> AI workspace</button>}
         <button type="button" className="ask-header" onClick={openAskDeepwater}><span aria-hidden="true">✦</span> Ask AI</button></>}
@@ -341,7 +344,7 @@ function App() {
       onChange={pickEchoMode} />}
     {examId && tab !== 'profile' && <ExamPractice key={examId} examId={examId} />}
 
-    {home && !examId && !home.onboarded && <section className="onboarding panel">
+    {home && !examId && !home.onboarded && tab !== 'profile' && <section className="onboarding panel">
       <p className="eyebrow">ECHO · YOUR LANGUAGE START</p>
       <h1>Start with what you want to say.</h1>
       <p className="intro">Pick a language above and tell Echo what you want to be able to express. Your self-described experience sets a gentle starting point.</p>
@@ -356,9 +359,9 @@ function App() {
       </form>
     </section>}
 
-    {home?.onboarded && tab === 'profile' && <>
+    {home && tab === 'profile' && <>
       <button type="button" className="link back-link" onClick={() => setTab('today')}>← Back to learning</button>
-      <ProfilePage home={home} cards={cards} onSaved={saved => {
+      <ProfilePage home={home.onboarded ? home : null} cards={cards} onSignedOut={logout} onSaved={saved => {
         const next = { ...user, name: saved.name }; setUser(next); session.saveUser(next);
       }} />
     </>}
@@ -459,7 +462,7 @@ function App() {
     </>}
     </>}
     {product === 'harbor' && <Harbor />}
-    {product === 'amber' && <Amber />}
+    {product === 'amber' && <Amber onOpenProfile={openProfile} />}
     </ErrorBoundary>}
     {!workspaceOpen && product === 'echo' && home && (tab === 'profile' || (!home.onboarded && !examId)) && <DeleteAccount email={user.email} onDeleted={logout} />}
     <AskDeepwater />
